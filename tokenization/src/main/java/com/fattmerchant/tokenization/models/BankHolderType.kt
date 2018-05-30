@@ -1,8 +1,5 @@
-package com.fattmerchant.models
+package com.fattmerchant.tokenization.models
 
-/**
- * Created by tulio on 5/23/18.
- */
 class BankHolderType {
     companion object {
         const val PERSONAL = "personal"

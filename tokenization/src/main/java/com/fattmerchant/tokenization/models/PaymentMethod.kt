@@ -1,11 +1,11 @@
-package com.fattmerchant.models
+package com.fattmerchant.tokenization.models
 
 import com.squareup.moshi.Json
 
 /** A payment method such as a credit card or a bank account */
 open class PaymentMethod (
         val id: String,
-        val method: String, // TODO: Should be paymentmethodtype
+        val method: String,
         val nickname: String,
 
         @Json(name = "has_cvv")
@@ -30,5 +30,5 @@ open class PaymentMethod (
         val bankType: String?,
 
         @Json(name = "bank_holder_type")
-        val bankHolderType: String? // TODO: Should be BankHolderType?
+        val bankHolderType: String?
 )

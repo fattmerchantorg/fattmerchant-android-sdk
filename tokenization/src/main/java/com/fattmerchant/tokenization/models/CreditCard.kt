@@ -1,4 +1,4 @@
-package com.fattmerchant.models
+package com.fattmerchant.tokenization.models
 
 import com.squareup.moshi.Json
 

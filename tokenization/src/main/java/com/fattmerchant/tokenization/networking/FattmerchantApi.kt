@@ -1,7 +1,7 @@
 package com.fattmerchant.tokenization.networking
 
-import com.fattmerchant.models.BankAccount
-import com.fattmerchant.models.CreditCard
+import com.fattmerchant.tokenization.models.BankAccount
+import com.fattmerchant.tokenization.models.CreditCard
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.Body

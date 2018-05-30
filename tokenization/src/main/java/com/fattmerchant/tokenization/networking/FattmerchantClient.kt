@@ -1,8 +1,8 @@
 package com.fattmerchant.tokenization.networking
 
-import com.fattmerchant.models.BankAccount
-import com.fattmerchant.models.CreditCard
-import com.fattmerchant.models.PaymentMethod
+import com.fattmerchant.tokenization.models.BankAccount
+import com.fattmerchant.tokenization.models.CreditCard
+import com.fattmerchant.tokenization.models.PaymentMethod
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody

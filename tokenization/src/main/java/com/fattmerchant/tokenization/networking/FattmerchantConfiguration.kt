@@ -1,7 +1,7 @@
 package com.fattmerchant.tokenization.networking
 
 /** Configures the FattmerchantApi */
-public class FattmerchantConfiguration (
+class FattmerchantConfiguration (
 
         /** Base URL of the Fattmerchant API */
         var baseUrl: String = "https://apiprod01.fattlabs.com",
