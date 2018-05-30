@@ -17,9 +17,22 @@ The Fattmerchant Android SDK provides a simple way to accept a payment on your A
 ## <a name="installation">Installation</a>
 
 #### Jitpack
-To install, simply add the following line to your `build.gradle` file
+To install,
 
-`compile 'com.github.fattmerchantorg.fattmerchant-android-sdk:tokenization:0.1.0'`
+1. Add the JitPack repository to your build file
+
+```
+allprojects {
+  repositories {
+    ...
+    maven { url 'https://jitpack.io' }
+  }
+}
+```
+
+2. Add the following line to your `build.gradle` file
+
+`implementation 'com.github.fattmerchantorg:fattmerchant-android-sdk:v1.0.0'`
 
 ## <a name="getting-started">Getting Started</a>
 To accept a payment, you'll need to collect information from the customer, tokenize it, and send the token to your server. Your server will then be responsible for using the Fattmerchant API to run the transaction.
@@ -51,16 +64,16 @@ val client = FattmerchantClient(config)
 You first want to collect credit card information and populate a `CreditCard` or a `BankAccount` object.
 
 ```kotlin
-val creditCard = CreditCard(personName = "Joan Parsnip", 
-	cardNumber = "4111111111111111", 
-	cardExp = "1230", 
+val creditCard = CreditCard(personName = "Joan Parsnip",
+	cardNumber = "4111111111111111",
+	cardExp = "1230",
 	addressZip = "32822")
 
 // Or for a bank account...
-val bankAccount = BankAccount(personName = "Jim Parsnip", 
-	bankType = "savings", 
-	bankAccount = "9876543210", 
-	bankRouting = "021000021", 
+val bankAccount = BankAccount(personName = "Jim Parsnip",
+	bankType = "savings",
+	bankAccount = "9876543210",
+	bankRouting = "021000021",
 	addressZip = "32822")
 ```
 
