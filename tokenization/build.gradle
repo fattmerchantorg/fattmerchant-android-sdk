@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'maven-publish'
 apply plugin: 'com.github.dcendents.android-maven'
 
-group='com.github.fattmerchantorg.fattmerchant-android-sdk'
+group='com.github.fattmerchantorg'
 
 android {
     compileSdkVersion 26
