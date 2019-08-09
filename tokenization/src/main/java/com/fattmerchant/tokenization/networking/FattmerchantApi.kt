@@ -2,6 +2,7 @@ package com.fattmerchant.tokenization.networking
 
 import com.fattmerchant.tokenization.models.BankAccount
 import com.fattmerchant.tokenization.models.CreditCard
+import com.fattmerchant.tokenization.models.PaymentMethod
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.Body
@@ -16,10 +17,10 @@ interface FattmerchantApi {
 
     @POST("/webpayment/{webPaymentsToken}/tokenize")
     fun tokenizeCreditCard(@Path("webPaymentsToken") webPaymentsToken: String, @Body card: CreditCard)
-    : Call<ResponseBody>
+    : Call<PaymentMethod>
 
     @POST("/webpayment/{webPaymentsToken}/tokenize")
     fun tokenizeBankAccount(@Path("webPaymentsToken") webPaymentsToken: String, @Body card: BankAccount)
-    : Call<ResponseBody>
+    : Call<PaymentMethod>
 
 }
