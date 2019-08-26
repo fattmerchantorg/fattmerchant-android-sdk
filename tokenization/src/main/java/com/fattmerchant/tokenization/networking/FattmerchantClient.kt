@@ -1,5 +1,6 @@
 package com.fattmerchant.tokenization.networking
 
+import android.util.Log
 import com.fattmerchant.tokenization.models.BankAccount
 import com.fattmerchant.tokenization.models.CreditCard
 import com.fattmerchant.tokenization.models.PaymentMethod
@@ -11,6 +12,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import java.lang.ref.WeakReference
 
 /** Communicates with Fattmercahant */
 class FattmerchantClient(override var configuration: FattmerchantConfiguration) : FattmerchantApi {
@@ -24,13 +26,41 @@ class FattmerchantClient(override var configuration: FattmerchantConfiguration) 
         fun onPaymentMethodCreateError(errors: String)
     }
 
+    inner class PaymentMethodCallback(
+            private val weakListener: WeakReference<TokenizationListener>
+    ) : Callback<PaymentMethod> {
+        override fun onFailure(call: Call<PaymentMethod>, t: Throwable) {
+            weakListener.get()?.onPaymentMethodCreateError(t.message ?: unknownErrorString)
+        }
+
+        override fun onResponse(call: Call<PaymentMethod>, response: Response<PaymentMethod>) {
+            weakListener.get()?.let { listener ->
+                if (response.isSuccessful) {
+                    val paymentMethod = response.body()
+                            ?: return listener.onPaymentMethodCreateError(getError(response))
+
+                    listener.onPaymentMethodCreated(paymentMethod)
+                } else {
+                    listener.onPaymentMethodCreateError(getError(response))
+                }
+            }
+        }
+
+        private fun getError(response: Response<PaymentMethod>): String = response.errorBody()?.string()
+                ?: unknownErrorString
+
+    }
+
+
     companion object {
         const val unknownErrorString = "An unknown error occured creating the payment method"
     }
 
-    lateinit private var fattmerchantApi: FattmerchantApi
+    lateinit internal var fattmerchantApi: FattmerchantApi
 
-    init { configure() }
+    init {
+        configure()
+    }
 
     private fun configure() {
         // Add headers
@@ -56,51 +86,25 @@ class FattmerchantClient(override var configuration: FattmerchantConfiguration) 
     }
 
     //region Credit Card Tokenization
-    override fun tokenizeCreditCard(webPaymentsToken: String, card: CreditCard): Call<ResponseBody> = fattmerchantApi.tokenizeCreditCard(webPaymentsToken, card)
+    override fun tokenizeCreditCard(webPaymentsToken: String, card: CreditCard): Call<PaymentMethod> = fattmerchantApi.tokenizeCreditCard(webPaymentsToken, card)
 
-    fun tokenize(card: CreditCard): Call<ResponseBody> = tokenizeCreditCard(configuration.webPaymentsToken, card)
+    private fun tokenize(card: CreditCard): Call<PaymentMethod> = tokenizeCreditCard(configuration.webPaymentsToken, card)
 
     fun tokenize(card: CreditCard, listener: TokenizationListener) {
-        tokenize(card).enqueue(object : Callback<ResponseBody> {
-            override fun onResponse(call: Call<ResponseBody>?, response: Response<ResponseBody>?) {
-                if (response?.body() != null && response.body() is PaymentMethod) {
-                    listener.onPaymentMethodCreated(response.body() as PaymentMethod)
-                } else {
-                    var errorString = response?.errorBody()?.string()
-                    listener.onPaymentMethodCreateError(errorString ?: unknownErrorString)
-                }
-            }
-
-            override fun onFailure(call: Call<ResponseBody>?, t: Throwable?) {
-                listener.onPaymentMethodCreateError(t?.message ?: unknownErrorString)
-            }
-
-        })
+        val callback = PaymentMethodCallback(WeakReference(listener))
+        tokenizeCreditCard(configuration.webPaymentsToken, card).enqueue(callback)
     }
     //endregion
 
     //region Bank Account Tokenization
 
-    override fun tokenizeBankAccount(webPaymentsToken: String, card: BankAccount): Call<ResponseBody> = fattmerchantApi.tokenizeBankAccount(webPaymentsToken, card)
+    override fun tokenizeBankAccount(webPaymentsToken: String, card: BankAccount): Call<PaymentMethod> = fattmerchantApi.tokenizeBankAccount(webPaymentsToken, card)
 
-    fun tokenize(bankAccount: BankAccount) : Call<ResponseBody> = tokenizeBankAccount(configuration.webPaymentsToken, bankAccount)
+    private fun tokenize(bankAccount: BankAccount): Call<PaymentMethod> = tokenizeBankAccount(configuration.webPaymentsToken, bankAccount)
 
     fun tokenize(bankAccount: BankAccount, listener: TokenizationListener) {
-        tokenize(bankAccount = bankAccount).enqueue(object : Callback<ResponseBody> {
-            override fun onResponse(call: Call<ResponseBody>?, response: Response<ResponseBody>?) {
-                if (response?.body() != null && response.body() is PaymentMethod) {
-                    listener.onPaymentMethodCreated(response.body() as PaymentMethod)
-                } else {
-                    var errorString = response?.errorBody()?.string()
-                    listener.onPaymentMethodCreateError(errorString ?: unknownErrorString)
-                }
-            }
-
-            override fun onFailure(call: Call<ResponseBody>?, t: Throwable?) {
-                listener.onPaymentMethodCreateError(t?.message ?: unknownErrorString)
-            }
-
-        })
+        val callback = PaymentMethodCallback(WeakReference(listener))
+        tokenize(bankAccount = bankAccount).enqueue(callback)
     }
     //endregion
 }
