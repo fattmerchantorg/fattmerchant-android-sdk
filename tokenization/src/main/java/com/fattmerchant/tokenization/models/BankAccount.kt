@@ -43,9 +43,30 @@ class BankAccount (
 
     var note: String? = null,
     var phone: String? = null,
-    var email: String? = null,
-    private var method: String = "bank"
+    var email: String? = null
 ) {
+
+    private var method: String = "bank"
+
+    @Deprecated("Please use the new constructor that does not use the `method` parameter",
+            ReplaceWith("BankAccount(personName, bankType, bankHolderType, bankAccount, bankRouting, addressZip, bankName, address1, address2, addressCity, addressState, customerId, note, phone, email)"))
+    constructor(personName: String,
+                bankType: String,
+                bankHolderType: String,
+                bankAccount: String,
+                bankRouting: String,
+                addressZip: String,
+                bankName: String?,
+                address1: String?,
+                address2: String?,
+                addressCity: String?,
+                addressState: String?,
+                customerId: String?,
+                note: String?,
+                phone: String?,
+                email: String?,
+                method: String?
+    ): this(personName, bankType, bankHolderType, bankAccount, bankRouting, addressZip, bankName, address1, address2, addressCity, addressState, customerId, note, phone, email)
 
     companion object {
 

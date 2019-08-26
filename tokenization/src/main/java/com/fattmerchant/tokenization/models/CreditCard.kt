@@ -34,12 +34,31 @@ class CreditCard (
 
     var note: String? = null,
     var phone: String? = null,
-    var email: String? = null,
-    private var method: String = "card"
+    var email: String? = null
 ) {
 
-    companion object {
+    private var method: String = "card"
 
+    @Deprecated("Please use the new constructor that does not use the `method` parameter",
+            ReplaceWith("CreditCard(personName, cardNumber, cardExp, addressZip, address1, address2, addressCity, addressState, customerId, note, phone, email)"))
+    constructor(personName: String,
+                cardNumber: String,
+                cardExp: String,
+                addressZip: String,
+                address1: String?,
+                address2: String?,
+                addressCity: String?,
+                addressState: String?,
+                customerId: String?,
+                note: String?,
+                phone: String?,
+                email: String?,
+                method: String? = "card")
+            : this(personName, cardNumber, cardExp, addressZip, address1, address2, addressCity, addressState, customerId, note, phone, email) {
+        this.method = "card"
+    }
+
+    companion object {
         /**
          * Creates a test credit card
          *
