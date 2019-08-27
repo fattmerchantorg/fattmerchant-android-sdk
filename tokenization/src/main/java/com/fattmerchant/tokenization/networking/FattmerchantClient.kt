@@ -1,5 +1,6 @@
 package com.fattmerchant.tokenization.networking
 
+import android.util.Log
 import com.fattmerchant.tokenization.models.BankAccount
 import com.fattmerchant.tokenization.models.CreditCard
 import com.fattmerchant.tokenization.models.PaymentMethod
@@ -29,7 +30,7 @@ class FattmerchantClient(override var configuration: FattmerchantConfiguration) 
             private val weakListener: WeakReference<TokenizationListener>
     ) : Callback<PaymentMethod> {
         override fun onFailure(call: Call<PaymentMethod>, t: Throwable) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            weakListener.get()?.onPaymentMethodCreateError(t.message ?: unknownErrorString)
         }
 
         override fun onResponse(call: Call<PaymentMethod>, response: Response<PaymentMethod>) {
