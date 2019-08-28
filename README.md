@@ -1,5 +1,7 @@
 # Fattmerchant Android SDK
 
+![Release](https://jitpack.io/v/fattmerchantorg/fattmerchant-android-sdk.svg)
+
 The Fattmerchant Android SDK provides a simple way to accept a payment on your Android app by providing tokenization of payment methods. By using these tokens instead of card and bank information, you no longer have to worry about sending sensitive card information to your server.
 
 * [Requirements](#requirements)
@@ -32,7 +34,7 @@ allprojects {
 
 2. Add the following line to your `build.gradle` file
 
-`implementation 'com.github.fattmerchantorg:fattmerchant-android-sdk:v1.0.0'`
+`implementation 'com.github.fattmerchantorg:fattmerchant-android-sdk:v1.0.3'`
 
 ## <a name="getting-started">Getting Started</a>
 To accept a payment, you'll need to collect information from the customer, tokenize it, and send the token to your server. Your server will then be responsible for using the Fattmerchant API to run the transaction.
@@ -81,12 +83,11 @@ val bankAccount = BankAccount(personName = "Jim Parsnip",
 Once you have a `CreditCard` object, call the `tokenize(:)` method on  `FattmerchantClient` object and pass a listener to be notified once tokenization is complete.
 
 ```kotlin
-let fattClient = FattmerchantClient(config)
+var fattClient = FattmerchantClient(config)
 fattClient.tokenize(card) { (response) in
   client.tokenize(card, object : FattmerchantClient.TokenizationListener {
             override fun onPaymentMethodCreated(paymentMethod: PaymentMethod) {
               // Success! You can now run a transaction with Fattmerchant using paymentToken as the PaymentMethod
-                signal.countDown()
             }
 
             override fun onPaymentMethodCreateError(errors: String) {
