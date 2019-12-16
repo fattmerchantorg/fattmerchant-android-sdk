@@ -8,6 +8,7 @@ The Fattmerchant Android SDK provides a simple way to accept a payment on your A
 * [Installation](#installation)
 * [Getting Started](#getting-started)
 * [Testing](#testing)
+* [Taking a payment with a mobile reader](https://fattmerchantorg.github.io/fattmerchant-android-sdk/cardpresent/)
 
 ![Tokenization Info](https://raw.githubusercontent.com/fattmerchantorg/Fattmerchant-iOS-SDK/master/assets/images/tokenization-info.png)
 
@@ -34,7 +35,7 @@ allprojects {
 
 2. Add the following line to your `build.gradle` file
 
-`implementation 'com.github.fattmerchantorg:fattmerchant-android-sdk:v1.0.3'`
+`implementation 'com.github.fattmerchantorg:fattmerchant-android-sdk:v1.0.4'`
 
 ## <a name="getting-started">Getting Started</a>
 To accept a payment, you'll need to collect information from the customer, tokenize it, and send the token to your server. Your server will then be responsible for using the Fattmerchant API to run the transaction.
