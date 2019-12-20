@@ -38,51 +38,56 @@ open class Omni(var omniApi: OmniApi) {
      * This method will kick off procedures like preparing the mobile reader drivers so the client is ready to take
      * requests for payments
      */
-    fun initialize(args: Map<String, Any>, error: (OmniException) -> Unit) = coroutineScope.launch {
+    fun initialize(args: Map<String, Any>, completion: () -> Unit, error: (OmniException) -> Unit) {
+        coroutineScope.launch {
+            // Verify that the apiKey corresponds to a real merchant
+            val merchant = omniApi.getMerchant {
+                error(OmniException("Could not initialize Omni", it.message))
+            } ?: return@launch
 
-        // Verify that the apiKey corresponds to a real merchant
-        val merchant = omniApi.getMerchant {
-            error(OmniException("Could not initialize Omni", it.message))
-        } ?: return@launch
+            // Get the nmiApiKey from the merchant
+            val argsWithMerchant = args.toMutableMap().apply {
+                set("merchant", merchant)
+            }
 
-        // Get the nmiApiKey from the merchant
-        val argsWithMerchant = args.toMutableMap().apply {
-            set("merchant", merchant)
-        }
-
-        try {
-            InitializeDrivers(
-                mobileReaderDriverRepository,
-                argsWithMerchant,
-                coroutineContext
-            ).start()
-        } catch (e: Error) {
-            error(e)
+            try {
+                InitializeDrivers(
+                        mobileReaderDriverRepository,
+                        argsWithMerchant,
+                        coroutineContext
+                ).start()
+                
+                completion()
+            } catch (e: Error) {
+                error(e)
+            }
         }
     }
 
     /**
      * Searches for all readers that are available given across all the mobile reader drivers
      */
-    fun getAvailableReaders(onReadersFound: (List<MobileReader>) -> Unit) = coroutineScope.launch {
-        val searchJob = SearchForReaders(
-            mobileReaderDriverRepository,
-            mapOf(),
-            coroutineContext
-        )
-        onReadersFound(searchJob.start())
+    fun getAvailableReaders(onReadersFound: (List<MobileReader>) -> Unit) {
+        coroutineScope.launch {
+            val searchJob = SearchForReaders(
+                    mobileReaderDriverRepository,
+                    mapOf(),
+                    coroutineContext
+            )
+            onReadersFound(searchJob.start())
+        }
     }
 
     /**
      * Attempts to connect to the given [MobileReader]
      */
-    fun connectReader(mobileReader: MobileReader, onConnected: (MobileReader) -> Unit, onFail: (String) -> Unit) =
+    fun connectReader(mobileReader: MobileReader, onConnected: (MobileReader) -> Unit, onFail: (String) -> Unit) {
         coroutineScope.launch {
             try {
                 val connected = ConnectMobileReader(
-                    coroutineContext,
-                    mobileReaderDriverRepository,
-                    mobileReader
+                        coroutineContext,
+                        mobileReaderDriverRepository,
+                        mobileReader
                 ).start()
 
                 if (connected) {
@@ -95,14 +100,15 @@ open class Omni(var omniApi: OmniApi) {
                 onFail(e.detail ?: e.message ?: "Could not connect mobile reader")
             }
         }
+    }
 
     /**
      * Captures a mobile reader transaction
      */
     fun takeMobileReaderTransaction(
-        request: TransactionRequest,
-        completion: (Transaction) -> Unit,
-        error: (OmniException) -> Unit
+            request: TransactionRequest,
+            completion: (Transaction) -> Unit,
+            error: (OmniException) -> Unit
     ) {
         coroutineScope.launch {
 
@@ -112,13 +118,13 @@ open class Omni(var omniApi: OmniApi) {
             }
 
             val takePaymentJob = TakeMobileReaderPayment(
-                mobileReaderDriverRepository = mobileReaderDriverRepository,
-                invoiceRepository = invoiceRepository,
-                customerRepository = customerRepository,
-                paymentMethodRepository = paymentMethodRepository,
-                transactionRepository = transactionRepository,
-                request = request,
-                coroutineContext = coroutineContext
+                    mobileReaderDriverRepository = mobileReaderDriverRepository,
+                    invoiceRepository = invoiceRepository,
+                    customerRepository = customerRepository,
+                    paymentMethodRepository = paymentMethodRepository,
+                    transactionRepository = transactionRepository,
+                    request = request,
+                    coroutineContext = coroutineContext
             )
 
             currentJob = takePaymentJob
@@ -142,16 +148,16 @@ open class Omni(var omniApi: OmniApi) {
      * @param error a block to run in case an error occurs
      */
     fun voidMobileReaderTransaction(
-        transaction: Transaction,
-        completion: (Transaction) -> Unit,
-        error: (OmniException) -> Unit
+            transaction: Transaction,
+            completion: (Transaction) -> Unit,
+            error: (OmniException) -> Unit
     ) {
         coroutineScope.launch {
             VoidMobileReaderTransaction(
-                mobileReaderDriverRepository,
-                transactionRepository,
-                transaction,
-                coroutineContext
+                    mobileReaderDriverRepository,
+                    transactionRepository,
+                    transaction,
+                    coroutineContext
             ).start {
                 error(it)
             }?.let { completion(it) }
@@ -166,15 +172,15 @@ open class Omni(var omniApi: OmniApi) {
      * @param error a block to run in case an error occurs
      */
     fun refundMobileReaderTransaction(
-        transaction: Transaction,
-        completion: (Transaction) -> Unit,
-        error: (error: OmniException) -> Unit
+            transaction: Transaction,
+            completion: (Transaction) -> Unit,
+            error: (error: OmniException) -> Unit
     ) {
         coroutineScope.launch {
             RefundMobileReaderTransaction(
-                mobileReaderDriverRepository,
-                transactionRepository,
-                transaction
+                    mobileReaderDriverRepository,
+                    transactionRepository,
+                    transaction
             ).start {
                 error(it)
             }?.let { completion(it) }
@@ -189,7 +195,7 @@ open class Omni(var omniApi: OmniApi) {
     fun getInvoices(completion: (List<Invoice>) -> Unit, error: (OmniException) -> Unit) {
         coroutineScope.launch {
             invoiceRepository.get(error)
-                ?.let { completion(it) }
+                    ?.let { completion(it) }
         }
     }
 
@@ -201,7 +207,7 @@ open class Omni(var omniApi: OmniApi) {
     fun getTransactions(completion: (List<Transaction>) -> Unit, error: (OmniException) -> Unit) {
         coroutineScope.launch {
             transactionRepository.get(error)
-                ?.let { completion(it) }
+                    ?.let { completion(it) }
         }
     }
 

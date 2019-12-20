@@ -57,17 +57,11 @@ class Omni(omniApi: OmniApi) : CommonOmni(omniApi) {
 
             // Init omni
             omni.coroutineScope.launch {
-
-                var failed = false
-                omni.initialize(params) { error ->
-                    failed = true
-                    error(error)
-                }.invokeOnCompletion {
-                    if (!failed) {
-                        completion()
-                    }
+                omni.initialize(params, {
+                    completion()
+                }) {
+                    error(it)
                 }
-
             }
         }
 
