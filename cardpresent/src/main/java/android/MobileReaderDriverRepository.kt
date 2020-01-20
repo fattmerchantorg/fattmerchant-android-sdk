@@ -22,11 +22,7 @@ class MobileReaderDriverRepository : MobileReaderDriverRepository {
     }
 
     override suspend fun getDriverFor(mobileReader: MobileReader): MobileReaderDriver? {
-        return if (mobileReader.getName().contains("Miura")) {
-            chipDna
-        } else {
-            null
-        }
+        return chipDna
     }
 
 }
