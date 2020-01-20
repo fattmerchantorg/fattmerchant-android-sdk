@@ -50,17 +50,13 @@ open class Omni(var omniApi: OmniApi) {
                 set("merchant", merchant)
             }
 
-            try {
-                InitializeDrivers(
-                        mobileReaderDriverRepository,
-                        argsWithMerchant,
-                        coroutineContext
-                ).start()
-                
-                completion()
-            } catch (e: Error) {
-                error(OmniException("Could not initialize", e.message))
-            }
+            InitializeDrivers(
+                    mobileReaderDriverRepository,
+                    argsWithMerchant,
+                    coroutineContext
+            ).start(error)
+
+            completion()
         }
     }
 
