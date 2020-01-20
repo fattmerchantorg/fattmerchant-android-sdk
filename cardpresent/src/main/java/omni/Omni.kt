@@ -59,7 +59,7 @@ open class Omni(var omniApi: OmniApi) {
                 
                 completion()
             } catch (e: Error) {
-                error(e)
+                error(OmniException("Could not initialize", e.message))
             }
         }
     }
