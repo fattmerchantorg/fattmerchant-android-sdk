@@ -63,8 +63,8 @@ class TakeMobileReaderPayment(
         // Create customer
         val customer = customerRepository.create(
             Customer().apply {
-                firstname = result.cardHolderFirstName
-                lastname = result.cardHolderLastName
+                firstname = result.cardHolderFirstName ?: "SWIPE"
+                lastname = result.cardHolderLastName ?: "CUSTOMER"
             }
         ) {
             onError(it)

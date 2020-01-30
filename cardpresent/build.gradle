@@ -58,7 +58,6 @@ dependencies {
     androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
 
-    implementation 'androidx.core:core-ktx:1.0.2'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     androidTestCompile 'net.zetetic:android-database-sqlcipher:3.5.1'

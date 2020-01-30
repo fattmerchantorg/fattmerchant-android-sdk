@@ -31,7 +31,9 @@ class Omni(omniApi: OmniApi) : CommonOmni(omniApi) {
         fun initialize(params: InitParams, completion: () -> Unit, error: (OmniException) -> Unit) {
             val paramMap = mapOf (
                 "apiKey" to params.apiKey,
-                "context" to params.appContext
+                "appContext" to params.appContext,
+                "environment" to params.environment,
+                "appId" to "sampleapp123"
             )
 
             initialize(paramMap, completion, error)
@@ -48,7 +50,7 @@ class Omni(omniApi: OmniApi) : CommonOmni(omniApi) {
         fun initialize(params: Map<String, Any>, completion: () -> Unit, error: (OmniException) -> Unit) {
             // Init the API
             val omniApi = OmniApi()
-            omniApi.environment = OmniApi.Environment.LIVE
+            omniApi.environment = params["environment"] as? OmniApi.Environment ?: OmniApi.Environment.LIVE
             omniApi.token = params["apiKey"] as? String ?: ""
 
             // Create the shared Omni object
