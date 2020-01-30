@@ -121,7 +121,7 @@ class TakeMobileReaderPayment(
                 meta = transactionMeta
                 type = "charge"
                 method = "card"
-                source = "Android|CPSDK"
+                source = "Android|CPSDK|NMI"
                 customerId = customer.id
                 invoiceId = invoice.id
                 response = gatewayResponse
