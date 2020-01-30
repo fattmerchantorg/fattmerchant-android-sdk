@@ -99,7 +99,10 @@ Omni.shared()?.takeMobileReaderTransaction(request, {
 
 
 ## Refunding a Payment
-To refund a payment, you must first get the `Transaction` that you want to refund. Once you do, you can 
+To refund a payment, you must first get the `Transaction` that you want to refund. You can use the [Omni API](https://fattmerchant.docs.apiary.io/#reference/0/transactions) to do so. 
+Once you get the transaction, you can use the `refundMobileReaderTransaction` method to attempt the refund.
+
+> At this time, you may only refund transactions that were performed on the same device that performed the original transaction 
 
 ```kotlin
 // Attain a transaction
