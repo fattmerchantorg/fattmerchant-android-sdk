@@ -57,4 +57,7 @@ open class TransactionResult {
      */
     var externalId: String? = null
 
+    /** The token that represents this payment method */
+    internal var paymentToken: String? = null
+
 }
