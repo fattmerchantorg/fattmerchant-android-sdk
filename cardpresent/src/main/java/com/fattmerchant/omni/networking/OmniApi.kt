@@ -112,8 +112,18 @@ class OmniApi {
      * @param paymentMethod
      * @return the created payment method
      */
-    suspend fun createPaymentMethod(paymentMethod: PaymentMethod, error: (Error) -> Unit): PaymentMethod? =
-        post("payment-method", JsonParser.toJson(paymentMethod), error)
+    suspend fun createPaymentMethod(paymentMethod: PaymentMethod, error: (Error) -> Unit): PaymentMethod? {
+        // If the payment method is already tokenized, use the payment-method/token route
+        // that allows us to pass the token to Omni
+        val url = if (paymentMethod.paymentToken != null) {
+            "payment-method/token"
+        } else {
+            "payment-method"
+        }
+
+        return post(url, JsonParser.toJson(paymentMethod), error)
+    }
+
 
     private suspend inline fun <reified T> post(urlString: String, body: String, error: (Error) -> Unit): T? =
         this.request<T>(

@@ -152,7 +152,7 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
     }
 
     override suspend fun performTransaction(request: TransactionRequest): TransactionResult {
-        val paymentRequestParams = mapTransactionRequestToParams(request)
+        val paymentRequestParams = Parameters().withTransactionRequest(request)
 
         val result = suspendCancellableCoroutine<Parameters> { cont ->
 
@@ -224,10 +224,16 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
             authCode = result[ParameterKeys.AuthCode]
             maskedPan = result[ParameterKeys.MaskedPan] ?: ""
             userReference = result[ParameterKeys.UserReference]
+            localId = result[ParameterKeys.CardEaseReference]
+            externalId = result[ParameterKeys.TransactionId]
             cardHolderFirstName = firstName
             cardHolderLastName = lastName
             cardType = result[ParameterKeys.CardSchemeId]?.toLowerCase()
             success = result[ParameterKeys.TransactionResult] == ParameterValues.Approved
+
+            result[ParameterKeys.CustomerVaultId]?.let { token ->
+                paymentToken = "nmi_$token"
+            }
         }
     }
 
@@ -302,40 +308,5 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         }
 
         return availablePinPadsList
-    }
-
-    companion object {
-
-        /**
-         * Gets the User Reference from the given [Transaction]
-         *
-         * @param transaction
-         * @return a string containing the user reference or null if not found
-         */
-        private fun extractCardEaseReference(transaction: Transaction): String? =
-            (transaction.meta as? Map<*, *>)?.get("cardEaseReference") as? String
-
-        /**
-         * Generates a user reference for chipDNA transactions
-         *
-         * @return String containing the generated user reference
-         */
-        private fun generateUserReference(): String =
-            String.format("CDM-%s", SimpleDateFormat("yy-MM-dd-HH.mm.ss", Locale.US).format(Date()))
-
-        /**
-         * Converts a [TransactionRequest] into a [Parameters] object that ChipDNA understands
-         *
-         * @param request
-         */
-        private fun mapTransactionRequestToParams(request: TransactionRequest) = Parameters().apply {
-            add(ParameterKeys.Amount, request.amount.centsString())
-            add(ParameterKeys.AmountType, ParameterValues.AmountTypeActual)
-            add(ParameterKeys.Currency, "USD")
-            add(ParameterKeys.UserReference, generateUserReference())
-            add(ParameterKeys.PaymentMethod, ParameterValues.Card)
-            add(ParameterKeys.AutoConfirm, ParameterValues.TRUE)
-            add(ParameterKeys.TransactionType, ParameterValues.Sale)
-        }
     }
 }

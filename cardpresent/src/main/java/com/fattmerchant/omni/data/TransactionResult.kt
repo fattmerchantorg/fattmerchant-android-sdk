@@ -43,4 +43,21 @@ open class TransactionResult {
     /** A user-defined string used to refer to the transaction */
     var userReference: String? = null
 
+    /**
+     * The ID of this transaction in the local database
+     *
+     * For example, in the case of NMI, this would be the CardEaseReferenceId
+     */
+    var localId: String? = null
+
+    /**
+     * The ID of this transaction in the 3rd party responsible for performing it.
+     *
+     * For example, in the case of NMI, this would be the TransactionID
+     */
+    var externalId: String? = null
+
+    /** The token that represents this payment method */
+    internal var paymentToken: String? = null
+
 }

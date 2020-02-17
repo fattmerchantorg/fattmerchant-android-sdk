@@ -20,6 +20,26 @@ class TakeMobileReaderPayment(
     class TakeMobileReaderPaymentException(message: String? = null) :
         OmniException("Could not take mobile reader payment", message)
 
+    companion object {
+        internal fun transactionMetaFrom(result: TransactionResult): Map<String, Any> {
+            val transactionMeta = mutableMapOf<String, Any>()
+
+            result.userReference?.let {
+                transactionMeta["nmiUserRef"] = it
+            }
+
+            result.localId?.let {
+                transactionMeta["cardEaseReference"] = it
+            }
+
+            result.externalId?.let {
+                transactionMeta["nmiTransactionId"] = it
+            }
+
+            return transactionMeta
+        }
+    }
+
     suspend fun start(onError: (OmniException) -> Unit): Transaction? = coroutineScope {
 
         // Get the reader responsible for taking the payment
@@ -80,6 +100,7 @@ class TakeMobileReaderPayment(
                 this.cardLastFour = cardLastFour
                 personName = (customer.firstname ?: "") + " " + (customer.lastname ?: "")
                 tokenize = false
+                paymentToken = result.paymentToken
             }
         ) {
             onError(it)
@@ -95,8 +116,7 @@ class TakeMobileReaderPayment(
         } ?: return@coroutineScope null
 
         // Create transaction
-        val transactionMeta = mutableMapOf<String, Any>()
-        transactionMeta["nmiUserRef"] = result.userReference ?: ""
+        val transactionMeta = transactionMetaFrom(result)
 
         var gatewayResponse: Map<String, Any>? = null
 
