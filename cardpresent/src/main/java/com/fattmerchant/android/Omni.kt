@@ -33,7 +33,7 @@ class Omni(omniApi: OmniApi) : CommonOmni(omniApi) {
                 "apiKey" to params.apiKey,
                 "appContext" to params.appContext,
                 "environment" to params.environment,
-                "appId" to "sampleapp123"
+                "appId" to params.appId
             )
 
             initialize(paramMap, completion, error)
