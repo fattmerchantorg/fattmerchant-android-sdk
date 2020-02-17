@@ -1,5 +1,6 @@
 package com.fattmerchant.omni
 
+import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.TransactionRequest
 import com.fattmerchant.omni.data.models.Invoice
@@ -171,12 +172,28 @@ open class Omni(var omniApi: OmniApi) {
             transaction: Transaction,
             completion: (Transaction) -> Unit,
             error: (error: OmniException) -> Unit
+    ) = refundMobileReaderTransaction(transaction, null, completion, error)
+
+    /**
+     * Refunds the given transaction and returns a new [Transaction] that represents the refund in Omni
+     *
+     * @param transaction
+     * @param refundAmount The [Amount] to refund. When present, this **must** be greater than zero and lesser than or equal to the transaction total
+     * @param completion
+     * @param error a block to run in case an error occurs
+     */
+    fun refundMobileReaderTransaction(
+            transaction: Transaction,
+            refundAmount: Amount? = null,
+            completion: (Transaction) -> Unit,
+            error: (error: OmniException) -> Unit
     ) {
         coroutineScope.launch {
             RefundMobileReaderTransaction(
                     mobileReaderDriverRepository,
                     transactionRepository,
-                    transaction
+                    transaction,
+                    refundAmount
             ).start {
                 error(it)
             }?.let { completion(it) }

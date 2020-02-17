@@ -74,5 +74,5 @@ interface MobileReaderDriver {
      * @return the result of the operation
      */
     @Throws(RefundTransactionException::class)
-    suspend fun refundTransaction(transaction: Transaction): TransactionResult
+    suspend fun refundTransaction(transaction: Transaction, refundAmount: Amount? = null): TransactionResult
 }
