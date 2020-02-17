@@ -80,6 +80,7 @@ class TakeMobileReaderPayment(
                 this.cardLastFour = cardLastFour
                 personName = (customer.firstname ?: "") + " " + (customer.lastname ?: "")
                 tokenize = false
+                paymentToken = result.paymentToken
             }
         ) {
             onError(it)

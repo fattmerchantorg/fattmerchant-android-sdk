@@ -228,6 +228,10 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
             cardHolderLastName = lastName
             cardType = result[ParameterKeys.CardSchemeId]?.toLowerCase()
             success = result[ParameterKeys.TransactionResult] == ParameterValues.Approved
+
+            result[ParameterKeys.CustomerVaultId]?.let { token ->
+                paymentToken = "nmi_$token"
+            }
         }
     }
 

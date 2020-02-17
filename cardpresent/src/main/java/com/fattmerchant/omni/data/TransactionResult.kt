@@ -43,4 +43,7 @@ open class TransactionResult {
     /** A user-defined string used to refer to the transaction */
     var userReference: String? = null
 
+    /** The token that represents this payment method */
+    internal var paymentToken: String? = null
+
 }
