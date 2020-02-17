@@ -224,6 +224,8 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
             authCode = result[ParameterKeys.AuthCode]
             maskedPan = result[ParameterKeys.MaskedPan] ?: ""
             userReference = result[ParameterKeys.UserReference]
+            localId = result[ParameterKeys.CardEaseReference]
+            externalId = result[ParameterKeys.TransactionId]
             cardHolderFirstName = firstName
             cardHolderLastName = lastName
             cardType = result[ParameterKeys.CardSchemeId]?.toLowerCase()
