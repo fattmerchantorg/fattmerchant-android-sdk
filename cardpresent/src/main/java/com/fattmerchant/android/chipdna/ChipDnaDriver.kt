@@ -232,7 +232,7 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
     }
 
     override suspend fun voidTransaction(transaction: Transaction): TransactionResult {
-        val ref = extractUserReference(transaction)
+        val ref = extractCardEaseReference(transaction)
 
         val voidRequestParams = Parameters().apply {
             add(ParameterKeys.UserReference, ref)
@@ -245,13 +245,14 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         return TransactionResult()
     }
 
-    override suspend fun refundTransaction(transaction: Transaction): TransactionResult {
+    override suspend fun refundTransaction(transaction: Transaction, refundAmount: Amount?): TransactionResult {
         // Prepare Parameters for refunding
-        val ref = extractUserReference(transaction)
-        val amountCents = transaction.total?.toFloat()?.times(100)?.toInt() ?: 0
+        val ref = extractCardEaseReference(transaction)
+
+        val amountCents = refundAmount?.cents ?: transaction.total?.toFloat()?.times(100)?.toInt() ?: 0
         val refundRequestParams = Parameters().apply {
             add(ParameterKeys.UserReference, generateUserReference())
-            add(ParameterKeys.SaleReference, ref)
+            add(ParameterKeys.CardEaseReference, ref)
             add(ParameterKeys.Amount, amountCents)
             add(ParameterKeys.Currency, "USD")
         }
@@ -263,6 +264,7 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
                 this.request = request
                 success = true
                 transactionType = "refund"
+                amount = refundAmount
             }
         } else {
             throw RefundTransactionException(result[ParameterKeys.Error] ?: "Could not refund transaction")
@@ -310,8 +312,8 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
          * @param transaction
          * @return a string containing the user reference or null if not found
          */
-        private fun extractUserReference(transaction: Transaction): String? =
-            (transaction.meta as? Map<*, *>)?.get("nmiUserRef") as? String
+        private fun extractCardEaseReference(transaction: Transaction): String? =
+            (transaction.meta as? Map<*, *>)?.get("cardEaseReference") as? String
 
         /**
          * Generates a user reference for chipDNA transactions
