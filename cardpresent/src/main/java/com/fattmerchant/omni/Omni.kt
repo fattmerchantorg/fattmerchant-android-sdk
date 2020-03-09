@@ -29,6 +29,9 @@ open class Omni(var omniApi: OmniApi) {
         override var omniApi: OmniApi = this@Omni.omniApi
     }
 
+    /// Responsible for providing signatures for transactions, when required
+    open var signatureProvider: SignatureProviding? = null
+
     open lateinit var mobileReaderDriverRepository: MobileReaderDriverRepository
     var coroutineScope = MainScope()
     var currentJob: CoroutineScope? = null
@@ -121,6 +124,7 @@ open class Omni(var omniApi: OmniApi) {
                     paymentMethodRepository = paymentMethodRepository,
                     transactionRepository = transactionRepository,
                     request = request,
+                    signatureProvider = signatureProvider,
                     coroutineContext = coroutineContext
             )
 

@@ -2,6 +2,7 @@ package com.fattmerchant.android.chipdna
 
 import android.content.Context
 import com.creditcall.chipdnamobile.*
+import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.data.*
 import com.fattmerchant.omni.data.models.Merchant
 import com.fattmerchant.omni.data.models.Transaction
@@ -151,7 +152,7 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         return true
     }
 
-    override suspend fun performTransaction(request: TransactionRequest): TransactionResult {
+    override suspend fun performTransaction(request: TransactionRequest, signatureProvider: SignatureProviding?): TransactionResult {
         val paymentRequestParams = mapTransactionRequestToParams(request)
 
         val result = suspendCancellableCoroutine<Parameters> { cont ->
@@ -169,6 +170,7 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
                 cont.resume(it)
             }
 
+            transactionListener.signatureProvider = signatureProvider
             ChipDnaMobile.getInstance().addTransactionUpdateListener(transactionListener)
             ChipDnaMobile.getInstance().addTransactionFinishedListener(transactionListener)
             ChipDnaMobile.getInstance().addDeferredAuthorizationListener(transactionListener)
