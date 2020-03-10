@@ -217,6 +217,7 @@ class MainActivity : AppCompatActivity() {
                     buttonRefundPreviousTransaction.isEnabled = true
                     buttonInitialize.visibility = View.GONE
                 }
+                Omni.shared()?.signatureProvider = SignatureProvider()
             }
         ) {
             updateStatus("${it.message}. ${it.detail}")
