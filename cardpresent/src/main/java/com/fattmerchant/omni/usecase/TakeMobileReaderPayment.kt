@@ -145,6 +145,7 @@ class TakeMobileReaderPayment(
                 customerId = customer.id
                 invoiceId = invoice.id
                 response = gatewayResponse
+                token = result.externalId
             }
         ) {
             onError(it)
