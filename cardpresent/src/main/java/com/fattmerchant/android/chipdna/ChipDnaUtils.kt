@@ -46,6 +46,16 @@ internal fun extractUserReference(transaction: Transaction): String? =
         (transaction.meta as? Map<*, *>)?.get("nmiUserRef") as? String
 
 /**
+ * Gets the Card Ease Reference from the given [Transaction]
+ *
+ * @param transaction
+ * @return a string containing the user reference or null if not found
+ */
+internal fun extractCardEaseReference(transaction: Transaction): String? =
+        (transaction.meta as? Map<*, *>)?.get("cardEaseReference") as? String
+
+
+/**
  * Generates a user reference for chipDNA transactions
  *
  * @return String containing the generated user reference

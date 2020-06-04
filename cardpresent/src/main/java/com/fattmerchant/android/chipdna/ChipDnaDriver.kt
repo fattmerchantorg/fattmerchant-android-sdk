@@ -32,6 +32,9 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
 
     inner class SelectablePinPad(var name: String, var connectionType: String)
 
+    /** A key used to communicate with TransactionGateway */
+    private var securityKey: String = ""
+
     val log = Logger.getLogger("ChipDNA")
     fun log(msg: String?) {
         log.info("[${Thread.currentThread().name}] $msg")
@@ -61,6 +64,9 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
 
         // Init
         ChipDnaMobile.initialize(appContext, params)
+
+        // Store security key for later use
+        securityKey = apiKey
 
         // Set credentials
         val result = setCredentials(appId, apiKey)
@@ -218,6 +224,12 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         val address1 = result[ParameterKeys.BillingAddress1]
         val address2 = result[ParameterKeys.BillingAddress2]
         val addressState = result[ParameterKeys.BillingState]
+        var ccExpiration: String? = null
+
+        // Try to add the cc expiration
+        result[ParameterKeys.TransactionId]?.let { transactionId ->
+            ccExpiration = TransactionGateway.getTransactionCcExpiration(securityKey, transactionId)
+        }
 
         return TransactionResult().apply {
             this.request = request
@@ -229,6 +241,7 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
             cardHolderFirstName = firstName
             cardHolderLastName = lastName
             cardType = result[ParameterKeys.CardSchemeId]?.toLowerCase()
+            cardExpiration = ccExpiration
             success = result[ParameterKeys.TransactionResult] == ParameterValues.Approved
 
             result[ParameterKeys.CustomerVaultId]?.let { token ->

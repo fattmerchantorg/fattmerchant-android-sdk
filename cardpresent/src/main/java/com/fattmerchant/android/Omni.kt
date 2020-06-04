@@ -1,5 +1,6 @@
 package com.fattmerchant.android
 
+import com.fattmerchant.android.chipdna.TransactionGateway
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.Omni as CommonOmni
 import com.fattmerchant.omni.data.repository.MobileReaderDriverRepository as CommonMobileReaderDriverRepo
