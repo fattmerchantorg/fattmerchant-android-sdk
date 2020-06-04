@@ -97,6 +97,7 @@ class TakeMobileReaderPayment(
                 customerId = customer.id
                 method = "card"
                 cardType = result.cardType
+                cardExp = result.cardExpiration
                 this.cardLastFour = cardLastFour
                 personName = (customer.firstname ?: "") + " " + (customer.lastname ?: "")
                 tokenize = false

@@ -40,6 +40,9 @@ open class TransactionResult {
     /** VISA, Mastercard, JCB, etc */
     var cardType: String? = null
 
+    /** The expiration date of the card in 'mmyy' format */
+    var cardExpiration: String? = null
+
     /** A user-defined string used to refer to the transaction */
     var userReference: String? = null
 
