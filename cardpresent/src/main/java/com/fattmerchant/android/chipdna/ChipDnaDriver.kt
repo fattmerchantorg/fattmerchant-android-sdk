@@ -33,6 +33,9 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
 
     inner class SelectablePinPad(var name: String, var connectionType: String)
 
+    /** A key used to communicate with TransactionGateway */
+    private var securityKey: String = ""
+
     val log = Logger.getLogger("ChipDNA")
     fun log(msg: String?) {
         log.info("[${Thread.currentThread().name}] $msg")
@@ -62,6 +65,9 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
 
         // Init
         ChipDnaMobile.initialize(appContext, params)
+
+        // Store security key for later use
+        securityKey = apiKey
 
         // Set credentials
         val result = setCredentials(appId, apiKey)
@@ -220,16 +226,29 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         val address1 = result[ParameterKeys.BillingAddress1]
         val address2 = result[ParameterKeys.BillingAddress2]
         val addressState = result[ParameterKeys.BillingState]
+        var ccExpiration: String? = null
+
+        // Try to add the cc expiration
+        result[ParameterKeys.TransactionId]?.let { transactionId ->
+            ccExpiration = TransactionGateway.getTransactionCcExpiration(securityKey, transactionId)
+        }
 
         return TransactionResult().apply {
             this.request = request
             authCode = result[ParameterKeys.AuthCode]
             maskedPan = result[ParameterKeys.MaskedPan] ?: ""
             userReference = result[ParameterKeys.UserReference]
+            localId = result[ParameterKeys.CardEaseReference]
+            externalId = result[ParameterKeys.TransactionId]
             cardHolderFirstName = firstName
             cardHolderLastName = lastName
             cardType = result[ParameterKeys.CardSchemeId]?.toLowerCase()
+            cardExpiration = ccExpiration
             success = result[ParameterKeys.TransactionResult] == ParameterValues.Approved
+
+            result[ParameterKeys.CustomerVaultId]?.let { token ->
+                paymentToken = "nmi_$token"
+            }
         }
     }
 
@@ -304,40 +323,5 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         }
 
         return availablePinPadsList
-    }
-
-    companion object {
-
-        /**
-         * Gets the User Reference from the given [Transaction]
-         *
-         * @param transaction
-         * @return a string containing the user reference or null if not found
-         */
-        private fun extractCardEaseReference(transaction: Transaction): String? =
-            (transaction.meta as? Map<*, *>)?.get("cardEaseReference") as? String
-
-        /**
-         * Generates a user reference for chipDNA transactions
-         *
-         * @return String containing the generated user reference
-         */
-        private fun generateUserReference(): String =
-            String.format("CDM-%s", SimpleDateFormat("yy-MM-dd-HH.mm.ss", Locale.US).format(Date()))
-
-        /**
-         * Converts a [TransactionRequest] into a [Parameters] object that ChipDNA understands
-         *
-         * @param request
-         */
-        private fun mapTransactionRequestToParams(request: TransactionRequest) = Parameters().apply {
-            add(ParameterKeys.Amount, request.amount.centsString())
-            add(ParameterKeys.AmountType, ParameterValues.AmountTypeActual)
-            add(ParameterKeys.Currency, "USD")
-            add(ParameterKeys.UserReference, generateUserReference())
-            add(ParameterKeys.PaymentMethod, ParameterValues.Card)
-            add(ParameterKeys.AutoConfirm, ParameterValues.TRUE)
-            add(ParameterKeys.TransactionType, ParameterValues.Sale)
-        }
     }
 }
