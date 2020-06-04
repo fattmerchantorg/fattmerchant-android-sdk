@@ -1,5 +1,6 @@
 package com.fattmerchant.omni.data
 
+import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.models.Transaction
 
@@ -52,11 +53,13 @@ interface MobileReaderDriver {
      * Attempts to perform the given transaction [request]
      *
      * @throws PerformTransactionException
-     * @param request
+     * @param request has all the information required to run a transaction
+     * @param signatureProvider responsible for providing a signature should the transaction
+     * require one
      * @return the result of the operation
      */
     @Throws(PerformTransactionException::class)
-    suspend fun performTransaction(request: TransactionRequest): TransactionResult
+    suspend fun performTransaction(request: TransactionRequest, signatureProvider: SignatureProviding?): TransactionResult
 
     /**
      * Attempts to void the given [transaction]
