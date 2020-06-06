@@ -222,6 +222,5 @@ class OmniApi {
         }
     }
 
-    fun isTokenExpired(response: String): Boolean = response.contains("token_expired")
-
+    private fun isTokenExpired(response: String): Boolean = response.contains("token_expired")
 }
