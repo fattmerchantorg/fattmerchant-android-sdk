@@ -3,7 +3,7 @@ package com.fattmerchant.omni.data.repository
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.models.Transaction
 
-interface TransactionRepository : ModelRepository<Transaction> {
+internal interface TransactionRepository : ModelRepository<Transaction> {
 
     class CreateTransactionException(message: String? = null) : OmniException("Could not create transaction", message)
     class GetTransactionException(message: String? = null) : OmniException("Could not get transactions", message)

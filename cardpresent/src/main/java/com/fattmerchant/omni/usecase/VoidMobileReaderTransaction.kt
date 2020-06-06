@@ -16,7 +16,7 @@ import kotlin.coroutines.CoroutineContext
  * @property transaction
  * @property coroutineContext
  */
-class VoidMobileReaderTransaction(
+internal class VoidMobileReaderTransaction(
     private val mobileReaderDriverRepository: MobileReaderDriverRepository,
     private val transactionRepository: TransactionRepository,
     val transaction: Transaction,

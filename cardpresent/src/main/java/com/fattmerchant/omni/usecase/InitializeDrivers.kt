@@ -8,7 +8,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Initializes all the drivers provided by the mobileReaderDriverRepository
  */
-class InitializeDrivers(
+internal class InitializeDrivers(
         private val mobileReaderDriverRepository: MobileReaderDriverRepository,
         private val args: Map<String, Any>,
         override val coroutineContext: CoroutineContext

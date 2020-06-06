@@ -6,7 +6,7 @@ import com.fattmerchant.omni.data.MobileReaderDriver
 import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.data.repository.MobileReaderDriverRepository
 
-class MobileReaderDriverRepository : MobileReaderDriverRepository {
+internal class MobileReaderDriverRepository : MobileReaderDriverRepository {
 
     private var chipDna = ChipDnaDriver()
 

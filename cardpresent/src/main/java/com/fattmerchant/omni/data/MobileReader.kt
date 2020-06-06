@@ -1,5 +1,8 @@
 package com.fattmerchant.omni.data
 
+/**
+ * A mobile reader that can take a payment
+ */
 interface MobileReader {
     /** The name of the mobile reader. For example, "Miura 186" */
     fun getName(): String

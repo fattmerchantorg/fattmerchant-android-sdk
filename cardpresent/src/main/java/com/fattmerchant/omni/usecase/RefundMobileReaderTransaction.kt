@@ -14,7 +14,7 @@ import kotlinx.coroutines.coroutineScope
  * @property transactionRepository
  * @property transaction
  */
-class RefundMobileReaderTransaction(
+internal class RefundMobileReaderTransaction(
     private val mobileReaderDriverRepository: MobileReaderDriverRepository,
     private val transactionRepository: TransactionRepository,
     internal val transaction: Transaction,

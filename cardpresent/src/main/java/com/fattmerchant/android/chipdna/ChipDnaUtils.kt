@@ -19,7 +19,7 @@ import java.util.*
  * @param pinPad a pin pad that can be connected
  * @return a [MobileReader]
  */
-fun mapPinPadToMobileReader(pinPad: ChipDnaDriver.SelectablePinPad): MobileReader {
+internal fun mapPinPadToMobileReader(pinPad: ChipDnaDriver.SelectablePinPad): MobileReader {
     return object : MobileReader {
         override fun getName() = pinPad.name
         override fun getFirmwareVersion(): String? = null
@@ -35,7 +35,7 @@ fun mapPinPadToMobileReader(pinPad: ChipDnaDriver.SelectablePinPad): MobileReade
  * @param deviceStatus a [DeviceStatus] object that ChipDna uses to represent a device
  * @return a [MobileReader]
  */
-fun mapDeviceStatusToMobileReader(deviceStatus: DeviceStatus): MobileReader {
+internal fun mapDeviceStatusToMobileReader(deviceStatus: DeviceStatus): MobileReader {
     return object : MobileReader {
         override fun getName() = deviceStatus.name
         override fun getFirmwareVersion(): String? = deviceStatus.firmwareVersion

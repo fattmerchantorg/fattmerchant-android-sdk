@@ -16,7 +16,7 @@ import java.util.logging.Logger
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
 
-class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
+internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
 
     class ConnectReaderException(message: String? = null) :
         MobileReaderDriver.ConnectReaderException(mapDetailMessage(message)) {

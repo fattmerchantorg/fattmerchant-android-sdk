@@ -8,7 +8,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Searches for all readers in the mobileReaderDriverRepository
  */
-class SearchForReaders(
+internal class SearchForReaders(
     private val mobileReaderDriverRepository: MobileReaderDriverRepository,
     private val args: Map<String, Any>,
     override val coroutineContext: CoroutineContext

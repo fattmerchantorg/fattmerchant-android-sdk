@@ -5,7 +5,7 @@ import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.data.TransactionUpdate
 
-class ChipDnaTransactionListener : ITransactionUpdateListener, ITransactionFinishedListener,
+internal class ChipDnaTransactionListener : ITransactionUpdateListener, ITransactionFinishedListener,
     IDeferredAuthorizationListener, ISignatureVerificationListener, IVoiceReferralListener,
     IPartialApprovalListener, IForceAcceptanceListener, IVerifyIdListener, IApplicationSelectionListener, IUserNotificationListener {
 

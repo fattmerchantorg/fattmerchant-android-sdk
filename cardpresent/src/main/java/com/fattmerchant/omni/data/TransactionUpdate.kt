@@ -1,14 +1,12 @@
 package com.fattmerchant.omni.data
 
-import com.fattmerchant.omni.data.models.Transaction
-
 /**
  * Represents an update in the transaction
  *
  * This object will provide information about events with the transaction. Some examples of events
  * are "Transaction Started" or "Signature Provided"
  */
-final class TransactionUpdate(val value: String, val userFriendlyMessage: String? = null) {
+open class TransactionUpdate(val value: String, val userFriendlyMessage: String? = null) {
 
     companion object {
         /** Request card be swiped or inserted */

@@ -9,7 +9,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Connects a single mobile reader from the [mobileReaderDriverRepository]
  */
-class ConnectMobileReader(
+internal class ConnectMobileReader(
     override val coroutineContext: CoroutineContext,
     var mobileReaderDriverRepository: MobileReaderDriverRepository,
     var mobileReader: MobileReader

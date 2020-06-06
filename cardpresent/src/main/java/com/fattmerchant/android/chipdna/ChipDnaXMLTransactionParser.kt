@@ -7,7 +7,7 @@ import java.io.StringReader
 /**
  * Parses information from a chipdna transaction formatted in XML
  */
-class ChipDnaXMLTransactionParser {
+internal class ChipDnaXMLTransactionParser {
 
     companion object {
         /**

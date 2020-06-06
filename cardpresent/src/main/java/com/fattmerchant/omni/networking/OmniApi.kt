@@ -26,7 +26,7 @@ class OmniApi {
         }
     }
 
-    val httpClient = HttpClient {
+    private val httpClient = HttpClient {
         install(JsonFeature) {
             serializer = GsonSerializer {
                 serializeNulls()
@@ -35,8 +35,8 @@ class OmniApi {
         }
     }
 
-    var token = ""
-    var environment: Environment = Environment.LIVE
+    internal var token = ""
+    internal var environment: Environment = Environment.LIVE
 
     /**
      * Uses the [token] field and returns the [Self] object associated with that token
@@ -44,7 +44,7 @@ class OmniApi {
      * @param error
      * @return [Self], the owner of the [token]
      */
-    suspend fun getSelf(error: (Error) -> Unit): Self? = get("self", error)
+    internal suspend fun getSelf(error: (Error) -> Unit): Self? = get("self", error)
 
     /**
      * Gets the merchant which the [token] corresponds to
@@ -52,7 +52,7 @@ class OmniApi {
      * @param error
      * @return
      */
-    suspend fun getMerchant(error: (Error) -> Unit): Merchant? = getSelf(error)?.merchant
+    internal suspend fun getMerchant(error: (Error) -> Unit): Merchant? = getSelf(error)?.merchant
 
     /**
      * Creates a new invoice in Omni
@@ -60,7 +60,7 @@ class OmniApi {
      * @param invoice
      * @return the created invoice
      */
-    suspend fun createInvoice(invoice: Invoice, error: (Error) -> Unit): Invoice? =
+    internal suspend fun createInvoice(invoice: Invoice, error: (Error) -> Unit): Invoice? =
         post("invoice", JsonParser.toJson(invoice), error)
 
     /**
@@ -69,7 +69,7 @@ class OmniApi {
      * @param invoice
      * @return the updated invoice
      */
-    suspend fun updateInvoice(invoice: Invoice): Invoice? =
+    internal suspend fun updateInvoice(invoice: Invoice): Invoice? =
         put("invoice/${invoice.id}", JsonParser.toJson(invoice))
 
     /**
@@ -78,7 +78,7 @@ class OmniApi {
      * @param customer
      * @return the created customer
      */
-    suspend fun createCustomer(customer: Customer, error: (Error) -> Unit): Customer? =
+    internal suspend fun createCustomer(customer: Customer, error: (Error) -> Unit): Customer? =
         post("customer", JsonParser.toJson(customer), error)
 
     /**
@@ -87,7 +87,7 @@ class OmniApi {
      * @param transaction
      * @return the created transaction
      */
-    suspend fun createTransaction(transaction: Transaction, error: (Error) -> Unit): Transaction? =
+    internal suspend fun createTransaction(transaction: Transaction, error: (Error) -> Unit): Transaction? =
         post("transaction", JsonParser.toJson(transaction), error)
 
     /**
@@ -95,7 +95,7 @@ class OmniApi {
      *
      * @return the list of transactions
      */
-    suspend fun getTransactions(error: (Error) -> Unit): List<Transaction>? =
+    internal suspend fun getTransactions(error: (Error) -> Unit): List<Transaction>? =
         get<PaginatedData<Transaction>>("transaction", error)?.data
 
     /**
@@ -103,7 +103,7 @@ class OmniApi {
      *
      * @return the list of transactions
      */
-    suspend fun getInvoices(error: (Error) -> Unit): List<Invoice>? =
+    internal suspend fun getInvoices(error: (Error) -> Unit): List<Invoice>? =
         get<PaginatedData<Invoice>>("invoice", error)?.data
 
     /**
@@ -112,7 +112,7 @@ class OmniApi {
      * @param paymentMethod
      * @return the created payment method
      */
-    suspend fun createPaymentMethod(paymentMethod: PaymentMethod, error: (Error) -> Unit): PaymentMethod? {
+    internal suspend fun createPaymentMethod(paymentMethod: PaymentMethod, error: (Error) -> Unit): PaymentMethod? {
         // If the payment method is already tokenized, use the payment-method/token route
         // that allows us to pass the token to Omni
         val url = if (paymentMethod.paymentToken != null) {
@@ -139,16 +139,16 @@ class OmniApi {
         body = body
     )
 
-    suspend inline fun <reified T> get(urlString: String, error: (Error) -> Unit): T? = this.request<T>(
+    private suspend inline fun <reified T> get(urlString: String, error: (Error) -> Unit): T? = this.request<T>(
         method = HttpMethod.Get,
         urlString = urlString,
         error = error
     )
 
-    suspend inline fun <reified T> request(method: HttpMethod, urlString: String, body: String? = null): T? =
+    private suspend inline fun <reified T> request(method: HttpMethod, urlString: String, body: String? = null): T? =
         request(method, urlString, body) {}
 
-    suspend inline fun <reified T> request(
+    private suspend inline fun <reified T> request(
         method: HttpMethod,
         urlString: String,
         body: String? = null,

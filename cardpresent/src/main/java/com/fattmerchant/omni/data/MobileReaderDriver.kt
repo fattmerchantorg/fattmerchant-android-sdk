@@ -5,7 +5,7 @@ import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.models.Transaction
 
-interface MobileReaderDriver {
+internal interface MobileReaderDriver {
 
     class PerformTransactionException(message: String? = null) :
         OmniException("Could not perform transaction", message)

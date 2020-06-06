@@ -3,7 +3,7 @@ package com.fattmerchant.omni.data.repository
 import com.fattmerchant.omni.data.models.Invoice
 import com.fattmerchant.omni.data.models.OmniException
 
-interface InvoiceRepository : ModelRepository<Invoice> {
+internal interface InvoiceRepository : ModelRepository<Invoice> {
 
     class UpdateInvoiceException(message: String? = null) : OmniException("Could not update invoice", message)
     class CreateInvoiceException(message: String? = null) : OmniException("Could not create invoice", message)

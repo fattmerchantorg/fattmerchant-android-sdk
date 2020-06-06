@@ -7,7 +7,7 @@ import com.fattmerchant.omni.data.repository.MobileReaderDriverRepository as Com
 import com.fattmerchant.omni.networking.OmniApi
 import kotlinx.coroutines.launch
 
-class Omni(omniApi: OmniApi) : CommonOmni(omniApi) {
+class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
 
     /**
      * Thrown when Omni failed to initialize

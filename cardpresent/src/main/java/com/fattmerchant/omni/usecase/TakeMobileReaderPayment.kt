@@ -9,7 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlin.coroutines.CoroutineContext
 
-class TakeMobileReaderPayment(
+internal class TakeMobileReaderPayment(
     val mobileReaderDriverRepository: MobileReaderDriverRepository,
     val invoiceRepository: InvoiceRepository,
     val customerRepository: CustomerRepository,

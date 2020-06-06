@@ -11,21 +11,21 @@ import com.fattmerchant.omni.networking.OmniApi
 import com.fattmerchant.omni.usecase.*
 import kotlinx.coroutines.*
 
-open class Omni(var omniApi: OmniApi) {
+open class Omni internal constructor(internal var omniApi: OmniApi) {
 
-    open var transactionRepository: TransactionRepository = object : TransactionRepository {
+    internal open var transactionRepository: TransactionRepository = object : TransactionRepository {
         override var omniApi: OmniApi = this@Omni.omniApi
     }
 
-    open var invoiceRepository: InvoiceRepository = object : InvoiceRepository {
+    internal open var invoiceRepository: InvoiceRepository = object : InvoiceRepository {
         override var omniApi: OmniApi = this@Omni.omniApi
     }
 
-    open var customerRepository: CustomerRepository = object : CustomerRepository {
+    internal open var customerRepository: CustomerRepository = object : CustomerRepository {
         override var omniApi: OmniApi = this@Omni.omniApi
     }
 
-    open var paymentMethodRepository: PaymentMethodRepository = object : PaymentMethodRepository {
+    internal open var paymentMethodRepository: PaymentMethodRepository = object : PaymentMethodRepository {
         override var omniApi: OmniApi = this@Omni.omniApi
     }
 
@@ -35,9 +35,9 @@ open class Omni(var omniApi: OmniApi) {
     /** Receives notifications about transaction events such as when a card is swiped */
     open var transactionUpdateListener: TransactionUpdateListener? = null
 
-    open lateinit var mobileReaderDriverRepository: MobileReaderDriverRepository
-    var coroutineScope = MainScope()
-    var currentJob: CoroutineScope? = null
+    internal open lateinit var mobileReaderDriverRepository: MobileReaderDriverRepository
+    internal var coroutineScope = MainScope()
+    private var currentJob: CoroutineScope? = null
 
     /**
      * Prepares the OmniService Client for taking payments
@@ -45,7 +45,7 @@ open class Omni(var omniApi: OmniApi) {
      * This method will kick off procedures like preparing the mobile reader drivers so the client is ready to take
      * requests for payments
      */
-    fun initialize(args: Map<String, Any>, completion: () -> Unit, error: (OmniException) -> Unit) {
+    internal fun initialize(args: Map<String, Any>, completion: () -> Unit, error: (OmniException) -> Unit) {
         coroutineScope.launch {
             // Verify that the apiKey corresponds to a real merchant
             val merchant = omniApi.getMerchant {

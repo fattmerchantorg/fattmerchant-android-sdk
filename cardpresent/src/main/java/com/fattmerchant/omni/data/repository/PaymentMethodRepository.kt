@@ -3,7 +3,7 @@ package com.fattmerchant.omni.data.repository
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.models.PaymentMethod
 
-interface PaymentMethodRepository : ModelRepository<PaymentMethod> {
+internal interface PaymentMethodRepository : ModelRepository<PaymentMethod> {
 
     class CreatePaymentMethodException(message: String? = null) :
         OmniException("Could not create payment method", message)

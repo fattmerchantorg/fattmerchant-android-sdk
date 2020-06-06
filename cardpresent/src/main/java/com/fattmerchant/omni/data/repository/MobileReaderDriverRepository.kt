@@ -4,7 +4,7 @@ import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.MobileReaderDriver
 import com.fattmerchant.omni.data.models.Transaction
 
-interface MobileReaderDriverRepository {
+internal interface MobileReaderDriverRepository {
 
     /**
      * Returns the available [MobileReaderDriver]s

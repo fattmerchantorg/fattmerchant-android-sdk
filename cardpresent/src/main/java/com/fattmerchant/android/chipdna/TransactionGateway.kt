@@ -10,7 +10,7 @@ import io.ktor.http.content.MultiPartData
  *
  * https://fattmerchant.transactiongateway.com/merchants/resources/integration/integration_portal.php
  */
-class TransactionGateway {
+internal class TransactionGateway {
     companion object {
         /** Transaction Gateway's baseUrl */
         val baseUrl = "https://secure.nmi.com/api/query.php"
