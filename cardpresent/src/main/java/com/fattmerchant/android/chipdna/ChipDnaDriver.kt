@@ -3,6 +3,7 @@ package com.fattmerchant.android.chipdna
 import android.content.Context
 import com.creditcall.chipdnamobile.*
 import com.fattmerchant.omni.SignatureProviding
+import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.data.*
 import com.fattmerchant.omni.data.models.Merchant
 import com.fattmerchant.omni.data.models.Transaction
@@ -10,7 +11,6 @@ import com.fattmerchant.omni.data.MobileReaderDriver.*
 import kotlinx.coroutines.*
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.logging.Logger
 import kotlin.coroutines.CoroutineContext
@@ -28,6 +28,29 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
                     else -> chipDnaMessage
                 }
             }
+        }
+    }
+
+    companion object {
+        /** The make of the pin pad */
+        internal final class PinPadManufacturer(val name: String) {
+            companion object {
+                val Miura = PinPadManufacturer("Miura")
+                val BBPOS = PinPadManufacturer("BBPOS")
+            }
+        }
+
+        /**
+         * Attempts to get the connected mobile reader.
+         *
+         * @param chipDnaMobileStatus the result of [ChipDnaMobile.getStatus]. If none is provided, this
+         * method will retrieve it
+         * @return the connected [MobileReader], if found. Null otherwise
+         */
+        internal fun getConnectedReader(chipDnaMobileStatus: Parameters? = ChipDnaMobile.getInstance().getStatus(null)): MobileReader? {
+            val deviceStatusXml = chipDnaMobileStatus[ParameterKeys.DeviceStatus] ?: return null
+            val deviceStatus = ChipDnaMobileSerializer.deserializeDeviceStatus(deviceStatusXml)
+            return mapDeviceStatusToMobileReader(deviceStatus)
         }
     }
 
@@ -120,7 +143,7 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
                     return@IConnectAndConfigureFinishedListener
                 }
 
-                val error = params[ParameterKeys.Error]
+                val error = params[ParameterKeys.ErrorDescription]
                 throw ConnectReaderException(error)
             }
 
@@ -158,8 +181,8 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         return true
     }
 
-    override suspend fun performTransaction(request: TransactionRequest, signatureProvider: SignatureProviding?): TransactionResult {
-        val paymentRequestParams = mapTransactionRequestToParams(request)
+    override suspend fun performTransaction(request: TransactionRequest, signatureProvider: SignatureProviding?, transactionUpdateListener: TransactionUpdateListener?): TransactionResult {
+        val paymentRequestParams = Parameters().withTransactionRequest(request)
 
         val result = suspendCancellableCoroutine<Parameters> { cont ->
 
@@ -177,6 +200,9 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
             }
 
             transactionListener.signatureProvider = signatureProvider
+            transactionListener.transactionUpdateListener = transactionUpdateListener
+            ChipDnaMobile.getInstance().addUserNotificationListener(transactionListener)
+            ChipDnaMobile.getInstance().addApplicationSelectionListener(transactionListener)
             ChipDnaMobile.getInstance().addTransactionUpdateListener(transactionListener)
             ChipDnaMobile.getInstance().addTransactionFinishedListener(transactionListener)
             ChipDnaMobile.getInstance().addDeferredAuthorizationListener(transactionListener)
@@ -288,7 +314,7 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
                 amount = refundAmount
             }
         } else {
-            throw RefundTransactionException(result[ParameterKeys.Error] ?: "Could not refund transaction")
+            throw RefundTransactionException(result[ParameterKeys.ErrorDescription] ?: "Could not refund transaction")
         }
     }
 

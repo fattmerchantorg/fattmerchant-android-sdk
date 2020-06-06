@@ -1,11 +1,14 @@
 package com.fattmerchant.android.chipdna
 
+import com.creditcall.chipdnamobile.DeviceStatus
 import com.creditcall.chipdnamobile.ParameterKeys
 import com.creditcall.chipdnamobile.ParameterValues
 import com.creditcall.chipdnamobile.Parameters
+import com.creditcall.chipdnamobile.TransactionUpdate as ChipDnaTransactionUpdate
 import com.fattmerchant.android.chipdna.ChipDnaDriver
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.TransactionRequest
+import com.fattmerchant.omni.data.TransactionUpdate
 import com.fattmerchant.omni.data.models.Transaction
 import java.text.SimpleDateFormat
 import java.util.*
@@ -19,6 +22,45 @@ import java.util.*
 fun mapPinPadToMobileReader(pinPad: ChipDnaDriver.SelectablePinPad): MobileReader {
     return object : MobileReader {
         override fun getName() = pinPad.name
+        override fun getFirmwareVersion(): String? = null
+        override fun getMake(): String? = null
+        override fun getModel(): String? = null
+        override fun serialNumber(): String? = null
+    }
+}
+
+fun mapDeviceStatusToMobileReader(deviceStatus: DeviceStatus): MobileReader {
+    return object : MobileReader {
+        override fun getName() = deviceStatus.name
+        override fun getFirmwareVersion(): String? = deviceStatus.firmwareVersion
+        override fun getMake(): String? = deviceStatus.make
+        override fun getModel(): String? = deviceStatus.model
+        override fun serialNumber(): String? = deviceStatus.serialNumber
+    }
+}
+
+/**
+ * Maps a ChipDna TransactionUpdate to an Omni Transaction Update
+ *
+ * @param transactionUpdate the value of a ChipDnaTransactionUpdate
+ * @return an Omni [TransactionUpdate]
+ */
+fun mapTransactionUpdate(transactionUpdate: String): TransactionUpdate? {
+    return when (transactionUpdate) {
+        ChipDnaTransactionUpdate.CardEntryPrompted.value -> {
+            return if (ChipDnaDriver.getConnectedReader()?.getMake() == ChipDnaDriver.Companion.PinPadManufacturer.Miura.name) {
+                TransactionUpdate.PromptInsertSwipeCard
+            } else {
+                TransactionUpdate.PromptSwipeCard
+            }
+        }
+
+        ChipDnaTransactionUpdate.CardSwiped.value -> TransactionUpdate.CardSwiped
+        ChipDnaTransactionUpdate.SmartcardInserted.value -> TransactionUpdate.CardInserted
+        ChipDnaTransactionUpdate.CardSwipeError.value -> TransactionUpdate.CardSwipeError
+        ChipDnaTransactionUpdate.SmartcardRemovePrompted.value -> TransactionUpdate.PromptRemoveCard
+        ChipDnaTransactionUpdate.SmartcardRemoved.value -> TransactionUpdate.CardRemoved
+        else -> null
     }
 }
 

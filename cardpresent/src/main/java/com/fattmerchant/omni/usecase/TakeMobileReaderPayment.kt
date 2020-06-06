@@ -1,6 +1,7 @@
 package com.fattmerchant.omni.usecase
 
 import com.fattmerchant.omni.SignatureProviding
+import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.data.*
 import com.fattmerchant.omni.data.models.*
 import com.fattmerchant.omni.data.repository.*
@@ -16,6 +17,7 @@ class TakeMobileReaderPayment(
     val transactionRepository: TransactionRepository,
     val request: TransactionRequest,
     val signatureProvider: SignatureProviding? = null,
+    val transactionUpdateListener: TransactionUpdateListener? = null,
     override val coroutineContext: CoroutineContext
 ) : CoroutineScope {
 
@@ -66,7 +68,7 @@ class TakeMobileReaderPayment(
         val result: TransactionResult
 
         try {
-            result = reader.performTransaction(request, signatureProvider)
+            result = reader.performTransaction(request, signatureProvider, transactionUpdateListener)
         } catch (e: MobileReaderDriver.PerformTransactionException) {
             onError(TakeMobileReaderPaymentException(e.detail))
             return@coroutineScope null
