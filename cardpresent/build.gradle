@@ -76,6 +76,9 @@ dependencies {
     implementation 'com.jakewharton.timber:timber:4.7.1'
     implementation 'net.zetetic:android-database-sqlcipher:4.0.1@aar'
 
+    // AnywhereCommerce
+    api files('libs/com.anywherecommerce.android.sdk-release.aar')
+
     // Ktor
     implementation "io.ktor:ktor-client-core:$ktor_version"
     implementation "io.ktor:ktor-client-okhttp:$ktor_version"
