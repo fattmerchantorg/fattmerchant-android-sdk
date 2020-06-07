@@ -27,6 +27,9 @@ open class TransactionUpdate(val value: String, val userFriendlyMessage: String?
         /** Request card be removed */
         val PromptRemoveCard = TransactionUpdate("Prompt Remove Card", "Please remove card")
 
+        /** Transaction is being authorized */
+        val Authorizing = TransactionUpdate("Authorizing", "Authorizing. Please wait")
+
         /** Card was removed */
         val CardRemoved = TransactionUpdate("Card Removed")
 
