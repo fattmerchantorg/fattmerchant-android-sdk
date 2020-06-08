@@ -105,6 +105,26 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
         }
     }
 
+    fun disconnectReader(mobileReader: MobileReader, onDisconnected: (Boolean) -> Unit, onFail: (String) -> Unit) {
+        coroutineScope.launch {
+            try {
+                val disconnected = DisconnectMobileReader(
+                        coroutineContext,
+                        mobileReaderDriverRepository,
+                        mobileReader
+                ).start()
+
+                if (disconnected) {
+                    onDisconnected(true)
+                } else {
+                    onFail("Could not disconnect mobile reader")
+                }
+            } catch (e: OmniException) {
+                onFail(e.detail ?: e.message ?: "Could not disconnect mobile reader")
+            }
+        }
+    }
+
     /**
      * Captures a mobile reader transaction
      */

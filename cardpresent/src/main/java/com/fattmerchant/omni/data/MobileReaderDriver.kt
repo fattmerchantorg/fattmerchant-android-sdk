@@ -59,6 +59,13 @@ internal interface MobileReaderDriver {
     suspend fun connectReader(reader: MobileReader): Boolean
 
     /**
+     * Attempts to disconnect the given [reader]
+     *
+     * @param reader
+     */
+    suspend fun disconnectReader(reader: MobileReader): Boolean
+
+    /**
      * Attempts to perform the given transaction [request]
      *
      * @throws PerformTransactionException

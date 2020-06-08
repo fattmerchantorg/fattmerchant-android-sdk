@@ -74,6 +74,12 @@
                 android:text="Connect reader" />
 
             <Button
+                android:id="@+id/buttonDisconnectReader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Disconnect reader" />
+
+            <Button
                 android:id="@+id/buttonRefundPreviousTransaction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

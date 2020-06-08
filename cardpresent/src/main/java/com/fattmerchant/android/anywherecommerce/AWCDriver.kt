@@ -117,6 +117,11 @@ internal class AWCDriver: MobileReaderDriver {
                 && CardReaderController.getConnectedReader().serialNumber == reader.serialNumber())
     }
 
+    override suspend fun disconnectReader(reader: MobileReader): Boolean {
+        CardReaderController.getConnectedReader().disconnect()
+        return true
+    }
+
     override suspend fun performTransaction(request: TransactionRequest, signatureProvider: SignatureProviding?, transactionUpdateListener: TransactionUpdateListener?): TransactionResult {
         TODO("Not yet implemented")
     }

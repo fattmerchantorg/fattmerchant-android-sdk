@@ -1,0 +1,11 @@
+{
+  "type": "WorldnetTerminal",
+  "configuration": {
+    "endpoint": {
+      "provider": "worldnet",
+      "type": "WorldnetEndpoint",
+      "url" :  "https://payments.anywherecommerce.com/merchant/"
+    }
+  }
+
+}

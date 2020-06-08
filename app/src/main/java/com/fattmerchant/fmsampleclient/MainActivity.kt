@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
 import com.fattmerchant.omni.data.Amount
+import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.TransactionRequest
 import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.networking.OmniApi
@@ -19,6 +20,9 @@ import java.util.logging.Logger
 class MainActivity : AppCompatActivity() {
 
     val log = Logger.getLogger("MainActivity")
+
+    var connectedReader: MobileReader? = null
+
     fun log(msg: String?) {
         log.info("[${Thread.currentThread().name}] $msg")
     }
@@ -124,6 +128,23 @@ class MainActivity : AppCompatActivity() {
         buttonConnectReader.isEnabled = false
     }
 
+    private fun setupDisconnectReaderButton() {
+        buttonDisconnectReader.setOnClickListener {
+            connectedReader?.let { reader ->
+                Omni.shared()?.disconnectReader(reader, {
+                    connectedReader = null
+                    buttonConnectReader.isEnabled = true
+                    buttonDisconnectReader.isEnabled = false
+                    updateStatus("Disconnected reader")
+                }, {
+                    updateStatus(it)
+                })
+            }
+        }
+
+        buttonDisconnectReader.isEnabled = false
+    }
+
     private fun showApiKeyDialog() {
         val editText = EditText(this).apply { maxLines = 1 }
         updateStatus("Attempting to initialize CPSDK")
@@ -142,6 +163,7 @@ class MainActivity : AppCompatActivity() {
         setupPerformSaleButton()
         setupRefundButton()
         setupConnectReaderButton()
+        setupDisconnectReaderButton()
         setupVoidButton()
     }
 
@@ -183,11 +205,12 @@ class MainActivity : AppCompatActivity() {
                         updateStatus("Trying to connect to [${selected.getName()}]")
 
                         Omni.shared()?.connectReader(selected, { reader ->
+                            this.connectedReader = reader
+                            buttonDisconnectReader.isEnabled = true
                             updateStatus("Connected to [${reader.getName()}]")
 
                             runOnUiThread {
                                 buttonPerformSale.isEnabled = true
-                                buttonConnectReader.visibility = View.GONE
                             }
                         }, { error ->
                             updateStatus("Error connecting: $error")

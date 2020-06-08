@@ -156,6 +156,11 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         }
     }
 
+    override suspend fun disconnectReader(reader: MobileReader): Boolean {
+        ChipDnaMobile.dispose(null)
+        return true
+    }
+
     override var familiarSerialNumbers: MutableList<String> = mutableListOf()
 
     override suspend fun isReadyToTakePayment(): Boolean {
