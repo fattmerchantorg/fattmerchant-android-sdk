@@ -30,12 +30,16 @@ class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
          * @throws InitializationError if you don't pass an apiKey
          */
         fun initialize(params: InitParams, completion: () -> Unit, error: (OmniException) -> Unit) {
-            val paramMap = mapOf (
+            val paramMap = mutableMapOf (
                 "apiKey" to params.apiKey,
                 "appContext" to params.appContext,
                 "environment" to params.environment,
                 "appId" to params.appId
             )
+
+            params.application?.let {
+                paramMap["application"] = it
+            }
 
             initialize(paramMap, completion, error)
         }

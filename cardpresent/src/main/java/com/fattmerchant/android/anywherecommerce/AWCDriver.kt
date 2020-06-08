@@ -8,6 +8,8 @@ import com.anywherecommerce.android.sdk.SDKManager
 import com.anywherecommerce.android.sdk.Terminal
 import com.anywherecommerce.android.sdk.endpoints.anywherecommerce.AnywhereCommerce
 import com.anywherecommerce.android.sdk.endpoints.worldnet.WorldnetEndpoint
+import com.fattmerchant.omni.SignatureProviding
+import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.data.*
 import com.fattmerchant.omni.data.models.Transaction
 
@@ -80,7 +82,7 @@ class AWCDriver: MobileReaderDriver {
         TODO("Not yet implemented")
     }
 
-    override suspend fun performTransaction(request: TransactionRequest): TransactionResult {
+    override suspend fun performTransaction(request: TransactionRequest, signatureProvider: SignatureProviding?, transactionUpdateListener: TransactionUpdateListener?): TransactionResult {
         TODO("Not yet implemented")
     }
 
