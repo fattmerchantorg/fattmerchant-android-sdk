@@ -16,6 +16,10 @@ internal class MobileReaderDriverRepository : MobileReaderDriverRepository {
         return listOf(awc, chipDna)
     }
 
+    override suspend fun getInitializedDrivers(): List<MobileReaderDriver> {
+        return getDrivers().filter { it.isInitialized() }
+    }
+
     override suspend fun getDriverFor(transaction: Transaction): MobileReaderDriver? {
         if (transaction.source?.contains("CPSDK") == true) {
             return chipDna
@@ -24,7 +28,11 @@ internal class MobileReaderDriverRepository : MobileReaderDriverRepository {
     }
 
     override suspend fun getDriverFor(mobileReader: MobileReader): MobileReaderDriver? {
-        return chipDna
+        mobileReader.serialNumber()?.let { serial ->
+            return getInitializedDrivers().firstOrNull {
+                it.familiarSerialNumbers.contains(serial)
+            }
+        } ?: return null
     }
 
 }

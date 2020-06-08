@@ -22,6 +22,9 @@ internal interface MobileReaderDriver {
     class InitializeMobileReaderDriverException(message: String? = null) :
         OmniException("Could not initialize mobile reader driver", message)
 
+    /** A list of serial numbers that this driver has previously connected to */
+    var familiarSerialNumbers: MutableList<String>
+
     /**
      * Whether or not the given [MobileReaderDriver] is ready to take payment
      */
@@ -35,6 +38,11 @@ internal interface MobileReaderDriver {
      */
     @Throws(InitializeMobileReaderDriverException::class)
     suspend fun initialize(args: Map<String, Any>): Boolean
+
+    /**
+     * Checks if the receiver has been initialized
+     */
+    suspend fun isInitialized(): Boolean
 
     /**
      * Searches for available [MobileReader]s

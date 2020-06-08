@@ -101,6 +101,10 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         return result[ParameterKeys.Result] == ParameterValues.TRUE
     }
 
+    override suspend fun isInitialized(): Boolean {
+        return ChipDnaMobile.isInitialized()
+    }
+
     override suspend fun searchForReaders(args: Map<String, Any>): List<MobileReader> {
         val parameters = Parameters().apply {
             add(ParameterKeys.SearchConnectionTypeBluetooth, ParameterValues.TRUE)
@@ -151,6 +155,8 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
             ChipDnaMobile.getInstance().connectAndConfigure(requestParams)
         }
     }
+
+    override var familiarSerialNumbers: MutableList<String> = mutableListOf()
 
     override suspend fun isReadyToTakePayment(): Boolean {
         // ChipDna must be initialized

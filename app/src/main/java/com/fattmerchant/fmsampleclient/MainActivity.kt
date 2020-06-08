@@ -2,9 +2,9 @@ package com.fattmerchant.fmsampleclient
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.EditText
+import androidx.appcompat.app.AppCompatActivity
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
 import com.fattmerchant.omni.data.Amount
@@ -133,7 +133,7 @@ class MainActivity : AppCompatActivity() {
             .setCancelable(false)
             .setPositiveButton("Done") { dialog, _ ->
                 dialog.dismiss()
-                initializeOmni(editText.text.toString())
+                initializeOmni("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnb2RVc2VyIjpmYWxzZSwibWVyY2hhbnQiOiJlYjQ4ZWY5OS1hYTc4LTQ5NmUtOWIwMS00MjFmOGRhZjczMjMiLCJzdWIiOiJmMTI4YWQwNS0xYzhlLTQ3MmEtOWFlNi04MmE1MjdjMWFlNmMiLCJicmFuZCI6ImZhdHRtZXJjaGFudCIsImlzcyI6Imh0dHA6Ly9hcGlkZXYuZmF0dGxhYnMuY29tL2VwaGVtZXJhbCIsImlhdCI6MTU5MTU4ODQzMCwiZXhwIjoxNTkxNjc0ODMwLCJuYmYiOjE1OTE1ODg0MzAsImp0aSI6Im9lbVc1SWNMZVJkeHByOEEiLCJhc3N1bWluZyI6ZmFsc2V9.qXjs36rnGws6f9LDTUZ3A87NKCHjHAFy8-DgjiWxXz4")
             }.show()
     }
 
@@ -210,7 +210,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initializeOmni(apiKey: String) {
         Omni.initialize(
-            InitParams(applicationContext, apiKey, OmniApi.Environment.DEV), {
+            InitParams(applicationContext, application, apiKey, OmniApi.Environment.DEV), {
                 runOnUiThread {
                     updateStatus("Initialized")
                     buttonConnectReader.isEnabled = true

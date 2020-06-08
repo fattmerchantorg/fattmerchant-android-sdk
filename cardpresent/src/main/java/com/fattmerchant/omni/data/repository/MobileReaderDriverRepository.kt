@@ -14,6 +14,11 @@ internal interface MobileReaderDriverRepository {
     suspend fun getDrivers(): List<MobileReaderDriver>
 
     /**
+     * Returns the [MobileReaderDriver]s which have been initialized
+     */
+    suspend fun getInitializedDrivers(): List<MobileReaderDriver>
+
+    /**
      * Returns the driver that knows how to handle the given transaction
      *
      * @return MobileReaderDriver The driver for this kind of transaction or null if not found
