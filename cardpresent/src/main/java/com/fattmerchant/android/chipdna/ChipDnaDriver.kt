@@ -311,7 +311,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
                 this.request = request
                 success = true
                 transactionType = "refund"
-                amount = refundAmount
+                amount = Amount(cents = amountCents)
             }
         } else {
             throw RefundTransactionException(result[ParameterKeys.ErrorDescription] ?: "Could not refund transaction")
