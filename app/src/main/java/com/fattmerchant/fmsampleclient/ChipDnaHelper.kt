@@ -33,7 +33,7 @@ class ChipDnaHelper(
                 return context?.get()?.let { context ->
                     val parameters = Parameters()
                     parameters.add(ParameterKeys.Password, params.first())
-                    return ChipDnaMobile.initialise(context, parameters)
+                    return ChipDnaMobile.initialize(context, parameters)
                 }
             }
 
