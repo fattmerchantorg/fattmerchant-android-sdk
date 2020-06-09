@@ -7,8 +7,10 @@ import android.view.View
 import android.widget.EditText
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
+import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.TransactionRequest
+import com.fattmerchant.omni.data.TransactionUpdate
 import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.networking.OmniApi
 import kotlinx.android.synthetic.main.activity_main.*
@@ -41,6 +43,14 @@ class MainActivity : AppCompatActivity() {
             val amount = Amount(getAmount())
             updateStatus("Attempting to charge ${amount.dollarsString()}")
             val request = TransactionRequest(amount)
+
+            // Listen to transaction updates delivered by the Omni SDK
+            Omni.shared()?.transactionUpdateListener = object: TransactionUpdateListener {
+                override fun onTransactionUpdate(transactionUpdate: TransactionUpdate) {
+                    updateStatus("${transactionUpdate.value} | ${transactionUpdate.userFriendlyMessage}")
+                }
+            }
+
             Omni.shared()?.takeMobileReaderTransaction(request, {
 
                 val msg = if (it.success == true) {
@@ -133,6 +143,9 @@ class MainActivity : AppCompatActivity() {
             .setCancelable(false)
             .setPositiveButton("Done") { dialog, _ ->
                 dialog.dismiss()
+                
+                // If you want to not use the apikey dialog, modify the initializeOmni call like below
+                // initializeOmni("insert api key here")
                 initializeOmni(editText.text.toString())
             }.show()
     }
