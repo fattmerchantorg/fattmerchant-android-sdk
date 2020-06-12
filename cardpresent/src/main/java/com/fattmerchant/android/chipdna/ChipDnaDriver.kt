@@ -9,6 +9,7 @@ import com.fattmerchant.omni.data.*
 import com.fattmerchant.omni.data.models.Merchant
 import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.data.MobileReaderDriver.*
+import com.fattmerchant.omni.data.models.OmniException
 import kotlinx.coroutines.*
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
@@ -69,6 +70,17 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         log.info("[${Thread.currentThread().name}] $msg")
     }
 
+    /**
+     * This is the data that we will need in order to initialize ChipDna again if something
+     * happens at runtime.
+     *
+     * For example, if the user wants to disconnect a reader, we have to use
+     * the ChipDnaMobile.dispose() method. This method uninitializes the SDK and we have to
+     * initialize again if we want to reconnect a reader. When we want to reconnect, we use these
+     * args
+     * */
+    private var initArgs: Map<String, Any> = mapOf()
+
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Default
 
@@ -94,8 +106,9 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         // Init
         ChipDnaMobile.initialize(appContext, params)
 
-        // Store security key for later use
+        // Store security key and init args for later use
         securityKey = apiKey
+        initArgs = args
 
         // Set credentials
         val result = setCredentials(appId, apiKey)
@@ -155,6 +168,12 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
             ChipDnaMobile.getInstance().addConnectAndConfigureFinishedListener(connectAndConfigureListener)
             ChipDnaMobile.getInstance().connectAndConfigure(requestParams)
         }
+    }
+
+    override suspend fun disconnect(reader: MobileReader, error: (OmniException) -> Unit): Boolean {
+        ChipDnaMobile.dispose(null)
+        initialize(initArgs)
+        return true
     }
 
     override suspend fun getConnectedReader(): MobileReader? {

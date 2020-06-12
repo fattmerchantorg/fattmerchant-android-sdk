@@ -143,6 +143,30 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
     }
 
     /**
+     * Attempts to disconnect the given [MobileReader]
+     *
+     * @param mobileReader the [MobileReader] to disconnect
+     * @param onDisconnected a block to run once finished. It will receive true if the reader was disconencted
+     * @param onFail a block to run if this operation fails. Receives an [OmniException]
+     */
+    fun disconnectReader(mobileReader: MobileReader, onDisconnected: (Boolean) -> Unit, onFail: (OmniException) -> Unit) {
+        if (!initialized) {
+            onFail(OmniGeneralException.uninitialized)
+            return
+        }
+
+        coroutineScope.launch {
+            val job = DisconnectMobileReader(
+                    coroutineContext,
+                    mobileReaderDriverRepository,
+                    mobileReader
+            )
+
+            onDisconnected(job.start(onFail))
+        }
+    }
+
+    /**
      * Captures a mobile reader transaction
      */
     fun takeMobileReaderTransaction(
