@@ -7,6 +7,26 @@ import com.fattmerchant.omni.data.repository.MobileReaderDriverRepository as Com
 import com.fattmerchant.omni.networking.OmniApi
 import kotlinx.coroutines.launch
 
+/**
+ * Communicates with the Omni platform and bluetooth mobile readers
+ *
+ * ## Usage
+ * ```
+ * // First, initialize Omni using InitParams
+ * val initParams = InitParams(myAppContext, apiKey)
+ * Omni.initialize(initParams, {
+ *   // Omni is now initialized and ready!
+ *
+ * }, { omniException ->
+ *
+ * )
+ * ```
+ *
+ * Once initialized, you can use methods like `Omni.shared().getAvailableReaders`
+ *
+ * @see InitParams
+ * @property omniApi
+ */
 class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
 
     /**

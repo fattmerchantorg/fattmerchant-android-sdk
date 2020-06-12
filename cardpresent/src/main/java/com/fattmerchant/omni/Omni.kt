@@ -168,6 +168,41 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
 
     /**
      * Captures a mobile reader transaction
+     *
+     * ## Signature
+     * Omni should be assigned a [SignatureProviding] object by the time this transaction is
+     * called. This object is responsible for providing a signature in case one is required to
+     * complete the transaction. If the [SignatureProviding] object is not set on the receiver, then
+     * the a blank signature will be submitted
+     *
+     * ```
+     * Omni.shared()?.signatureProvider = object : SignatureProviding {
+     *     override fun signatureRequired(completion: (String) -> Unit) {
+     *          var base64EncodedSignature = // ...
+     *          completion(base64EncodedSignature)
+     *     }
+     * }
+     * ```
+     *
+     * ## Transaction Updates
+     * Transaction updates will be delivered via the [TransactionUpdateListener]. This will need
+     * to be set on the instance of Omni prior to running the transaction. This is optional and
+     * omission of this step will not alter the flow of the transaction
+     *
+     * ```
+     * Omni.shared()?.transactionUpdateListener = object: TransactionUpdateListener {
+     *      override fun onTransactionUpdate(transactionUpdate: TransactionUpdate) {
+     *          print("${transactionUpdate.value} | ${transactionUpdate.userFriendlyMessage}")
+     *      }
+     * }
+     * ```
+     *
+     *
+     * @param request a [TransactionRequest] object that includes all the information needed to
+     * run this transaction including [TransactionRequest.amount] and [TransactionRequest.tokenize]
+     * @param completion a block to run once the transaction is finished. Receives the completed
+     * [Transaction]
+     * @param error a block to run if an error is thrown. Receives an [OmniException]
      */
     fun takeMobileReaderTransaction(
             request: TransactionRequest,
