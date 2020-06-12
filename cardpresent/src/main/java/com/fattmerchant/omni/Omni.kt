@@ -11,6 +11,13 @@ import com.fattmerchant.omni.networking.OmniApi
 import com.fattmerchant.omni.usecase.*
 import kotlinx.coroutines.*
 
+class OmniGeneralException(detail: String): OmniException("Omni General Error", detail) {
+    companion object {
+        val unknown = OmniGeneralException("Unknown error has occurred")
+        val uninitialized = OmniGeneralException("Omni has not been initialized yet")
+    }
+}
+
 open class Omni internal constructor(internal var omniApi: OmniApi) {
 
     internal open var transactionRepository: TransactionRepository = object : TransactionRepository {
@@ -85,6 +92,29 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
                     coroutineContext
             )
             onReadersFound(searchJob.start())
+        }
+    }
+
+    /**
+     * Returns the connected mobile reader
+     *
+     * @param onReaderFound a block to run once finished. Receives the connected mobile reader, if
+     * any
+     * @param onFail a block to run if an error is thrown. Receives the error
+     */
+    fun getConnectedReader(onReaderFound: (MobileReader?) -> Unit, onFail: (OmniException) -> Unit) {
+        if (!initialized) {
+            onFail(OmniGeneralException.uninitialized)
+            return
+        }
+
+        coroutineScope.launch {
+            val job = GetConnectedMobileReader(
+                    coroutineContext,
+                    mobileReaderDriverRepository
+            )
+
+            onReaderFound(job.start(onFail))
         }
     }
 

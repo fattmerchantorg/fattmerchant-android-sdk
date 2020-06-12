@@ -2,6 +2,7 @@ package com.fattmerchant.android.chipdna
 
 import android.content.Context
 import com.creditcall.chipdnamobile.*
+import com.fattmerchant.omni.OmniGeneralException
 import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.data.*
@@ -50,7 +51,11 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         internal fun getConnectedReader(chipDnaMobileStatus: Parameters? = ChipDnaMobile.getInstance().getStatus(null)): MobileReader? {
             val deviceStatusXml = chipDnaMobileStatus[ParameterKeys.DeviceStatus] ?: return null
             val deviceStatus = ChipDnaMobileSerializer.deserializeDeviceStatus(deviceStatusXml)
-            return mapDeviceStatusToMobileReader(deviceStatus)
+
+            return when (deviceStatus.status) {
+                DeviceStatus.DeviceStatusEnum.DeviceStatusConnected -> mapDeviceStatusToMobileReader(deviceStatus)
+                else -> null
+            }
         }
     }
 
@@ -149,6 +154,15 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
 
             ChipDnaMobile.getInstance().addConnectAndConfigureFinishedListener(connectAndConfigureListener)
             ChipDnaMobile.getInstance().connectAndConfigure(requestParams)
+        }
+    }
+
+    override suspend fun getConnectedReader(): MobileReader? {
+        // ChipDna must be initialized
+        if (!ChipDnaMobile.isInitialized()) {
+            throw OmniGeneralException.uninitialized
+        } else {
+            return Companion.getConnectedReader()
         }
     }
 

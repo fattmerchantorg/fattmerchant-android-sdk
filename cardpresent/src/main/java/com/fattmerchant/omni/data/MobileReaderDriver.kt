@@ -51,6 +51,13 @@ internal interface MobileReaderDriver {
     suspend fun connectReader(reader: MobileReader): Boolean
 
     /**
+     * Gets the [MobileReader] that is currently connected and accessible via the receiver
+     *
+     * @return the connected [MobileReader] or null
+     */
+    suspend fun getConnectedReader(): MobileReader?
+
+    /**
      * Attempts to perform the given transaction [request]
      *
      * @throws PerformTransactionException
