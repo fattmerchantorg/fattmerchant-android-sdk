@@ -7,10 +7,13 @@ import android.view.View
 import android.widget.EditText
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
+import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.data.Amount
+import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.TransactionRequest
 import com.fattmerchant.omni.data.TransactionUpdate
+import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.networking.OmniApi
 import kotlinx.android.synthetic.main.activity_main.*
@@ -130,8 +133,35 @@ class MainActivity : AppCompatActivity() {
         buttonConnectReader.setOnClickListener {
             searchAndConnectReader()
         }
+    }
 
-        buttonConnectReader.isEnabled = false
+    private fun setupReaderDetailsButton() {
+        buttonConnectedReaderDetails.setOnClickListener {
+            Omni.shared()?.getConnectedReader({ connectedReader ->
+                connectedReader?.let { reader ->
+                    updateStatus("Connected Reader:")
+                    updateStatus(reader)
+                } ?: updateStatus("There is no connected reader")
+            }, { exception ->
+                updateStatus(exception)
+            }) ?: updateStatus("Could not get connected reader")
+        }
+    }
+
+    private fun setupDisconnectReaderButton() {
+        buttonDisconnectReader.setOnClickListener {
+            Omni.shared()?.getConnectedReader({ connectedReader ->
+                connectedReader?.let { reader ->
+                    Omni.shared()?.disconnectReader(reader, {
+                        updateStatus("Reader disconnected")
+                    }, {
+                        updateStatus(it)
+                    })
+                } ?: updateStatus("There is no connected reader")
+            }, { exception ->
+                updateStatus(exception)
+            }) ?: updateStatus("Could not get connected reader")
+        }
     }
 
     private fun showApiKeyDialog() {
@@ -143,10 +173,9 @@ class MainActivity : AppCompatActivity() {
             .setCancelable(false)
             .setPositiveButton("Done") { dialog, _ ->
                 dialog.dismiss()
-                
                 // If you want to not use the apikey dialog, modify the initializeOmni call like below
                 // initializeOmni("insert api key here")
-                initializeOmni(editText.text.toString())
+                initializeOmni("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6ImViNDhlZjk5LWFhNzgtNDk2ZS05YjAxLTQyMWY4ZGFmNzMyMyIsImdvZFVzZXIiOnRydWUsImJyYW5kIjoiZmF0dG1lcmNoYW50Iiwic3ViIjoiMzBjNmVlYjYtNjRiNi00N2Y2LWJjZjYtNzg3YTljNTg3OThiIiwiaXNzIjoiaHR0cDovL2FwaWRldi5mYXR0bGFicy5jb20vYXV0aGVudGljYXRlIiwiaWF0IjoxNTkxOTAxMjEwLCJleHAiOjE1OTE5ODc2MTAsIm5iZiI6MTU5MTkwMTIxMCwianRpIjoiMGdjUTBtUno2dUR2OHBaOCJ9.5lnby6KfWgnRhBdzu51PaFbnKqoCSiA6JBiSzyo6y5s")
             }.show()
     }
 
@@ -156,6 +185,8 @@ class MainActivity : AppCompatActivity() {
         setupRefundButton()
         setupConnectReaderButton()
         setupVoidButton()
+        setupReaderDetailsButton()
+        setupDisconnectReaderButton()
     }
 
     private fun Transaction.pretty(): String {
@@ -200,7 +231,6 @@ class MainActivity : AppCompatActivity() {
 
                             runOnUiThread {
                                 buttonPerformSale.isEnabled = true
-                                buttonConnectReader.visibility = View.GONE
                             }
                         }, { error ->
                             updateStatus("Error connecting: $error")
@@ -211,10 +241,24 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun updateStatus(reader: MobileReader) = runOnUiThread {
+        val readerString = """Mobile Reader:
+            Name:       ${reader.getName()}
+            Serial:     ${reader.serialNumber()}
+            Make:       ${reader.getMake()}
+            Model:      ${reader.getModel()}
+            Firmware:   ${reader.getFirmwareVersion()}
+        """.trimIndent()
+
+        updateStatus(readerString)
+    }
+
     private fun updateStatus(msg: String) = runOnUiThread {
         val newText = formatMessage(msg) + "\n" + textView.text
         textView.text = newText
     }
+
+    private fun updateStatus(exception: OmniException) = updateStatus("[${exception.message}] ${exception.detail}")
 
     private fun formatMessage(msg: String): String {
         val dateFormat = SimpleDateFormat("h:m:ss", Locale.US)
@@ -226,7 +270,6 @@ class MainActivity : AppCompatActivity() {
             InitParams(applicationContext, apiKey, OmniApi.Environment.DEV), {
                 runOnUiThread {
                     updateStatus("Initialized")
-                    buttonConnectReader.isEnabled = true
                     buttonRefundPreviousTransaction.isEnabled = true
                     buttonInitialize.visibility = View.GONE
                 }
