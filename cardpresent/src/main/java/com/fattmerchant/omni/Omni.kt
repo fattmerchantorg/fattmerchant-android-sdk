@@ -29,6 +29,11 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
         override var omniApi: OmniApi = this@Omni.omniApi
     }
 
+    internal open var initialized: Boolean = false
+
+    /** True when Omni is initialized. False otherwise */
+    public val isInitialized get() = initialized
+
     /** Responsible for providing signatures for transactions, when required */
     open var signatureProvider: SignatureProviding? = null
 
@@ -62,6 +67,8 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
                     argsWithMerchant,
                     coroutineContext
             ).start(error)
+
+            initialized = true
 
             completion()
         }
