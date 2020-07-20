@@ -9,9 +9,11 @@ import com.anywherecommerce.android.sdk.MeaningfulError
 import com.anywherecommerce.android.sdk.SDKManager
 import com.anywherecommerce.android.sdk.Terminal
 import com.anywherecommerce.android.sdk.devices.*
+import com.anywherecommerce.android.sdk.devices.bbpos.BBPOSDevice
 import com.anywherecommerce.android.sdk.endpoints.anywherecommerce.AnywhereCommerce
 import com.anywherecommerce.android.sdk.endpoints.worldnet.WorldnetEndpoint
 import com.anywherecommerce.android.sdk.services.CardReaderConnectionService
+import com.fattmerchant.omni.MobileReaderConnectionStatusListener
 import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.data.*
@@ -32,8 +34,11 @@ internal class AWCDriver: MobileReaderDriver {
 
     override var familiarSerialNumbers: MutableList<String> = mutableListOf()
 
+    override var mobileReaderConnectionStatusListener: MobileReaderConnectionStatusListener? = null
+
     override suspend fun isReadyToTakePayment(): Boolean {
         TODO("Not yet implemented")
+        return false
     }
 
     override suspend fun initialize(args: Map<String, Any>): Boolean {

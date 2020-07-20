@@ -60,7 +60,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
 
     /** A key used to communicate with TransactionGateway */
     private var securityKey: String = ""
-    private var mobileReaderConnectionStatusListener: MobileReaderConnectionStatusListener? = null
+    override var mobileReaderConnectionStatusListener: MobileReaderConnectionStatusListener? = null
 
     val log = Logger.getLogger("ChipDNA")
     fun log(msg: String?) {
