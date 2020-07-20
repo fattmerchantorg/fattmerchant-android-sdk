@@ -2,12 +2,14 @@ package com.fattmerchant.android.chipdna
 
 import android.content.Context
 import com.creditcall.chipdnamobile.*
+import com.fattmerchant.omni.MobileReaderConnectionStatusListener
 import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.data.*
 import com.fattmerchant.omni.data.models.Merchant
 import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.data.MobileReaderDriver.*
+import com.fattmerchant.omni.data.models.MobileReaderConnectionStatus
 import kotlinx.coroutines.*
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
@@ -16,7 +18,7 @@ import java.util.logging.Logger
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
 
-internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
+internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfigurationUpdateListener, IDeviceUpdateListener {
 
     class ConnectReaderException(message: String? = null) :
         MobileReaderDriver.ConnectReaderException(mapDetailMessage(message)) {
@@ -58,6 +60,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
 
     /** A key used to communicate with TransactionGateway */
     private var securityKey: String = ""
+    private var mobileReaderConnectionStatusListener: MobileReaderConnectionStatusListener? = null
 
     val log = Logger.getLogger("ChipDNA")
     fun log(msg: String?) {
@@ -88,6 +91,10 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
 
         // Init
         ChipDnaMobile.initialize(appContext, params)
+
+        // Start listening to configuration updates
+        ChipDnaMobile.getInstance().addConfigurationUpdateListener(this)
+        ChipDnaMobile.getInstance().addDeviceUpdateListener(this)
 
         // Store security key for later use
         securityKey = apiKey
@@ -360,5 +367,23 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         }
 
         return availablePinPadsList
+    }
+
+    override fun onConfigurationUpdateListener(parameters: Parameters?) {
+        parameters[ParameterKeys.ConfigurationUpdate]?.let {
+            MobileReaderConnectionStatus.from(it)?.let {
+                mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(it)
+            }
+        }
+    }
+
+    override fun onDeviceUpdate(parameters: Parameters?) {
+        parameters[ParameterKeys.DeviceStatusUpdate]?.let { deviceStatusXml ->
+            ChipDnaMobileSerializer.deserializeDeviceStatus(deviceStatusXml)?.let { deviceStatus ->
+                MobileReaderConnectionStatus.from(deviceStatus.status)?.let {
+                    mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(it)
+                }
+            }
+        }
     }
 }

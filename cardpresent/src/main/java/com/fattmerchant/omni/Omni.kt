@@ -35,6 +35,9 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
     /** Receives notifications about transaction events such as when a card is swiped */
     open var transactionUpdateListener: TransactionUpdateListener? = null
 
+    /** Receives notifications about reader connection events */
+    open var mobileReaderConnectionStatusListener: MobileReaderConnectionStatusListener? = null
+
     internal open lateinit var mobileReaderDriverRepository: MobileReaderDriverRepository
     internal var coroutineScope = MainScope()
     private var currentJob: CoroutineScope? = null
@@ -90,7 +93,8 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
                 val connected = ConnectMobileReader(
                         coroutineContext,
                         mobileReaderDriverRepository,
-                        mobileReader
+                        mobileReader,
+                        mobileReaderConnectionStatusListener
                 ).start()
 
                 if (connected) {

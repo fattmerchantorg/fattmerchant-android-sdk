@@ -1,5 +1,6 @@
 package com.fattmerchant.omni.data
 
+import com.fattmerchant.omni.MobileReaderConnectionStatusListener
 import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.data.models.OmniException
@@ -24,6 +25,8 @@ internal interface MobileReaderDriver {
 
     /** A list of serial numbers that this driver has previously connected to */
     var familiarSerialNumbers: MutableList<String>
+
+    var mobileReaderConnectionStatusListener: MobileReaderConnectionStatusListener?
 
     /**
      * Whether or not the given [MobileReaderDriver] is ready to take payment

@@ -1,25 +1,23 @@
 package com.fattmerchant.omni.data.models
 
 /** The status of a {MobileReader} */
-class MobileReaderConnectionStatus {
+enum class MobileReaderConnectionStatus(val status: String) {
+    /** The reader has been found by the Android device and is currently being connected */
+    CONNECTING("connecting"),
 
-    companion object {
-        /** The reader has been found by the Android device and is currently being connected */
-        val connecting: String = "connecting"
+    /** The reader is connected */
+    CONNECTED("connected"),
 
-        /** The reader is connected */
-        val connected: String = ""
+    /** The reader is disconnected */
+    DISCONNECTED("disconnected"),
 
-        /** The reader is disconnected */
-        val disconnected: String = ""
+    /** The reader is performing an update
+     * - Note: This might be a long-running operation
+     */
+    UPDATING("updating"),
 
-        /** The reader is performing an update
-         * - Note: This might be a long-running operation
-         */
-        val updating: String = ""
+    /** The reader is performing a reboot */
+    REBOOTING("rebooting");
 
-        /** The reader is performing a reboot */
-        val rebooting: String = ""
-    }
-
+    companion object { }
 }
