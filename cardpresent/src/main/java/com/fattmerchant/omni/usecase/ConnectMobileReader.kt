@@ -19,10 +19,20 @@ internal class ConnectMobileReader(
 
     suspend fun start(): Boolean {
         return try {
-            return mobileReaderDriverRepository.getDriverFor(mobileReader)?.let { driver ->
+            val driver = mobileReaderDriverRepository.getDriverFor(mobileReader)
+            if (driver != null) {
                 driver.mobileReaderConnectionStatusListener = mobileReaderConnectionStatusListener
-                driver.connectReader(mobileReader)
-            } ?: false
+                return driver.connectReader(mobileReader)
+            } else {
+                // We couldn't find the driver, so lets ask all initialized drivers
+                // to connect the reader. If all of them fail, return false
+                mobileReaderDriverRepository.getInitializedDrivers().forEach {
+                    if (it.connectReader(mobileReader)) {
+                        return true
+                    }
+                }
+                return false
+            }
         } catch (e: OmniException) {
             false
         }
