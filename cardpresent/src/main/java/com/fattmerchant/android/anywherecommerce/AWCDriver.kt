@@ -117,9 +117,9 @@ internal class AWCDriver: MobileReaderDriver {
         }
     }
 
-    override suspend fun connectReader(reader: MobileReader): Boolean {
-        return (CardReaderController.isCardReaderConnected()
-                && CardReaderController.getConnectedReader().serialNumber == reader.serialNumber())
+    override suspend fun connectReader(reader: MobileReader): MobileReader? {
+        // TODO("Need to implement this")
+        return CardReaderController.getConnectedReader()?.toMobileReader()
     }
 
     override suspend fun disconnectReader(reader: MobileReader): Boolean {

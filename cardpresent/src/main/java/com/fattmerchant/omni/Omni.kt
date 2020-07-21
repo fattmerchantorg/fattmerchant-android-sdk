@@ -90,15 +90,15 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
     fun connectReader(mobileReader: MobileReader, onConnected: (MobileReader) -> Unit, onFail: (String) -> Unit) {
         coroutineScope.launch {
             try {
-                val connected = ConnectMobileReader(
+                val connectedReader = ConnectMobileReader(
                         coroutineContext,
                         mobileReaderDriverRepository,
                         mobileReader,
                         mobileReaderConnectionStatusListener
                 ).start()
 
-                if (connected) {
-                    onConnected(mobileReader)
+                if (connectedReader != null) {
+                    onConnected(connectedReader)
                 } else {
                     onFail("Could not connect to mobile reader")
                 }

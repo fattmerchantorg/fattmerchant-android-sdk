@@ -58,8 +58,9 @@ internal interface MobileReaderDriver {
      * Attempts to connect the given [reader]
      *
      * @param reader
+     * @return the connected [MobileReader] or nil
      */
-    suspend fun connectReader(reader: MobileReader): Boolean
+    suspend fun connectReader(reader: MobileReader): MobileReader?
 
     /**
      * Attempts to disconnect the given [reader]

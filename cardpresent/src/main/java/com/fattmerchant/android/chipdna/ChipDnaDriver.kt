@@ -136,7 +136,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
         }
     }
 
-    override suspend fun connectReader(reader: MobileReader): Boolean {
+    override suspend fun connectReader(reader: MobileReader): MobileReader? {
 
         val requestParams = Parameters()
         requestParams.add(ParameterKeys.PinPadName, reader.getName())
@@ -150,7 +150,12 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
                 ChipDnaMobile.getInstance().removeConnectAndConfigureFinishedListener(connectAndConfigureListener)
 
                 if (params[ParameterKeys.Result] == ParameterValues.TRUE) {
-                    cont.resume(true)
+                    // Reader is connected. Add the serial number to the list of familiar ones
+                    // And return the hydrated mobile reader
+                    getConnectedReader()?.let { connectedReader ->
+                        connectedReader.serialNumber()?.let { familiarSerialNumbers.add(it) }
+                        cont.resume(connectedReader)
+                    }
                     return@IConnectAndConfigureFinishedListener
                 }
 

@@ -17,7 +17,12 @@ internal class ConnectMobileReader(
     var mobileReaderConnectionStatusListener: MobileReaderConnectionStatusListener? = null
 ) : CoroutineScope {
 
-    suspend fun start(): Boolean {
+    /**
+     * Connects the given [mobileReader]
+     *
+     * @return the connected [MobileReader]
+     */
+    suspend fun start(): MobileReader? {
         return try {
             val driver = mobileReaderDriverRepository.getDriverFor(mobileReader)
             if (driver != null) {
@@ -27,14 +32,14 @@ internal class ConnectMobileReader(
                 // We couldn't find the driver, so lets ask all initialized drivers
                 // to connect the reader. If all of them fail, return false
                 mobileReaderDriverRepository.getInitializedDrivers().forEach {
-                    if (it.connectReader(mobileReader)) {
-                        return true
+                    it.connectReader(mobileReader)?.let { connectedReader ->
+                        return connectedReader
                     }
                 }
-                return false
+                return null
             }
         } catch (e: OmniException) {
-            false
+            null
         }
     }
 }
