@@ -23,15 +23,21 @@ internal class InitializeDrivers(
     }
 
     suspend fun start(onError: (OmniException) -> Unit) {
-        try {
-            val drivers = mobileReaderDriverRepository.getDrivers()
-            val initializedDrivers = drivers.map { it.initialize(args) }
-            if (initializedDrivers.contains(true)) {
-                return
-            } else {
-                onError(InitializeDriversException.NoMobileReadersFound)
+        // Get all the drivers
+        val drivers = mobileReaderDriverRepository.getDrivers()
+
+        // One by one, try to initialize them
+        val initializedDrivers = drivers.map {
+            try {
+                it.initialize(args)
+            } catch (e: Throwable) {
+                false
             }
-        } catch (e: Error) {
+        }
+
+        if (initializedDrivers.contains(true)) {
+            return
+        } else {
             onError(InitializeDriversException.NoMobileReadersFound)
         }
     }
