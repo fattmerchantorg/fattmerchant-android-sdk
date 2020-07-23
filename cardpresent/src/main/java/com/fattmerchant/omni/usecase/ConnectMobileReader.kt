@@ -32,6 +32,7 @@ internal class ConnectMobileReader(
                 // We couldn't find the driver, so lets ask all initialized drivers
                 // to connect the reader. If all of them fail, return false
                 mobileReaderDriverRepository.getInitializedDrivers().forEach {
+                    it.mobileReaderConnectionStatusListener = mobileReaderConnectionStatusListener
                     it.connectReader(mobileReader)?.let { connectedReader ->
                         return connectedReader
                     }
