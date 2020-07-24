@@ -85,7 +85,7 @@ internal class AWCDriver: MobileReaderDriver {
 
     }
 
-    override suspend fun isInitialized(): Boolean = Terminal.isInitialized()
+    override suspend fun isInitialized(): Boolean = Terminal.isInitialized() && endpoint != null
 
     override suspend fun searchForReaders(args: Map<String, Any>): List<MobileReader> {
         return suspendCancellableCoroutine {

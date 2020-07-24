@@ -146,7 +146,7 @@ internal class TakeMobileReaderPayment(
                 meta = transactionMeta
                 type = "charge"
                 method = "card"
-                source = "Android|CPSDK|NMI"
+                source = "Android|CPSDK|NMI" //TODO: THIS NEEDS TO BE TAKEN FROM THE TRANSACTION
                 customerId = customer.id
                 invoiceId = invoice.id
                 response = gatewayResponse
@@ -164,7 +164,7 @@ internal class TakeMobileReaderPayment(
      * @return a [MobileReaderDriver], if found
      */
     private suspend fun getAvailableMobileReaderDriver(repo: MobileReaderDriverRepository): MobileReaderDriver? = repo
-        .getDrivers()
+        .getInitializedDrivers()
         .firstOrNull { it.isReadyToTakePayment() }
 
 }
