@@ -64,17 +64,19 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
                 error(OmniException("Could not get reader settings", it.message))
             } ?: return@launch
 
+            val mutatedArgs = args.toMutableMap()
+
             if(mobileReaderDetails.nmi != null) {
-                args.toMutableMap()["nmi"] = mobileReaderDetails.nmi!!
+                mutatedArgs["nmi"] = mobileReaderDetails.nmi!!
             }
 
             if(mobileReaderDetails.anywhereCommerce != null) {
-                args.toMutableMap()["awc"] = mobileReaderDetails.anywhereCommerce!!
+                mutatedArgs["awc"] = mobileReaderDetails.anywhereCommerce!!
             }
 
             InitializeDrivers(
                     mobileReaderDriverRepository,
-                    args,
+                    mutatedArgs,
                     coroutineContext
             ).start(error)
 
