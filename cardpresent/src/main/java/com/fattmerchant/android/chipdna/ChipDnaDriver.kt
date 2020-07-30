@@ -10,6 +10,8 @@ import com.fattmerchant.omni.data.models.Merchant
 import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.data.MobileReaderDriver.*
 import com.fattmerchant.omni.data.models.MobileReaderConnectionStatus
+import com.fattmerchant.omni.data.models.OmniException
+import com.fattmerchant.omni.usecase.CancelCurrentTransaction
 import kotlinx.coroutines.*
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
@@ -339,6 +341,25 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
         } else {
             throw RefundTransactionException(result[ParameterKeys.ErrorDescription] ?: "Could not refund transaction")
         }
+    }
+
+    override suspend fun cancelCurrentTransaction(error: ((OmniException) -> Unit)?): Boolean {
+        val result = ChipDnaMobile.getInstance().terminateTransaction(null)
+        result?.let {
+            val success = result[ParameterKeys.Result] == ParameterValues.TRUE
+            if (success) {
+                return success
+            } else {
+                val status = ChipDnaMobile.getInstance().getStatus(null)
+                val idle = status[ParameterKeys.ChipDnaStatus] == "IDLE"
+                if (idle) {
+                    error?.invoke(CancelCurrentTransaction.CancelCurrentTransactionException.NoTransactionToCancel)
+                } else {
+                    error?.invoke(CancelCurrentTransaction.CancelCurrentTransactionException.Unknown)
+                }
+            }
+        }
+        return false
     }
 
 

@@ -21,6 +21,7 @@ import com.fattmerchant.omni.data.models.Transaction
 
 import com.fattmerchant.omni.data.MobileReaderDriver.*
 import com.fattmerchant.omni.data.models.Merchant
+import com.fattmerchant.omni.data.models.OmniException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
@@ -136,6 +137,10 @@ internal class AWCDriver: MobileReaderDriver {
     }
 
     override suspend fun refundTransaction(transaction: Transaction, refundAmount: Amount?): TransactionResult {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun cancelCurrentTransaction(error: ((OmniException) -> Unit)?): Boolean {
         TODO("Not yet implemented")
     }
 

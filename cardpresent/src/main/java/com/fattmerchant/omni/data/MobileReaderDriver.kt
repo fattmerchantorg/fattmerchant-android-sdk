@@ -5,6 +5,7 @@ import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.models.Transaction
+import com.fattmerchant.omni.usecase.CancelCurrentTransaction
 
 internal interface MobileReaderDriver {
 
@@ -99,4 +100,13 @@ internal interface MobileReaderDriver {
      */
     @Throws(RefundTransactionException::class)
     suspend fun refundTransaction(transaction: Transaction, refundAmount: Amount? = null): TransactionResult
+
+    /**
+     * Attempts to cancel a current mobile reader [transaction]
+     *
+     * @param error
+     * @return the result of the operation
+     */
+    @Throws(CancelCurrentTransaction.CancelCurrentTransactionException::class)
+    suspend fun cancelCurrentTransaction(error: ((OmniException) -> Unit)?): Boolean
 }
