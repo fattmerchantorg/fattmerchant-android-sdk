@@ -7,7 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
 
 /**
- * Connects a single mobile reader from the [mobileReaderDriverRepository]
+ * Cancels a current mobile reader [transaction]
  */
 internal class CancelCurrentTransaction(
         override val coroutineContext: CoroutineContext,
