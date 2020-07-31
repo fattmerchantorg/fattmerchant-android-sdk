@@ -233,6 +233,24 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
     }
 
     /**
+     * Attempts to cancel a current mobile reader [transaction]
+     *
+     * @param completion
+     * @param error a block to run in case an error occurs
+     */
+    fun cancelMobileReaderTransaction(
+            completion: (Boolean) -> Unit,
+            error: (error: OmniException) -> Unit
+    ) {
+        coroutineScope.launch {
+            completion(CancelCurrentTransaction(
+                    coroutineContext,
+                    mobileReaderDriverRepository
+            ).start(error))
+        }
+    }
+
+    /**
      * Gets the invoices
      *
      * @param completion a block of code to execute when finished
