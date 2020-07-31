@@ -1,10 +1,16 @@
 package com.fattmerchant.omni.usecase
 
-import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.repository.MobileReaderDriverRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
+
+class CancelCurrentTransactionException(message: String? = null) : OmniException("", message) {
+    companion object {
+        val NoTransactionToCancel = CancelCurrentTransactionException("There is no transaction to cancel")
+        val Unknown = CancelCurrentTransactionException("Unknown error")
+    }
+}
 
 /**
  * Cancels a current mobile reader [transaction]
@@ -13,13 +19,6 @@ internal class CancelCurrentTransaction(
         override val coroutineContext: CoroutineContext,
         var mobileReaderDriverRepository: MobileReaderDriverRepository
 ) : CoroutineScope {
-
-    class CancelCurrentTransactionException(message: String? = null) : OmniException("", message) {
-        companion object {
-            val NoTransactionToCancel = CancelCurrentTransactionException("There is no transaction to cancel")
-            val Unknown =  CancelCurrentTransactionException("Unknown error")
-        }
-    }
 
     /**
      * Attempt to cancel a current mobile reader [transaction]

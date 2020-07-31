@@ -11,7 +11,7 @@ import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.data.MobileReaderDriver.*
 import com.fattmerchant.omni.data.models.MobileReaderConnectionStatus
 import com.fattmerchant.omni.data.models.OmniException
-import com.fattmerchant.omni.usecase.CancelCurrentTransaction
+import com.fattmerchant.omni.usecase.CancelCurrentTransactionException
 import kotlinx.coroutines.*
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
@@ -353,9 +353,9 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
                 val status = ChipDnaMobile.getInstance().getStatus(null)
                 val idle = status[ParameterKeys.ChipDnaStatus] == "IDLE"
                 if (idle) {
-                    error?.invoke(CancelCurrentTransaction.CancelCurrentTransactionException.NoTransactionToCancel)
+                    error?.invoke(CancelCurrentTransactionException.NoTransactionToCancel)
                 } else {
-                    error?.invoke(CancelCurrentTransaction.CancelCurrentTransactionException.Unknown)
+                    error?.invoke(CancelCurrentTransactionException.Unknown)
                 }
             }
         }
