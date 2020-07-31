@@ -9,6 +9,7 @@ import com.fattmerchant.omni.data.*
 import com.fattmerchant.omni.data.models.Merchant
 import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.data.MobileReaderDriver.*
+import com.fattmerchant.omni.data.models.MobileReaderDetails
 import com.fattmerchant.omni.data.models.OmniException
 import kotlinx.coroutines.*
 import org.xmlpull.v1.XmlPullParserException
@@ -92,11 +93,10 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         val appId = args["appId"] as? String
             ?: throw InitializeMobileReaderDriverException("appId not found")
 
-        val merchant = args["merchant"] as? Merchant
-            ?: throw InitializeMobileReaderDriverException("merchant not found")
+        val nmiDetails = args["nmi"] as? MobileReaderDetails.NMIDetails
+            ?: throw InitializeMobileReaderDriverException("nmi details not found")
 
-        val apiKey = merchant.emvPassword()
-            ?: throw InitializeMobileReaderDriverException("emvTerminalSecret not found")
+        val apiKey = nmiDetails.securityKey
 
         val params = Parameters().apply {
             add(ParameterKeys.Password, "password")

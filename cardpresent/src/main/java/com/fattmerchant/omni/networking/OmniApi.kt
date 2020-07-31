@@ -47,6 +47,14 @@ class OmniApi {
     internal suspend fun getSelf(error: (Error) -> Unit): Self? = get("self", error)
 
     /**
+     * Gets the mobile reader settings which the [token] corresponds to
+     *
+     * @param error
+     * @return
+     */
+    internal suspend fun getMobileReaderSettings(error: (Error) -> Unit): MobileReaderDetails? = get("team/gateway/hardware/mobile", error)
+
+    /**
      * Gets the merchant which the [token] corresponds to
      *
      * @param error

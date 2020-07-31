@@ -59,19 +59,24 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
      */
     internal fun initialize(args: Map<String, Any>, completion: () -> Unit, error: (OmniException) -> Unit) {
         coroutineScope.launch {
-            // Verify that the apiKey corresponds to a real merchant
-            val merchant = omniApi.getMerchant {
-                error(OmniException("Could not initialize Omni", it.message))
+
+            val mobileReaderDetails = omniApi.getMobileReaderSettings {
+                error(OmniException("Could not get reader settings", it.message))
             } ?: return@launch
 
-            // Get the nmiApiKey from the merchant
-            val argsWithMerchant = args.toMutableMap().apply {
-                set("merchant", merchant)
+            val mutatedArgs = args.toMutableMap()
+
+            mobileReaderDetails.nmi?.let {
+                mutatedArgs["nmi"] = it
+            }
+
+            mobileReaderDetails.anywhereCommerce?.let {
+                mutatedArgs["awc"] = it
             }
 
             InitializeDrivers(
                     mobileReaderDriverRepository,
-                    argsWithMerchant,
+                    mutatedArgs,
                     coroutineContext
             ).start(error)
 
