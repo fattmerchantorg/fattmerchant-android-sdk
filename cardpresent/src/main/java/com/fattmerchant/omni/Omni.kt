@@ -66,12 +66,12 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
 
             val mutatedArgs = args.toMutableMap()
 
-            if(mobileReaderDetails.nmi != null) {
-                mutatedArgs["nmi"] = mobileReaderDetails.nmi!!
+            mobileReaderDetails.nmi?.let {
+                mutatedArgs["nmi"] = it
             }
 
-            if(mobileReaderDetails.anywhereCommerce != null) {
-                mutatedArgs["awc"] = mobileReaderDetails.anywhereCommerce!!
+            mobileReaderDetails.anywhereCommerce?.let {
+                mutatedArgs["awc"] = it
             }
 
             InitializeDrivers(
