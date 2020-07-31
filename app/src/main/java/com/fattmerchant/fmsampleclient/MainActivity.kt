@@ -10,6 +10,7 @@ import com.fattmerchant.android.Omni
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.TransactionRequest
+import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.networking.OmniApi
 import kotlinx.android.synthetic.main.activity_main.*
@@ -91,25 +92,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupVoidButton() {
-        buttonVoidPreviousTransaction.setOnClickListener {
-            updateStatus("Fetching list of transactions")
-            Omni.shared()?.getTransactions({ transactions ->
-
-                // Figure out which transactions are refundable
-                val voidableTransactions = transactions.filter {
-                    it.source?.contains("CPSDK") == true && it.isVoided == false
+        buttonCancelTransaction.setOnClickListener {
+            Omni.shared()?.cancelMobileReaderTransaction({
+                if (it) {
+                    updateStatus("Transaction cancelled")
+                } else {
+                    updateStatus("Transaction not cancelled")
                 }
 
-                chooseTransaction(voidableTransactions) { transactionToRefund ->
-                    updateStatus("Trying to void ${transactionToRefund.pretty()}")
-                    Omni.shared()?.voidMobileReaderTransaction(transactionToRefund, {
-                        updateStatus("Voided ${transactionToRefund.pretty()}")
-                    }, {
-                        updateStatus("Error Voiding: ${it.message} ${it.detail}")
-                    })
-                }
             }, {
-                updateStatus(it.message ?: "Could not get transactions")
+                updateStatus(it)
             })
         }
     }
@@ -219,6 +211,10 @@ class MainActivity : AppCompatActivity() {
                     }.create().show()
             }
         }
+    }
+
+    private fun updateStatus(omniException: OmniException) = runOnUiThread {
+        updateStatus(omniException.detail ?: omniException.message)
     }
 
     private fun updateStatus(msg: String) = runOnUiThread {

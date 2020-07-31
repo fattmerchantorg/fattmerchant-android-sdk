@@ -86,10 +86,10 @@
                 android:text="Refund A Transaction" />
 
             <Button
-                android:id="@+id/buttonVoidPreviousTransaction"
+                android:id="@+id/buttonCancelTransaction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Void A Transaction" />
+                android:text="Cancel Transaction" />
         </LinearLayout>
 
     </FrameLayout>
