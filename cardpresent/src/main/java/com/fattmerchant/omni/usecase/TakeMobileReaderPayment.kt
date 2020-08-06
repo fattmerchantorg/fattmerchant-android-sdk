@@ -40,6 +40,10 @@ internal class TakeMobileReaderPayment(
                 transactionMeta["nmiTransactionId"] = it
             }
 
+            result.request?.lineItems?.let {
+                transactionMeta["lineItems"] = it
+            }
+
             return transactionMeta
         }
     }
