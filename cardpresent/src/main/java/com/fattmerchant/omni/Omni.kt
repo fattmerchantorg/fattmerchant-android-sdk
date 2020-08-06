@@ -225,7 +225,8 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
                     mobileReaderDriverRepository,
                     transactionRepository,
                     transaction,
-                    refundAmount
+                    refundAmount,
+                    omniApi
             ).start {
                 error(it)
             }?.let { completion(it) }

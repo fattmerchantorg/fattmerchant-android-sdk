@@ -110,6 +110,10 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
         return result[ParameterKeys.Result] == ParameterValues.TRUE
     }
 
+    override suspend fun isOmniRefundsSupported(): Boolean {
+        return true
+    }
+
     override suspend fun isInitialized(): Boolean {
         return ChipDnaMobile.isInitialized()
     }

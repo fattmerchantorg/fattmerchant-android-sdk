@@ -42,6 +42,10 @@ internal class AWCDriver: MobileReaderDriver {
         return false
     }
 
+    override suspend fun isOmniRefundsSupported(): Boolean {
+        return false
+    }
+
     override suspend fun initialize(args: Map<String, Any>): Boolean {
         // Make sure we have all the necessary data
         val application = args["application"] as? Application
