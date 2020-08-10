@@ -35,6 +35,18 @@ internal interface MobileReaderDriver {
     suspend fun isReadyToTakePayment(): Boolean
 
     /**
+     * True when the Omni API can perform the refund
+     *
+     * Some `MobileReaderDriver`s, like NMI, support a deeper integration with Omni, such that Omni can facilitate the
+     * void/refund. This allows the SDK to relieve itself of the responsibility of having to perform the refund directly
+     * with the vendor (NMI), via the vendored SDK (ChipDNA).
+     *
+     * Other `MobileReaderDriver`s, like AWC, do not support this integration. For that reason, the SDK must perform
+     * the void/refund directly with AWC via the AWC sdk.
+     */
+    suspend fun isOmniRefundsSupported(): Boolean
+
+    /**
      * Attempts to initialize the [MobileReaderDriver]
      *
      * @throws InitializeMobileReaderDriverException
