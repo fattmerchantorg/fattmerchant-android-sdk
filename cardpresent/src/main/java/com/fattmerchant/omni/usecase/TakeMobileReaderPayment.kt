@@ -53,16 +53,26 @@ internal class TakeMobileReaderPayment(
             return@coroutineScope null
         }
 
-        // Create invoice
-        val invoice: Invoice = invoiceRepository.create(
-            Invoice().apply {
-                total = request.amount.dollarsString()
-                url = "https://qa.fattpay.com/#/bill/"
-                meta = mapOf("subtotal" to request.amount.dollarsString())
-            }
-        ) {
-            onError(it)
-        } ?: return@coroutineScope null
+        var invoice = Invoice()
+
+        // Check if we are passing an invoice id
+        request.invoiceId?.let {
+            // Check if the invoice exists
+            invoice = invoiceRepository.getById(it) {
+                onError(TakeMobileReaderPaymentException("Requested invoice was not found"))
+            } ?: return@coroutineScope null
+        } ?: run {
+            // If not create the invoice
+            invoice = invoiceRepository.create(
+                    Invoice().apply {
+                        total = request.amount.dollarsString()
+                        url = "https://qa.fattpay.com/#/bill/"
+                        meta = mapOf("subtotal" to request.amount.dollarsString())
+                    }
+            ) {
+                onError(it)
+            } ?: return@coroutineScope null
+        }
 
         // Take the mobile reader payment
         val result: TransactionResult

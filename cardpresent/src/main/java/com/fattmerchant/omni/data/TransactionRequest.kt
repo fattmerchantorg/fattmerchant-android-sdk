@@ -10,7 +10,10 @@ data class TransactionRequest(
     val amount: Amount,
 
     /** The option to tokenize the payment method for later usage */
-    val tokenize: Boolean = true
+    val tokenize: Boolean = true,
+
+    /** The id of the invoice we want to apply the transaction to */
+    val invoiceId: String? = null
 ) {
 
     /**
@@ -21,4 +24,14 @@ data class TransactionRequest(
      * @param amount The [Amount] to be collected during the transaction
      * */
     constructor(amount: Amount) : this(amount, true)
+
+    /**
+     * Initializes a Transaction with the given amount and invoice id
+     *
+     * Note that this will request tokenization
+     *
+     * @param amount The [Amount] to be collected during the transaction
+     * @param invoiceId The id of the invoice we are applying the transaction to
+     * */
+    constructor(amount: Amount, invoiceId: String?) : this(amount, true, invoiceId)
 }
