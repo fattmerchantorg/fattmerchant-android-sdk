@@ -24,8 +24,10 @@ import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.data.MobileReaderDriver.*
 import com.fattmerchant.omni.data.models.Merchant
 import com.fattmerchant.omni.data.models.OmniException
+import com.fattmerchant.omni.usecase.TakeMobileReaderPayment
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 internal class AWCDriver: MobileReaderDriver {
 
@@ -190,9 +192,8 @@ internal class AWCDriver: MobileReaderDriver {
 
                 override fun onTransactionFailed(p0: MeaningfulError?) {
                     currentTransaction = null
-                    TODO()
+                    cancellableContinuation.resumeWithException(PerformTransactionException(p0?.detail ?: "Transaction Failed"))
                 }
-
             })
         }
     }
