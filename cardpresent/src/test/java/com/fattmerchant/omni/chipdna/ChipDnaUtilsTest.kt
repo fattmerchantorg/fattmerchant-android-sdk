@@ -34,7 +34,7 @@ class ChipDnaUtilsTest {
         val userRef = "gotcha!"
         val transaction = Transaction().apply {
             meta = mapOf(
-                    "nmiUserRef" to userRef
+                "nmiUserRef" to userRef
             )
         }
 
