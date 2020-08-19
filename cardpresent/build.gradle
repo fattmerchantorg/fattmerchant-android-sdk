@@ -77,7 +77,19 @@ dependencies {
     implementation 'net.zetetic:android-database-sqlcipher:4.0.1@aar'
 
     // AnywhereCommerce
-    api files('libs/com.anywherecommerce.android.sdk-release.aar')
+    compile files('libs/com.anywherecommerce.android.sdk-release.aar')
+//    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.8.0'
+    implementation 'com.github.smart-fun:XmlToJson:1.4.4'
+    api 'org.slf4j:slf4j-api:1.7.25'
+    api 'com.github.tony19:logback-android:2.0.0'
+    api 'com.googlecode.libphonenumber:libphonenumber:8.5.0'
+    implementation 'com.squareup.retrofit2:converter-scalars:2.3.0'
+    compile('org.simpleframework:simple-xml:2.7.1') {
+        exclude group: 'stax', module: 'stax-api'
+        exclude group: 'xpp3', module: 'xpp3'
+    }
 
     // Ktor
     implementation "io.ktor:ktor-client-core:$ktor_version"
