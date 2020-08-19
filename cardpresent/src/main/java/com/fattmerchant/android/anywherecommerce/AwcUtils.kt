@@ -23,12 +23,13 @@ internal fun CardReader.toMobileReader(): MobileReader {
 }
 
 internal fun TransactionUpdate.Companion.from(anpMeaningfulMessage: MeaningfulMessage): TransactionUpdate? {
-    return (anpMeaningfulMessage as Throwable).message?.let { message ->
+
+    return anpMeaningfulMessage.toString().let { message ->
         when (message) {
-            "SWIPE OR INSERT OR TAP" -> TransactionUpdate.PromptInsertSwipeTap
-            "SWIPE OR INSERT" -> TransactionUpdate.PromptInsertSwipeCard
-            "Processing" -> TransactionUpdate.Authorizing
-            "Remove Card" -> TransactionUpdate.PromptRemoveCard
+            "SWIPE OR INSERT OR TAP" -> PromptInsertSwipeTap
+            "SWIPE OR INSERT" -> PromptInsertSwipeCard
+            "Processing" -> Authorizing
+            "Remove Card" -> PromptRemoveCard
             else -> null
         }
     }
