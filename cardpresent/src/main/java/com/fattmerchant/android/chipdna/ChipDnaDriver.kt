@@ -62,6 +62,8 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
 
     /** A key used to communicate with TransactionGateway */
     private var securityKey: String = ""
+
+    override val source: String = "NMI"
     override var mobileReaderConnectionStatusListener: MobileReaderConnectionStatusListener? = null
 
     val log = Logger.getLogger("ChipDNA")
@@ -85,6 +87,10 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
 
         val apiKey = merchant.emvPassword()
             ?: throw InitializeMobileReaderDriverException("emvTerminalSecret not found")
+
+        if (apiKey.isBlank()) {
+            throw InitializeMobileReaderDriverException("emvTerminalSecret not found")
+        }
 
         val params = Parameters().apply {
             add(ParameterKeys.Password, "password")
