@@ -146,7 +146,7 @@ internal class TakeMobileReaderPayment(
                 meta = transactionMeta
                 type = "charge"
                 method = "card"
-                source = "Android|CPSDK|NMI" //TODO: THIS NEEDS TO BE TAKEN FROM THE TRANSACTION
+                source = "Android|CPSDK|${result.source}"
                 customerId = customer.id
                 invoiceId = invoice.id
                 response = gatewayResponse

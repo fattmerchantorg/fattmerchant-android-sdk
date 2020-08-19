@@ -27,6 +27,9 @@ internal interface MobileReaderDriver {
     /** A list of serial numbers that this driver has previously connected to */
     var familiarSerialNumbers: MutableList<String>
 
+    /** The place where the transaction took place. For example, "NMI" or "AWC" */
+    val source: String
+
     var mobileReaderConnectionStatusListener: MobileReaderConnectionStatusListener?
 
     /**
