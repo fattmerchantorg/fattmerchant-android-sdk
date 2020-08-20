@@ -12,6 +12,12 @@ open class TransactionUpdate(val value: String, val userFriendlyMessage: String?
         /** Request card be swiped or inserted */
         val PromptInsertSwipeCard = TransactionUpdate("Prompt Insert Swipe Card", "Please insert or swipe card")
 
+        /** Request card be inserted */
+        val PromptInsertCard = TransactionUpdate("Prompt Insert Card", "Please insert card")
+
+        /** Request card be swiped, inserted, or tapped */
+        val PromptInsertSwipeTap = TransactionUpdate("Prompt Insert Swipe Tap Card", "Please insert, tap, or swipe card")
+
         /** Request card be swiped */
         val PromptSwipeCard = TransactionUpdate("Prompt Swipe Card", "Please swipe card")
 
@@ -26,6 +32,9 @@ open class TransactionUpdate(val value: String, val userFriendlyMessage: String?
 
         /** Request card be removed */
         val PromptRemoveCard = TransactionUpdate("Prompt Remove Card", "Please remove card")
+
+        /** Transaction is being authorized */
+        val Authorizing = TransactionUpdate("Authorizing", "Authorizing. Please wait")
 
         /** Card was removed */
         val CardRemoved = TransactionUpdate("Card Removed")

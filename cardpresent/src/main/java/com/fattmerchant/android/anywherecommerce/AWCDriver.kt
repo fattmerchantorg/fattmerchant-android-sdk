@@ -4,15 +4,17 @@ import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
-import com.anywherecommerce.android.sdk.AuthenticationListener
-import com.anywherecommerce.android.sdk.MeaningfulError
-import com.anywherecommerce.android.sdk.SDKManager
-import com.anywherecommerce.android.sdk.Terminal
+import com.anywherecommerce.android.sdk.*
 import com.anywherecommerce.android.sdk.devices.*
+import com.anywherecommerce.android.sdk.util.Amount as ANPAmount
 import com.anywherecommerce.android.sdk.devices.bbpos.BBPOSDevice
+import com.anywherecommerce.android.sdk.endpoints.AnyPayTransaction
 import com.anywherecommerce.android.sdk.endpoints.anywherecommerce.AnywhereCommerce
 import com.anywherecommerce.android.sdk.endpoints.worldnet.WorldnetEndpoint
+import com.anywherecommerce.android.sdk.models.Signature
+import com.anywherecommerce.android.sdk.models.TransactionType
 import com.anywherecommerce.android.sdk.services.CardReaderConnectionService
+import com.anywherecommerce.android.sdk.transactions.listener.CardTransactionListener
 import com.fattmerchant.omni.MobileReaderConnectionStatusListener
 import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
@@ -22,8 +24,10 @@ import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.data.MobileReaderDriver.*
 import com.fattmerchant.omni.data.models.Merchant
 import com.fattmerchant.omni.data.models.OmniException
+import com.fattmerchant.omni.usecase.TakeMobileReaderPayment
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 internal class AWCDriver: MobileReaderDriver {
 
@@ -33,13 +37,26 @@ internal class AWCDriver: MobileReaderDriver {
     /** The URL of the gateway that AnywhereCommerce will be reaching out to */
     private var gatewayUrl = "https://payments.anywherecommerce.com/merchant"
 
+    /** The transaction currently underway */
+    private var currentTransaction: AnyPayTransaction? = null
+
+    override val source: String = "AWC"
+
     override var familiarSerialNumbers: MutableList<String> = mutableListOf()
 
     override var mobileReaderConnectionStatusListener: MobileReaderConnectionStatusListener? = null
 
     override suspend fun isReadyToTakePayment(): Boolean {
-        TODO("Not yet implemented")
-        return false
+        // Make sure reader is connected
+        val cardReader = CardReaderController.getConnectedReader() ?: return false
+
+        // Make sure reader is idle
+        cardReader.connectionStatus == ConnectionStatus.CONNECTED
+
+        // Make sure there is no transaction running
+        if (currentTransaction != null) { return false }
+
+        return true
     }
 
     override suspend fun isOmniRefundsSupported(): Boolean {
@@ -133,7 +150,52 @@ internal class AWCDriver: MobileReaderDriver {
     }
 
     override suspend fun performTransaction(request: TransactionRequest, signatureProvider: SignatureProviding?, transactionUpdateListener: TransactionUpdateListener?): TransactionResult {
-        TODO("Not yet implemented")
+        return suspendCancellableCoroutine { cancellableContinuation ->
+            // Create AnyPayTransaction
+            val transaction = AnyPayTransaction()
+            transaction.transactionType = TransactionType.SALE
+            transaction.currency = "USD"
+            transaction.totalAmount = ANPAmount(request.amount.dollarsString())
+            transaction.useCardReader(CardReaderController.getConnectedReader())
+
+            // Register signature
+            transaction.setOnSignatureRequiredListener {
+                transactionUpdateListener?.onTransactionUpdate(TransactionUpdate.PromptProvideSignature)
+
+                if (signatureProvider != null) {
+                    signatureProvider.signatureRequired { signature ->
+                        transactionUpdateListener?.onTransactionUpdate(TransactionUpdate.SignatureProvided)
+                        transaction.signature = Signature() //TODO: Take care of the signature
+                        transaction.proceed()
+                    }
+                } else {
+                    transaction.proceed()
+                }
+            }
+
+            currentTransaction = transaction
+            transaction.execute(object : CardTransactionListener {
+                override fun onCardReaderEvent(message: MeaningfulMessage?) {
+                    message?.let {
+                        TransactionUpdate.from(it)?.let { update ->
+                            transactionUpdateListener?.onTransactionUpdate(update)
+                        }
+                    }
+                }
+
+                override fun onTransactionCompleted() {
+                    val result = TransactionResult.from(transaction)
+                    result.request = request
+                    currentTransaction = null
+                    cancellableContinuation.resume(result)
+                }
+
+                override fun onTransactionFailed(p0: MeaningfulError?) {
+                    currentTransaction = null
+                    cancellableContinuation.resumeWithException(PerformTransactionException(p0?.detail ?: "Transaction Failed"))
+                }
+            })
+        }
     }
 
     override suspend fun voidTransaction(transaction: Transaction): TransactionResult {
