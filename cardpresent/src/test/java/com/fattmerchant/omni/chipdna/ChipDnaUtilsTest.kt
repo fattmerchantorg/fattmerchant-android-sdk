@@ -14,12 +14,19 @@ import org.junit.Test
 class ChipDnaUtilsTest {
 
     private val amount = Amount(cents = 10)
+    private val invoiceId = "InvoiceId"
 
     @Test
     fun `adds customer vault request parameter if tokenization requested`() {
         val request = TransactionRequest(amount)
         val params = Parameters().withTransactionRequest(request)
         assert(params.containsKey(ParameterKeys.CustomerVaultCommand))
+    }
+
+    @Test
+    fun `adds invoice id to request when specified`() {
+        val request = TransactionRequest(amount, invoiceId)
+        assert(request.invoiceId == invoiceId)
     }
 
     @Test

@@ -56,6 +56,14 @@ class OmniApi {
     internal suspend fun getMerchant(error: (Error) -> Unit): Merchant? = getSelf(error)?.merchant
 
     /**
+     * Gets the invoice which the [id] corresponds to
+     *
+     * @param error
+     * @return the found invoice
+     */
+    internal suspend fun getInvoice(id: String, error: (Error) -> Unit): Invoice? = get("invoice/${id}", error)
+
+    /**
      * Creates a new invoice in Omni
      *
      * @param invoice
