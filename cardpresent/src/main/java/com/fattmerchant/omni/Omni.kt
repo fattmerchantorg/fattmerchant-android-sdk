@@ -159,7 +159,7 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
             currentJob = takePaymentJob
 
             val result = takePaymentJob.start {
-                error(it)
+                error(OmniException("Could not take mobile reader transaction", it.message))
                 return@start
             }
 
