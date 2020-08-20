@@ -12,6 +12,9 @@ open class TransactionUpdate(val value: String, val userFriendlyMessage: String?
         /** Request card be swiped or inserted */
         val PromptInsertSwipeCard = TransactionUpdate("Prompt Insert Swipe Card", "Please insert or swipe card")
 
+        /** Request card be inserted */
+        val PromptInsertCard = TransactionUpdate("Prompt Insert Card", "Please insert card")
+
         /** Request card be swiped, inserted, or tapped */
         val PromptInsertSwipeTap = TransactionUpdate("Prompt Insert Swipe Tap Card", "Please insert, tap, or swipe card")
 

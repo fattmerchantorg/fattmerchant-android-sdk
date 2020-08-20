@@ -30,6 +30,7 @@ internal fun TransactionUpdate.Companion.from(anpMeaningfulMessage: MeaningfulMe
             "SWIPE OR INSERT" -> PromptInsertSwipeCard
             "Processing" -> Authorizing
             "Remove Card" -> PromptRemoveCard
+            "INSERT_CARD" -> PromptInsertCard
             else -> null
         }
     }
