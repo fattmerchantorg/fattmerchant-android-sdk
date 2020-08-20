@@ -59,14 +59,14 @@ internal class TakeMobileReaderPayment(
         request.invoiceId?.let {
             // Check if the invoice exists
             invoice = invoiceRepository.getById(it) {
-                onError(TakeMobileReaderPaymentException("Requested invoice was not found"))
+                onError(TakeMobileReaderPaymentException("Invoice with given id not found"))
             } ?: return@coroutineScope null
         } ?: run {
             // If not create the invoice
             invoice = invoiceRepository.create(
                     Invoice().apply {
                         total = request.amount.dollarsString()
-                        url = "https://qa.fattpay.com/#/bill/"
+                        url = "https://fattpay.com/#/bill/"
                         meta = mapOf("subtotal" to request.amount.dollarsString())
                     }
             ) {
