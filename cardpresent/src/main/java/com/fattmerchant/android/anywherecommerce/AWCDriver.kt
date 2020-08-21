@@ -24,6 +24,7 @@ import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.data.MobileReaderDriver.*
 import com.fattmerchant.omni.data.models.Merchant
 import com.fattmerchant.omni.data.models.OmniException
+import com.fattmerchant.omni.usecase.CancelCurrentTransactionException
 import com.fattmerchant.omni.usecase.TakeMobileReaderPayment
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
@@ -207,7 +208,11 @@ internal class AWCDriver: MobileReaderDriver {
     }
 
     override suspend fun cancelCurrentTransaction(error: ((OmniException) -> Unit)?): Boolean {
-        TODO("Not yet implemented")
+        currentTransaction?.let {
+            it.cancel()
+            return@let true
+        }
+        error(CancelCurrentTransactionException("Could not cancel current transaction"))
     }
 
 }
