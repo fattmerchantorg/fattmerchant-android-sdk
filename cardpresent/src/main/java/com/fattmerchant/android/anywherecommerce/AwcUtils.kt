@@ -26,10 +26,10 @@ internal fun TransactionUpdate.Companion.from(anpMeaningfulMessage: MeaningfulMe
 
     return anpMeaningfulMessage.toString().let { message ->
         when (message) {
-            "SWIPE OR INSERT OR TAP" -> PromptInsertSwipeTap
+            "SWIPE OR INSERT OR TAP", "Insert, Swipe, or Tap Card"-> PromptInsertSwipeTap
             "SWIPE OR INSERT" -> PromptInsertSwipeCard
-            "Processing" -> Authorizing
-            "Remove Card" -> PromptRemoveCard
+            "PROCESSING" -> Authorizing
+            "REMOVE_CARD" -> PromptRemoveCard
             "INSERT_CARD" -> PromptInsertCard
             else -> null
         }
