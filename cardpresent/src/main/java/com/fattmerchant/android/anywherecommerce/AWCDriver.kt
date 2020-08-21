@@ -4,6 +4,7 @@ import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.os.Handler
 import com.anywherecommerce.android.sdk.*
 import com.anywherecommerce.android.sdk.devices.*
 import com.anywherecommerce.android.sdk.util.Amount as ANPAmount
@@ -25,7 +26,10 @@ import com.fattmerchant.omni.data.MobileReaderDriver.*
 import com.fattmerchant.omni.data.models.Merchant
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.usecase.TakeMobileReaderPayment
+import kotlinx.coroutines.android.HandlerDispatcher
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.*
+import kotlin.concurrent.timerTask
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -149,6 +153,8 @@ internal class AWCDriver: MobileReaderDriver {
         return true
     }
 
+    var transactionUpdateDelay = 0.0
+
     override suspend fun performTransaction(request: TransactionRequest, signatureProvider: SignatureProviding?, transactionUpdateListener: TransactionUpdateListener?): TransactionResult {
         return suspendCancellableCoroutine { cancellableContinuation ->
             // Create AnyPayTransaction
@@ -177,8 +183,17 @@ internal class AWCDriver: MobileReaderDriver {
             transaction.execute(object : CardTransactionListener {
                 override fun onCardReaderEvent(message: MeaningfulMessage?) {
                     message?.let {
-                        TransactionUpdate.from(it)?.let { update ->
-                            transactionUpdateListener?.onTransactionUpdate(update)
+                        // Ignore the PRESENT_CARD message
+                        if (message.toString() == "PRESENT_CARD") { return@let }
+
+                        val transactionUpdate = TransactionUpdate.from(it)
+                        if (transactionUpdate != null) {
+                            Handler().postDelayed({
+                                transactionUpdateListener?.onTransactionUpdate(transactionUpdate)
+                                transactionUpdateDelay = 0.0
+                            }, transactionUpdateDelay.toLong())
+                        } else {
+                            transactionUpdateDelay = 2.0 * 1000
                         }
                     }
                 }
