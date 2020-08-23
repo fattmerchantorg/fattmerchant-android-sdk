@@ -79,6 +79,11 @@ internal fun TransactionResult.Companion.from(transaction: AnyPayTransaction): T
 
     transaction.approvedAmount?.let { amount = Amount.from(it) }
     transaction.refTransactionId?.let { externalId = it }
+
+    if (externalId == null) {
+        transaction.externalId?.let { externalId = it }
+    }
+
     transaction.maskedPAN?.let { maskedPan = it }
     transaction.cardType?.let { cardType = mapCardType(it) }
     transaction.approvalCode?.let { authCode = it}
@@ -93,4 +98,8 @@ internal fun TransactionResult.Companion.from(transaction: AnyPayTransaction): T
         TransactionType.VOID -> "void"
         else -> "sale"
     }
+}
+
+internal fun com.fattmerchant.omni.data.models.Transaction.awcExternalId(): String? {
+    return (meta as? Map<*, *>)?.get("awcTransactionId") as? String
 }

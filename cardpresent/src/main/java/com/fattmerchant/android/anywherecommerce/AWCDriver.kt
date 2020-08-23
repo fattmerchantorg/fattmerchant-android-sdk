@@ -15,6 +15,7 @@ import com.anywherecommerce.android.sdk.models.Signature
 import com.anywherecommerce.android.sdk.models.TransactionType
 import com.anywherecommerce.android.sdk.services.CardReaderConnectionService
 import com.anywherecommerce.android.sdk.transactions.listener.CardTransactionListener
+import com.anywherecommerce.android.sdk.transactions.listener.TransactionListener
 import com.fattmerchant.omni.MobileReaderConnectionStatusListener
 import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
@@ -203,7 +204,25 @@ internal class AWCDriver: MobileReaderDriver {
     }
 
     override suspend fun refundTransaction(transaction: Transaction, refundAmount: Amount?): TransactionResult {
-        TODO("Not yet implemented")
+        return suspendCancellableCoroutine {
+            val refund = AnyPayTransaction()
+            refund.endpoint = endpoint
+            refund.transactionType = TransactionType.REFUND
+            refund.externalId = transaction.awcExternalId()
+            refund.refTransactionId = transaction.awcExternalId()
+            refund.totalAmount = ANPAmount(refundAmount?.dollarsString())
+
+            refund.execute(object: TransactionListener {
+                override fun onTransactionCompleted() {
+                    val result = TransactionResult.from(refund)
+                    it.resume(result)
+                }
+
+                override fun onTransactionFailed(p0: MeaningfulError?) {
+                    it.resumeWithException(RefundTransactionException(p0?.detail ?: "Could not perform refund"))
+                }
+            })
+        }
     }
 
     override suspend fun cancelCurrentTransaction(error: ((OmniException) -> Unit)?): Boolean {
