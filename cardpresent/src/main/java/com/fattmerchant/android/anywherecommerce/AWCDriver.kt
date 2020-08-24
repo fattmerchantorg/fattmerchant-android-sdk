@@ -210,9 +210,10 @@ internal class AWCDriver: MobileReaderDriver {
     override suspend fun cancelCurrentTransaction(error: ((OmniException) -> Unit)?): Boolean {
         currentTransaction?.let {
             it.cancel()
-            return@let true
+            return true
         }
-        error(CancelCurrentTransactionException("Could not cancel current transaction"))
+        error?.invoke(CancelCurrentTransactionException("Could not cancel current transaction"))
+        return false
     }
 
 }
