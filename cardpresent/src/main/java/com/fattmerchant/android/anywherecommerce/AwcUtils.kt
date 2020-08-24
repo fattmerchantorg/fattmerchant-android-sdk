@@ -6,11 +6,11 @@ import com.anywherecommerce.android.sdk.endpoints.AnyPayTransaction
 import com.anywherecommerce.android.sdk.models.TransactionStatus
 import com.anywherecommerce.android.sdk.models.TransactionType
 import com.anywherecommerce.android.sdk.util.Amount as ANPAmount
-import com.anywherecommerce.android.sdk.transactions.Transaction
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.TransactionResult
 import com.fattmerchant.omni.data.TransactionUpdate
+import com.fattmerchant.omni.data.models.Transaction
 
 internal fun CardReader.toMobileReader(): MobileReader {
     return object: MobileReader {
@@ -100,6 +100,6 @@ internal fun TransactionResult.Companion.from(transaction: AnyPayTransaction): T
     }
 }
 
-internal fun com.fattmerchant.omni.data.models.Transaction.awcExternalId(): String? {
+internal fun Transaction.awcExternalId(): String? {
     return (meta as? Map<*, *>)?.get("awcTransactionId") as? String
 }
