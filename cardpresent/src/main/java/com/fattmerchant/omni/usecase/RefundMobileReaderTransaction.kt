@@ -20,7 +20,7 @@ internal class RefundMobileReaderTransaction(
         private val mobileReaderDriverRepository: MobileReaderDriverRepository,
         private val transactionRepository: TransactionRepository,
         internal val transaction: Transaction,
-        private val refundAmount: Amount?,
+        private var refundAmount: Amount?,
         private val omniApi: OmniApi
 ) {
 
@@ -30,6 +30,15 @@ internal class RefundMobileReaderTransaction(
         try {
             // Validate the refund
             validateRefund(transaction, refundAmount)?.let { throw it }
+
+            // If no refundAmount given, assume that we want to refund the entire transaction amount
+            if (refundAmount == null) {
+                transaction.total?.let {
+                    it.toDoubleOrNull()?.let { amountDouble ->
+                        refundAmount = Amount(dollars = amountDouble)
+                    }
+                }
+            }
 
             // Get the driver
             mobileReaderDriverRepository.getDriverFor(transaction).let { driver ->
@@ -72,9 +81,19 @@ internal class RefundMobileReaderTransaction(
     }
 
     private suspend fun postRefundedTransaction(result: TransactionResult, error: (OmniException) -> Unit): Transaction? {
-        val refundedTransaction = Transaction()
-        refundedTransaction.total = result.amount?.dollarsString()
-        refundedTransaction.paymentMethodId = transaction.paymentMethodId
+        val refundedTransaction = Transaction().apply {
+            total = result.amount?.dollarsString()
+            paymentMethodId = transaction.paymentMethodId
+            success = result.success
+            lastFour = transaction.lastFour
+            type = "refund"
+            source = transaction.source
+            referenceId = transaction.id
+            method = transaction.method
+            customerId = transaction.customerId
+            invoiceId = transaction.invoiceId
+        }
+
         return transactionRepository.create(refundedTransaction, error)
     }
 

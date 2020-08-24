@@ -21,9 +21,16 @@ internal class MobileReaderDriverRepository : MobileReaderDriverRepository {
     }
 
     override suspend fun getDriverFor(transaction: Transaction): MobileReaderDriver? {
-        if (transaction.source?.contains("CPSDK") == true) {
-            return chipDna
+        if (transaction.source?.contains("CPSDK") != true) {
+            return null
         }
+
+        getInitializedDrivers().forEach {
+            if (transaction.source?.contains(it.source) == true) {
+                return it
+            }
+        }
+
         return null
     }
 

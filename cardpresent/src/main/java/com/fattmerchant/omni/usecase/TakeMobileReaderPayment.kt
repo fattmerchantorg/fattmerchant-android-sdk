@@ -1,5 +1,7 @@
 package com.fattmerchant.omni.usecase
 
+import com.fattmerchant.android.anywherecommerce.AWCDriver
+import com.fattmerchant.android.chipdna.ChipDnaDriver
 import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.data.*
@@ -28,17 +30,29 @@ internal class TakeMobileReaderPayment(
         internal fun transactionMetaFrom(result: TransactionResult): Map<String, Any> {
             val transactionMeta = mutableMapOf<String, Any>()
 
-            result.userReference?.let {
-                transactionMeta["nmiUserRef"] = it
+            when {
+                result.source.contains(ChipDnaDriver().source) -> {
+                    result.userReference?.let {
+                        transactionMeta["nmiUserRef"] = it
+                    }
+
+                    result.localId?.let {
+                        transactionMeta["cardEaseReference"] = it
+                    }
+
+                    result.externalId?.let {
+                        transactionMeta["nmiTransactionId"] = it
+                    }
+                }
+
+                result.source.contains(AWCDriver().source) -> {
+                    result.externalId?.let {
+                        transactionMeta["awcTransactionId"] = it
+                    }
+                }
             }
 
-            result.localId?.let {
-                transactionMeta["cardEaseReference"] = it
-            }
 
-            result.externalId?.let {
-                transactionMeta["nmiTransactionId"] = it
-            }
 
             return transactionMeta
         }
