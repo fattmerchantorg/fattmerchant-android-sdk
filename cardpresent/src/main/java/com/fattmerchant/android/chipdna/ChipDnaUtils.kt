@@ -68,6 +68,7 @@ fun mapTransactionUpdate(transactionUpdate: String): TransactionUpdate? {
         ChipDnaTransactionUpdate.CardSwipeError.value -> TransactionUpdate.CardSwipeError
         ChipDnaTransactionUpdate.SmartcardRemovePrompted.value -> TransactionUpdate.PromptRemoveCard
         ChipDnaTransactionUpdate.SmartcardRemoved.value -> TransactionUpdate.CardRemoved
+        ChipDnaTransactionUpdate.OnlineAuthorisation.value -> TransactionUpdate.Authorizing
         else -> null
     }
 }

@@ -22,7 +22,6 @@ import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.data.*
 import com.fattmerchant.omni.data.models.Transaction
-
 import com.fattmerchant.omni.data.MobileReaderDriver.*
 import com.fattmerchant.omni.data.models.Merchant
 import com.fattmerchant.omni.data.models.OmniException
@@ -150,7 +149,12 @@ internal class AWCDriver: MobileReaderDriver {
         return CardReaderController.getConnectedReader()?.toMobileReader()
     }
 
-    override suspend fun disconnectReader(reader: MobileReader): Boolean {
+    override suspend fun getConnectedReader(): MobileReader? {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun disconnect(reader: MobileReader, error: (OmniException) -> Unit): Boolean {
+        // TODO("Please implement the omniException bit")
         CardReaderController.getConnectedReader().disconnect()
         return true
     }

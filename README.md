@@ -35,7 +35,7 @@ allprojects {
 
 2. Add the following line to your `build.gradle` file
 
-`implementation 'com.github.fattmerchantorg:fattmerchant-android-sdk:v1.0.4'`
+`implementation 'com.github.fattmerchantorg:fattmerchant-android-sdk:v1.2.0'`
 
 ## <a name="getting-started">Getting Started</a>
 To accept a payment, you'll need to collect information from the customer, tokenize it, and send the token to your server. Your server will then be responsible for using the Fattmerchant API to run the transaction.

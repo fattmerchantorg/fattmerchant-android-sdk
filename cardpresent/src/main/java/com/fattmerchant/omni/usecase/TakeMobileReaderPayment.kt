@@ -52,7 +52,9 @@ internal class TakeMobileReaderPayment(
                 }
             }
 
-
+            result.request?.lineItems?.let {
+                transactionMeta["lineItems"] = it
+            }
 
             return transactionMeta
         }

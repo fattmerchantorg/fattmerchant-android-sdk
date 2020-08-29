@@ -3,6 +3,7 @@ package com.fattmerchant.android.chipdna
 import android.content.Context
 import com.creditcall.chipdnamobile.*
 import com.fattmerchant.omni.MobileReaderConnectionStatusListener
+import com.fattmerchant.omni.OmniGeneralException
 import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.data.*
@@ -12,6 +13,7 @@ import com.fattmerchant.omni.data.MobileReaderDriver.*
 import com.fattmerchant.omni.data.models.MobileReaderConnectionStatus
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.usecase.CancelCurrentTransactionException
+import com.fattmerchant.omni.data.models.MobileReaderDetails
 import kotlinx.coroutines.*
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
@@ -54,7 +56,11 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
         internal fun getConnectedReader(chipDnaMobileStatus: Parameters? = ChipDnaMobile.getInstance().getStatus(null)): MobileReader? {
             val deviceStatusXml = chipDnaMobileStatus[ParameterKeys.DeviceStatus] ?: return null
             val deviceStatus = ChipDnaMobileSerializer.deserializeDeviceStatus(deviceStatusXml)
-            return mapDeviceStatusToMobileReader(deviceStatus)
+
+            return when (deviceStatus.status) {
+                DeviceStatus.DeviceStatusEnum.DeviceStatusConnected -> mapDeviceStatusToMobileReader(deviceStatus)
+                else -> null
+            }
         }
     }
 
@@ -63,6 +69,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
     /** A key used to communicate with TransactionGateway */
     private var securityKey: String = ""
 
+    override var familiarSerialNumbers: MutableList<String> = mutableListOf()
     override val source: String = "NMI"
     override var mobileReaderConnectionStatusListener: MobileReaderConnectionStatusListener? = null
 
@@ -70,6 +77,17 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
     fun log(msg: String?) {
         log.info("[${Thread.currentThread().name}] $msg")
     }
+
+    /**
+     * This is the data that we will need in order to initialize ChipDna again if something
+     * happens at runtime.
+     *
+     * For example, if the user wants to disconnect a reader, we have to use
+     * the ChipDnaMobile.dispose() method. This method uninitializes the SDK and we have to
+     * initialize again if we want to reconnect a reader. When we want to reconnect, we use these
+     * args
+     * */
+    private var initArgs: Map<String, Any> = mapOf()
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Default
@@ -82,11 +100,10 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
         val appId = args["appId"] as? String
             ?: throw InitializeMobileReaderDriverException("appId not found")
 
-        val merchant = args["merchant"] as? Merchant
-            ?: throw InitializeMobileReaderDriverException("merchant not found")
+        val nmiDetails = args["nmi"] as? MobileReaderDetails.NMIDetails
+            ?: throw InitializeMobileReaderDriverException("nmi details not found")
 
-        val apiKey = merchant.emvPassword()
-            ?: throw InitializeMobileReaderDriverException("emvTerminalSecret not found")
+        val apiKey = nmiDetails.securityKey
 
         if (apiKey.isBlank()) {
             throw InitializeMobileReaderDriverException("emvTerminalSecret not found")
@@ -104,8 +121,9 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
         ChipDnaMobile.getInstance().addConfigurationUpdateListener(this)
         ChipDnaMobile.getInstance().addDeviceUpdateListener(this)
 
-        // Store security key for later use
+        // Store security key and init args for later use
         securityKey = apiKey
+        initArgs = args
 
         // Set credentials
         val result = setCredentials(appId, apiKey)
@@ -164,7 +182,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
                 if (params[ParameterKeys.Result] == ParameterValues.TRUE) {
                     // Reader is connected. Add the serial number to the list of familiar ones
                     // And return the hydrated mobile reader
-                    getConnectedReader()?.let { connectedReader ->
+                    getConnectedReader(null)?.let { connectedReader ->
                         connectedReader.serialNumber()?.let { familiarSerialNumbers.add(it) }
                         cont.resume(connectedReader)
                     }
@@ -180,12 +198,20 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
         }
     }
 
-    override suspend fun disconnectReader(reader: MobileReader): Boolean {
+    override suspend fun disconnect(reader: MobileReader, error: (OmniException) -> Unit): Boolean {
         ChipDnaMobile.dispose(null)
+        initialize(initArgs)
         return true
     }
 
-    override var familiarSerialNumbers: MutableList<String> = mutableListOf()
+    override suspend fun getConnectedReader(): MobileReader? {
+        // ChipDna must be initialized
+        if (!ChipDnaMobile.isInitialized()) {
+            throw OmniGeneralException.uninitialized
+        } else {
+            return Companion.getConnectedReader()
+        }
+    }
 
     override suspend fun isReadyToTakePayment(): Boolean {
         // ChipDna must be initialized
@@ -346,7 +372,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
                 this.request = request
                 success = true
                 transactionType = "refund"
-                amount = refundAmount
+                amount = Amount(cents = amountCents)
             }
         } else {
             throw RefundTransactionException(result[ParameterKeys.ErrorDescription] ?: "Could not refund transaction")
@@ -371,7 +397,6 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
         }
         return false
     }
-
 
     private fun setCredentials(appId: String, apiKey: String): Parameters {
         val params = Parameters().apply {
