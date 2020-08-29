@@ -4,6 +4,7 @@ import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.TransactionRequest
 import com.fattmerchant.omni.data.models.Invoice
+import com.fattmerchant.omni.data.models.MobileReaderDetails
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.data.repository.*
@@ -63,11 +64,26 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
     internal fun initialize(args: Map<String, Any>, completion: () -> Unit, error: (OmniException) -> Unit) {
         coroutineScope.launch {
 
+            val merchant = omniApi.getSelf {
+                error(OmniException("Could not get reader settings", it.message))
+            }?.merchant ?: return@launch
+
+            val mutatedArgs = args.toMutableMap()
+
+            // AWC
+            val awcDetails = MobileReaderDetails.AWCDetails()
+            merchant.emvTerminalId()?.let { awcDetails.terminalId = it }
+            merchant.emvTerminalSecret()?.let { awcDetails.terminalSecret = it }
+            mutatedArgs["awc"] = awcDetails
+
+            // NMI
+            val nmiDetails = MobileReaderDetails.NMIDetails()
+            merchant.emvPassword()?.let { nmiDetails.securityKey = it }
+            mutatedArgs["nmi"] = nmiDetails
+
             val mobileReaderDetails = omniApi.getMobileReaderSettings {
                 error(OmniException("Could not get reader settings", it.message))
             } ?: return@launch
-
-            val mutatedArgs = args.toMutableMap()
 
             mobileReaderDetails.nmi?.let {
                 mutatedArgs["nmi"] = it
@@ -147,26 +163,6 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
 
             } catch (e: OmniException) {
                 onFail(e.detail ?: e.message ?: "Could not connect mobile reader")
-            }
-        }
-    }
-
-    fun disconnectReader(mobileReader: MobileReader, onDisconnected: (Boolean) -> Unit, onFail: (String) -> Unit) {
-        coroutineScope.launch {
-            try {
-                val disconnected = DisconnectMobileReader(
-                        coroutineContext,
-                        mobileReaderDriverRepository,
-                        mobileReader
-                ).start()
-
-                if (disconnected) {
-                    onDisconnected(true)
-                } else {
-                    onFail("Could not disconnect mobile reader")
-                }
-            } catch (e: OmniException) {
-                onFail(e.detail ?: e.message ?: "Could not disconnect mobile reader")
             }
         }
     }

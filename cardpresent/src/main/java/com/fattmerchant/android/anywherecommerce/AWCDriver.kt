@@ -24,6 +24,7 @@ import com.fattmerchant.omni.data.*
 import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.data.MobileReaderDriver.*
 import com.fattmerchant.omni.data.models.Merchant
+import com.fattmerchant.omni.data.models.MobileReaderDetails
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.usecase.CancelCurrentTransactionException
 import com.fattmerchant.omni.usecase.TakeMobileReaderPayment
@@ -73,14 +74,8 @@ internal class AWCDriver: MobileReaderDriver {
         val application = args["application"] as? Application
                 ?: throw InitializeMobileReaderDriverException("appContext not found")
 
-        val merchant = args["merchant"] as? Merchant
+        val awcArgs = args["awc"] as? MobileReaderDetails.AWCDetails
                 ?: throw InitializeMobileReaderDriverException("merchant not found")
-
-        val emvTerminalId = merchant.emvTerminalId()
-                ?: throw InitializeMobileReaderDriverException("emvTerminalId not found")
-
-        val emvTerminalSecret = merchant.emvTerminalSecret()
-                ?: throw InitializeMobileReaderDriverException("emvTerminalSecret not found")
 
         // Initialize the Terminal. This will allow us to interact with AnyPay later on
         SDKManager.initialize(application)
@@ -90,8 +85,8 @@ internal class AWCDriver: MobileReaderDriver {
         val endpoint = Terminal.instance.endpoint as? WorldnetEndpoint
                 ?: throw InitializeMobileReaderDriverException("Could not create worldnet endpoint")
 
-        endpoint.worldnetTerminalID = emvTerminalId
-        endpoint.worldnetSecret = emvTerminalSecret
+        endpoint.worldnetTerminalID = awcArgs.terminalId
+        endpoint.worldnetSecret = awcArgs.terminalSecret
         endpoint.gatewayUrl = gatewayUrl
 
 

@@ -79,15 +79,6 @@ internal interface MobileReaderDriver {
     suspend fun connectReader(reader: MobileReader): MobileReader?
 
     /**
-     * Attempts to disconnect the given [reader]
-     *
-     * @param reader
-     */
-    @Deprecated("Please use the disconnect(reader:, error:) that has error handling",
-            ReplaceWith("disconnect(reader, error)"))
-    suspend fun disconnectReader(reader: MobileReader): Boolean = false
-
-    /**
      * Disconnects the given mobile reader
      *
      * @param reader the reader to disconnect
