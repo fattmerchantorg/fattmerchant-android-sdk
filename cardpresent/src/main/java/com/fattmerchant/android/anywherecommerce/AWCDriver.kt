@@ -144,9 +144,8 @@ internal class AWCDriver: MobileReaderDriver {
         return CardReaderController.getConnectedReader()?.toMobileReader()
     }
 
-    override suspend fun getConnectedReader(): MobileReader? {
-        TODO("Not yet implemented")
-    }
+    override suspend fun getConnectedReader(): MobileReader?
+            = CardReaderController.getConnectedReader()?.toMobileReader()
 
     override suspend fun disconnect(reader: MobileReader, error: (OmniException) -> Unit): Boolean {
         // TODO("Please implement the omniException bit")
