@@ -8,6 +8,7 @@ package com.fattmerchant.omni.data
 data class Amount(
     val cents: Int
 ) {
+    companion object { }
 
     /**
      * Creates an instance of [Amount] representing the given dollar value

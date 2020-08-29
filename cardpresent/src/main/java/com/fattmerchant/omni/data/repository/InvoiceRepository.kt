@@ -29,4 +29,10 @@ internal interface InvoiceRepository : ModelRepository<Invoice> {
         }
     }
 
+    override suspend fun getById(id: String, error: (OmniException) -> Unit): Invoice? {
+        return omniApi.getInvoice(id) {
+            error(GetInvoiceException(it.message))
+        }
+    }
+
 }

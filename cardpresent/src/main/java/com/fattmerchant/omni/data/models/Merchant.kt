@@ -9,11 +9,25 @@ class Merchant : Model {
     var options: Map<String, Any>? = null
 
     /**
-     * Use as the apiKey for mobile reader
+     * Gets the 'emvTerminalPassword' option from the Merchant
      *
-     * @return
+     * The 'emvTerminalId' is used for authenticating with a third-party provider of mobile reader
      */
     fun emvPassword(): String? = getOption("emv_password")
+
+    /**
+     * Gets the 'emvTerminalSecret' option from the Merchant
+     *
+     * The 'emvTerminalSecret' is used for authenticating with a third-party provider of mobile reader
+     */
+    fun emvTerminalSecret(): String? = getOption("emv_terminal_secret")
+
+    /**
+     * Gets the 'emvTerminalSecret' option from the Merchant
+     *
+     * The 'emvTerminalId' is used for authenticating with a third-party provider of mobile reader
+     */
+    fun emvTerminalId(): String? = getOption("emv_terminal_id")
 
     /**
      * Attempts to get a value from [options] at the given [key]

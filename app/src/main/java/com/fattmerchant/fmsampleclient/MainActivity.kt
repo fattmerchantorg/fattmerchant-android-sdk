@@ -2,9 +2,9 @@ package com.fattmerchant.fmsampleclient
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.EditText
+import androidx.appcompat.app.AppCompatActivity
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
 import com.fattmerchant.omni.SignatureProviding
@@ -24,6 +24,9 @@ import java.util.logging.Logger
 class MainActivity : AppCompatActivity() {
 
     val log = Logger.getLogger("MainActivity")
+
+    var connectedReader: MobileReader? = null
+
     fun log(msg: String?) {
         log.info("[${Thread.currentThread().name}] $msg")
     }
@@ -100,25 +103,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupVoidButton() {
-        buttonVoidPreviousTransaction.setOnClickListener {
-            updateStatus("Fetching list of transactions")
-            Omni.shared()?.getTransactions({ transactions ->
-
-                // Figure out which transactions are refundable
-                val voidableTransactions = transactions.filter {
-                    it.source?.contains("CPSDK") == true && it.isVoided == false
+        buttonCancelTransaction.setOnClickListener {
+            Omni.shared()?.cancelMobileReaderTransaction({
+                if (it) {
+                    updateStatus("Transaction cancelled")
+                } else {
+                    updateStatus("Transaction not cancelled")
                 }
 
-                chooseTransaction(voidableTransactions) { transactionToRefund ->
-                    updateStatus("Trying to void ${transactionToRefund.pretty()}")
-                    Omni.shared()?.voidMobileReaderTransaction(transactionToRefund, {
-                        updateStatus("Voided ${transactionToRefund.pretty()}")
-                    }, {
-                        updateStatus("Error Voiding: ${it.message} ${it.detail}")
-                    })
-                }
             }, {
-                updateStatus(it.message ?: "Could not get transactions")
+                updateStatus(it)
             })
         }
     }
@@ -175,7 +169,7 @@ class MainActivity : AppCompatActivity() {
                 dialog.dismiss()
                 // If you want to not use the apikey dialog, modify the initializeOmni call like below
                 // initializeOmni("insert api key here")
-                initializeOmni("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6ImViNDhlZjk5LWFhNzgtNDk2ZS05YjAxLTQyMWY4ZGFmNzMyMyIsImdvZFVzZXIiOnRydWUsImJyYW5kIjoiZmF0dG1lcmNoYW50Iiwic3ViIjoiMzBjNmVlYjYtNjRiNi00N2Y2LWJjZjYtNzg3YTljNTg3OThiIiwiaXNzIjoiaHR0cDovL2FwaWRldi5mYXR0bGFicy5jb20vYXV0aGVudGljYXRlIiwiaWF0IjoxNTkxOTAxMjEwLCJleHAiOjE1OTE5ODc2MTAsIm5iZiI6MTU5MTkwMTIxMCwianRpIjoiMGdjUTBtUno2dUR2OHBaOCJ9.5lnby6KfWgnRhBdzu51PaFbnKqoCSiA6JBiSzyo6y5s")
+                initializeOmni("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6ImU3MTJhZThlLTIwOWUtNGNkYi05MDMwLTc1NWU2OWFmMTI0NiIsImdvZFVzZXIiOnRydWUsImJyYW5kIjoiZmF0dG1lcmNoYW50Iiwic3ViIjoiMzBjNmVlYjYtNjRiNi00N2Y2LWJjZjYtNzg3YTljNTg3OThiIiwiaXNzIjoiaHR0cDovL2FwaWRldjAxLmZhdHRsYWJzLmNvbS9hdXRoZW50aWNhdGUiLCJpYXQiOjE1OTg3MTI1MDksImV4cCI6MTU5ODc5ODkwOSwibmJmIjoxNTk4NzEyNTA5LCJqdGkiOiJIYzVpRWwxOXdYbVR2UE5zIn0.BjjAvWCrmVfe4Njs_GVXi73JZLWHXgmqoAx1oDYqCdg")
             }.show()
     }
 
@@ -184,6 +178,7 @@ class MainActivity : AppCompatActivity() {
         setupPerformSaleButton()
         setupRefundButton()
         setupConnectReaderButton()
+        setupDisconnectReaderButton()
         setupVoidButton()
         setupReaderDetailsButton()
         setupDisconnectReaderButton()
@@ -227,6 +222,8 @@ class MainActivity : AppCompatActivity() {
                         updateStatus("Trying to connect to [${selected.getName()}]")
 
                         Omni.shared()?.connectReader(selected, { reader ->
+                            this.connectedReader = reader
+                            buttonDisconnectReader.isEnabled = true
                             updateStatus("Connected to [${reader.getName()}]")
 
                             runOnUiThread {
@@ -267,7 +264,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initializeOmni(apiKey: String) {
         Omni.initialize(
-            InitParams(applicationContext, apiKey, OmniApi.Environment.DEV), {
+            InitParams(applicationContext, application, apiKey, OmniApi.Environment.DEV), {
                 runOnUiThread {
                     updateStatus("Initialized")
                     buttonRefundPreviousTransaction.isEnabled = true

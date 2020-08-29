@@ -14,6 +14,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.content.TextContent
 import io.ktor.http.isSuccess
+import org.json.JSONObject
 
 class OmniApi {
 
@@ -63,6 +64,14 @@ class OmniApi {
     internal suspend fun getMerchant(error: (Error) -> Unit): Merchant? = getSelf(error)?.merchant
 
     /**
+     * Gets the invoice which the [id] corresponds to
+     *
+     * @param error
+     * @return the found invoice
+     */
+    internal suspend fun getInvoice(id: String, error: (Error) -> Unit): Invoice? = get("invoice/${id}", error)
+
+    /**
      * Creates a new invoice in Omni
      *
      * @param invoice
@@ -97,6 +106,22 @@ class OmniApi {
      */
     internal suspend fun createTransaction(transaction: Transaction, error: (Error) -> Unit): Transaction? =
         post("transaction", JsonParser.toJson(transaction), error)
+
+    /**
+     * Posts a void-or-refund to Omni
+     *
+     * @param transactionId the id of the transaction to void or refund
+     * @param total the amount in dollars to void or refund
+     * @return the voided or refunded transaction
+     */
+    internal suspend fun postVoidOrRefund(transactionId: String, total: String? = null, error: (Error) -> Unit): Transaction? {
+        val body = mutableMapOf<String, Any>()
+        total?.let {
+            body["total"] = it
+        }
+        return post("transaction/${transactionId}/void-or-refund", JSONObject(body).toString(), error)
+    }
+
 
     /**
      * Gets a list of transactions from Omni

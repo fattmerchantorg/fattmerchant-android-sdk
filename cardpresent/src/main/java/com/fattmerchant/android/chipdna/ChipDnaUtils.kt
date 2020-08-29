@@ -1,5 +1,6 @@
 package com.fattmerchant.android.chipdna
 
+import android.bluetooth.BluetoothClass
 import com.creditcall.chipdnamobile.DeviceStatus
 import com.creditcall.chipdnamobile.ParameterKeys
 import com.creditcall.chipdnamobile.ParameterValues
@@ -9,6 +10,7 @@ import com.fattmerchant.android.chipdna.ChipDnaDriver
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.TransactionRequest
 import com.fattmerchant.omni.data.TransactionUpdate
+import com.fattmerchant.omni.data.models.MobileReaderConnectionStatus
 import com.fattmerchant.omni.data.models.Transaction
 import java.text.SimpleDateFormat
 import java.util.*
@@ -124,4 +126,34 @@ internal fun Parameters.withTransactionRequest(request: TransactionRequest) = Pa
     if (request.tokenize) {
         add(ParameterKeys.CustomerVaultCommand, ParameterValuesAddCustomer)
     }
+}
+
+/**
+ * Initializes a `MobileReaderConnectionStatus` object from the given ChipDnaConfigurationUpdate
+ *
+ * ChipDna hands us a ton of configuration updates during the mobile reader connection process
+ * The ones we care about are:
+ *  - Connecting
+ *  - Permorming Tms Update
+ *  - Updating Pinpad Firmware
+ *  - Rebooting
+ *  - Registering
+ *
+ * @param chipDnaConfigurationUpdate
+ */
+fun MobileReaderConnectionStatus.Companion.from(chipDnaConfigurationUpdate: String): MobileReaderConnectionStatus? = when(chipDnaConfigurationUpdate) {
+    ParameterValues.Connecting -> MobileReaderConnectionStatus.CONNECTING
+
+    ParameterValues.UpdatingPinPadFirmware,
+    ParameterValues.PerformingTmsUpdate,
+    ParameterValues.Registering -> MobileReaderConnectionStatus.UPDATING
+
+    ParameterValues.RebootingPinPad -> MobileReaderConnectionStatus.REBOOTING
+
+    else -> null
+}
+
+fun MobileReaderConnectionStatus.Companion.from(chipDnaDeviceStatus: DeviceStatus.DeviceStatusEnum) = when(chipDnaDeviceStatus) {
+    DeviceStatus.DeviceStatusEnum.DeviceStatusDisconnected -> MobileReaderConnectionStatus.DISCONNECTED
+    else -> null
 }

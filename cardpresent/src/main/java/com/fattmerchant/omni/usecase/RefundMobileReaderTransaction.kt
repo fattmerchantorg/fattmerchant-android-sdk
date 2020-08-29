@@ -1,10 +1,12 @@
 package com.fattmerchant.omni.usecase
 
 import com.fattmerchant.omni.data.Amount
+import com.fattmerchant.omni.data.TransactionResult
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.data.repository.MobileReaderDriverRepository
 import com.fattmerchant.omni.data.repository.TransactionRepository
+import com.fattmerchant.omni.networking.OmniApi
 import kotlinx.coroutines.coroutineScope
 
 /**
@@ -15,44 +17,58 @@ import kotlinx.coroutines.coroutineScope
  * @property transaction
  */
 internal class RefundMobileReaderTransaction(
-    private val mobileReaderDriverRepository: MobileReaderDriverRepository,
-    private val transactionRepository: TransactionRepository,
-    internal val transaction: Transaction,
-    internal val refundAmount: Amount?
+        private val mobileReaderDriverRepository: MobileReaderDriverRepository,
+        private val transactionRepository: TransactionRepository,
+        internal val transaction: Transaction,
+        private var refundAmount: Amount?,
+        private val omniApi: OmniApi
 ) {
 
     class RefundException(message: String? = null) : OmniException("Could not refund transaction", message)
 
     suspend fun start(onError: (OmniException) -> Unit): Transaction? = coroutineScope {
         try {
-
             // Validate the refund
             validateRefund(transaction, refundAmount)?.let { throw it }
 
-            // Do the 3rd-party refund
-            val result = mobileReaderDriverRepository
-                .getDriverFor(transaction)
-                ?.refundTransaction(transaction, refundAmount)
-
-            if (result == null || result.success == false) {
-                throw RefundException()
+            // If no refundAmount given, assume that we want to refund the entire transaction amount
+            if (refundAmount == null) {
+                transaction.total?.let {
+                    it.toDoubleOrNull()?.let { amountDouble ->
+                        refundAmount = Amount(dollars = amountDouble)
+                    }
+                }
             }
 
-            val refunded = Transaction().apply {
-                paymentMethodId = transaction.paymentMethodId
-                total = result.amount?.dollarsString()
-                success = result.success
-                lastFour = transaction.lastFour
-                type = "refund"
-                source = transaction.source
-                referenceId = transaction.id
-                method = transaction.method
-                customerId = transaction.customerId
-                invoiceId = transaction.invoiceId
-            }
+            // Get the driver
+            mobileReaderDriverRepository.getDriverFor(transaction).let { driver ->
+                // Check if Omni refund is supported by driver
+                if(driver?.isOmniRefundsSupported()!!) {
+                    transaction.id?.let { transactionId ->
+                        val response = omniApi.postVoidOrRefund(transactionId, refundAmount?.dollarsString()) {
+                            throw RefundException()
+                        }
 
-            transactionRepository.create(refunded) {
-                throw RefundException(it.message)
+                        if (response == null || response.success == false) {
+                            throw RefundException()
+                        }
+
+                        return@coroutineScope response
+                    }
+                } else {
+                    // Do the 3rd-party refund
+                    val result = mobileReaderDriverRepository
+                            .getDriverFor(transaction)
+                            ?.refundTransaction(transaction, refundAmount)
+
+                    if (result == null || result.success == false) {
+                        throw RefundException()
+                    }
+
+                    postRefundedTransaction(result) {
+                        throw RefundException(it.message)
+                    }
+                }
             }
 
         } catch (e: RefundException) {
@@ -62,6 +78,23 @@ internal class RefundMobileReaderTransaction(
             onError(RefundException(e.message))
             return@coroutineScope null
         }
+    }
+
+    private suspend fun postRefundedTransaction(result: TransactionResult, error: (OmniException) -> Unit): Transaction? {
+        val refundedTransaction = Transaction().apply {
+            total = result.amount?.dollarsString()
+            paymentMethodId = transaction.paymentMethodId
+            success = result.success
+            lastFour = transaction.lastFour
+            type = "refund"
+            source = transaction.source
+            referenceId = transaction.id
+            method = transaction.method
+            customerId = transaction.customerId
+            invoiceId = transaction.invoiceId
+        }
+
+        return transactionRepository.create(refundedTransaction, error)
     }
 
     companion object {

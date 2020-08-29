@@ -34,7 +34,7 @@ internal class GetConnectedMobileReader(
      */
     suspend fun start(onError: (OmniException) -> Unit): MobileReader? {
         try {
-            val driver = mobileReaderDriverRepository.getDrivers().firstOrNull()
+            val driver = mobileReaderDriverRepository.getInitializedDrivers().firstOrNull()
 
             if (driver == null) {
                 onError(GetConnectedMobileReaderException.noReaderAvailable)

@@ -14,26 +14,9 @@ import com.fattmerchant.omni.data.repository.*
 import kotlinx.coroutines.*
 
 
-class InitializeDriversTest {
+private class InitializeDriversTest {
 
     private val mainThreadSurrogate = newSingleThreadContext("UI thread")
     private val scope = GlobalScope
-
-    //TODO: Build out mock mobile reader support for testing - Hassan
-//    val mockMobileReaderDriverRepository = object: MobileReaderDriverRepository {
-//
-//        override suspend fun getDriverFor(transaction: Transaction): MobileReaderDriver? {
-//            return null
-//        }
-//
-//        override suspend fun getDriverFor(mobileReader: MobileReader): MobileReaderDriver? {
-//            return null
-//        }
-//
-//        override suspend fun getDrivers(): List<MobileReaderDriver> {
-//            return listOf()
-//        }
-//    }
-
 
 }

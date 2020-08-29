@@ -1,5 +1,7 @@
 package com.fattmerchant.omni.usecase
 
+import com.fattmerchant.android.anywherecommerce.AWCDriver
+import com.fattmerchant.android.chipdna.ChipDnaDriver
 import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.data.*
@@ -28,16 +30,30 @@ internal class TakeMobileReaderPayment(
         internal fun transactionMetaFrom(result: TransactionResult): Map<String, Any> {
             val transactionMeta = mutableMapOf<String, Any>()
 
-            result.userReference?.let {
-                transactionMeta["nmiUserRef"] = it
+            when {
+                result.source.contains(ChipDnaDriver().source) -> {
+                    result.userReference?.let {
+                        transactionMeta["nmiUserRef"] = it
+                    }
+
+                    result.localId?.let {
+                        transactionMeta["cardEaseReference"] = it
+                    }
+
+                    result.externalId?.let {
+                        transactionMeta["nmiTransactionId"] = it
+                    }
+                }
+
+                result.source.contains(AWCDriver().source) -> {
+                    result.externalId?.let {
+                        transactionMeta["awcTransactionId"] = it
+                    }
+                }
             }
 
-            result.localId?.let {
-                transactionMeta["cardEaseReference"] = it
-            }
-
-            result.externalId?.let {
-                transactionMeta["nmiTransactionId"] = it
+            result.request?.lineItems?.let {
+                transactionMeta["lineItems"] = it
             }
 
             result.request?.lineItems?.let {
@@ -57,16 +73,26 @@ internal class TakeMobileReaderPayment(
             return@coroutineScope null
         }
 
-        // Create invoice
-        val invoice: Invoice = invoiceRepository.create(
-            Invoice().apply {
-                total = request.amount.dollarsString()
-                url = "https://qa.fattpay.com/#/bill/"
-                meta = mapOf("subtotal" to request.amount.dollarsString())
-            }
-        ) {
-            onError(it)
-        } ?: return@coroutineScope null
+        var invoice = Invoice()
+
+        // Check if we are passing an invoice id
+        request.invoiceId?.let {
+            // Check if the invoice exists
+            invoice = invoiceRepository.getById(it) {
+                onError(TakeMobileReaderPaymentException("Invoice with given id not found"))
+            } ?: return@coroutineScope null
+        } ?: run {
+            // If not create the invoice
+            invoice = invoiceRepository.create(
+                    Invoice().apply {
+                        total = request.amount.dollarsString()
+                        url = "https://fattpay.com/#/bill/"
+                        meta = mapOf("subtotal" to request.amount.dollarsString())
+                    }
+            ) {
+                onError(it)
+            } ?: return@coroutineScope null
+        }
 
         // Take the mobile reader payment
         val result: TransactionResult
@@ -150,7 +176,7 @@ internal class TakeMobileReaderPayment(
                 meta = transactionMeta
                 type = "charge"
                 method = "card"
-                source = "Android|CPSDK|NMI"
+                source = "Android|CPSDK|${result.source}"
                 customerId = customer.id
                 invoiceId = invoice.id
                 response = gatewayResponse
@@ -168,7 +194,7 @@ internal class TakeMobileReaderPayment(
      * @return a [MobileReaderDriver], if found
      */
     private suspend fun getAvailableMobileReaderDriver(repo: MobileReaderDriverRepository): MobileReaderDriver? = repo
-        .getDrivers()
+        .getInitializedDrivers()
         .firstOrNull { it.isReadyToTakePayment() }
 
 }

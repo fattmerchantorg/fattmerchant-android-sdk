@@ -15,7 +15,7 @@ internal class SearchForReaders(
 ) : CoroutineScope {
 
     suspend fun start(): List<MobileReader> = mobileReaderDriverRepository
-        .getDrivers()
+        .getInitializedDrivers()
         .flatMap { it.searchForReaders(args) }
 
 }
