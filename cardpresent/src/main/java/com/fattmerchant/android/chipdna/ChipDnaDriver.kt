@@ -17,6 +17,7 @@ import java.util.*
 import java.util.logging.Logger
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
 
@@ -162,7 +163,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
                 }
 
                 val error = params[ParameterKeys.ErrorDescription]
-                throw ConnectReaderException(error)
+                cont.resumeWithException(ConnectReaderException(error))
             }
 
             ChipDnaMobile.getInstance().addConnectAndConfigureFinishedListener(connectAndConfigureListener)
