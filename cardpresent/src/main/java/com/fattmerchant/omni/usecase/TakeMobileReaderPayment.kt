@@ -52,13 +52,12 @@ internal class TakeMobileReaderPayment(
                 }
             }
 
-            result.request?.lineItems?.let {
-                transactionMeta["lineItems"] = it
-            }
-
-            result.request?.lineItems?.let {
-                transactionMeta["lineItems"] = it
-            }
+            result.request?.lineItems?.let { transactionMeta["lineItems"] = it }
+            result.request?.subtotal?.let { transactionMeta["subtotal"] = it }
+            result.request?.tax?.let { transactionMeta["tax"] = it }
+            result.request?.tip?.let { transactionMeta["tip"] = it }
+            result.request?.memo?.let { transactionMeta["memo"] = it }
+            result.request?.reference?.let { transactionMeta["reference"] = it }
 
             return transactionMeta
         }

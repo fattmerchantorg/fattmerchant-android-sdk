@@ -28,7 +28,22 @@ data class TransactionRequest(
      * amountInStock of the CatalogItem in Omni will be decremented by to reflect a final
      * amountInStock of 91.
      * */
-    var lineItems: List<CatalogItem>? = listOf()
+    var lineItems: List<CatalogItem>? = listOf(),
+
+    /** The subtotal of the transaction */
+    var subtotal: Double? = null,
+
+    /** The tax applied to the transaction */
+    var tax: Double? = null,
+
+    /** The tip amount applied to the transaction */
+    var tip: Double? = null,
+
+    /** A memo for the transaction */
+    var memo: String? = null,
+
+    /** A reference for the transaction */
+    var reference: String? = null
 ) {
 
     /**

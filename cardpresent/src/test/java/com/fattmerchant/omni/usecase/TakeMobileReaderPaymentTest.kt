@@ -13,10 +13,12 @@ class TakeMobileReaderPaymentTest {
 
     @Test
     fun `properly adds nmi fields to meta from TransactionResult`() {
+
         val transactionResult = TransactionResult().apply {
             localId = "localId"
             externalId = "externalId"
             userReference = "userRef"
+            source = "NMI"
         }
 
         val meta = TakeMobileReaderPayment.transactionMetaFrom(transactionResult)
@@ -61,5 +63,30 @@ class TakeMobileReaderPaymentTest {
         val meta = TakeMobileReaderPayment.transactionMetaFrom(transactionResult)
 
         assert(meta["lineItems"] == expectedMeta["lineItems"])
+    }
+
+    @Test
+    fun `properly adds memo, reference, tip, tax, subtotal to meta from TransactionResult`() {
+        var transactionResult = TransactionResult().apply {
+            localId = "localId"
+            externalId = "externalId"
+            userReference = "userRef"
+            source = "NMI"
+            request = TransactionRequest(Amount(50.0)).apply {
+                subtotal = 40.0
+                tax = 6.0
+                tip = 4.0
+                memo = "This is a memo"
+                reference = "this is a reference"
+            }
+        }
+
+        val meta = TakeMobileReaderPayment.transactionMetaFrom(transactionResult)
+
+        assert(meta["subtotal"] == 40.0)
+        assert(meta["tax"] == 6.0)
+        assert(meta["tip"] == 4.0)
+        assert(meta["reference"] == "this is a reference")
+        assert(meta["memo"] == "This is a memo")
     }
 }
