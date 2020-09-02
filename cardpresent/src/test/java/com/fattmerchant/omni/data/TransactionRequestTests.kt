@@ -18,4 +18,26 @@ class TransactionRequestTests {
         assert(true)
     }
 
+    @Test
+    fun `can initialize with or without metadata`() {
+        TransactionRequest(Amount(10), true)
+        TransactionRequest(Amount(10))
+        assert(true)
+
+        val request = TransactionRequest(
+                amount = Amount(10),
+                memo = "1",
+                subtotal = 2.0,
+                tip = 3.0,
+                tax = 4.0,
+                reference = "5"
+        )
+
+        assert(request.memo == "1")
+        assert(request.subtotal == 2.0)
+        assert(request.tip == 3.0)
+        assert(request.tax == 4.0)
+        assert(request.reference == "5")
+    }
+
 }
