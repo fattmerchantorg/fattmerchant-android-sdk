@@ -9,13 +9,13 @@ import com.fattmerchant.omni.data.models.CatalogItem
  */
 data class TransactionRequest(
     /** The [Amount] to be collected during the transaction */
-    val amount: Amount,
+    var amount: Amount,
 
     /** The option to tokenize the payment method for later usage */
-    val tokenize: Boolean = true,
+    var tokenize: Boolean = true,
 
     /** The id of the invoice we want to apply the transaction to */
-    val invoiceId: String? = null,
+    var invoiceId: String? = null,
 
     /** A list of [CatalogItem]s to associate with the [Transaction]
      *
@@ -28,7 +28,22 @@ data class TransactionRequest(
      * amountInStock of the CatalogItem in Omni will be decremented by to reflect a final
      * amountInStock of 91.
      * */
-    val lineItems: List<CatalogItem>? = listOf()
+    var lineItems: List<CatalogItem>? = listOf(),
+
+    /** The subtotal of the transaction */
+    var subtotal: Double? = null,
+
+    /** The tax applied to the transaction */
+    var tax: Double? = null,
+
+    /** The tip amount applied to the transaction */
+    var tip: Double? = null,
+
+    /** A memo for the transaction */
+    var memo: String? = null,
+
+    /** A reference for the transaction */
+    var reference: String? = null
 ) {
 
     /**
