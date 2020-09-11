@@ -53,14 +53,7 @@ internal fun mapDeviceStatusToMobileReader(deviceStatus: DeviceStatus): MobileRe
  */
 fun mapTransactionUpdate(transactionUpdate: String): TransactionUpdate? {
     return when (transactionUpdate) {
-        ChipDnaTransactionUpdate.CardEntryPrompted.value -> {
-            return if (ChipDnaDriver.getConnectedReader()?.getMake() == ChipDnaDriver.Companion.PinPadManufacturer.Miura.name) {
-                TransactionUpdate.PromptInsertSwipeCard
-            } else {
-                TransactionUpdate.PromptSwipeCard
-            }
-        }
-
+        ChipDnaTransactionUpdate.CardEntryPrompted.value -> TransactionUpdate.PromptInsertSwipeCard
         ChipDnaTransactionUpdate.CardSwiped.value -> TransactionUpdate.CardSwiped
         ChipDnaTransactionUpdate.SmartcardInserted.value -> TransactionUpdate.CardInserted
         ChipDnaTransactionUpdate.CardSwipeError.value -> TransactionUpdate.CardSwipeError
