@@ -25,6 +25,12 @@ android {
         }
     }
 
+    testOptions {
+        unitTests.all {
+            jvmArgs '-noverify'
+        }
+    }
+
     packagingOptions {
         exclude 'META-INF/*.kotlin_module'
     }
