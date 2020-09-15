@@ -30,4 +30,5 @@ open class Invoice: Model {
     open var url: String? = null
     open var userId: String? = null
     open var viewedAt: String? = null
+    open var channel: String = "android"
 }
