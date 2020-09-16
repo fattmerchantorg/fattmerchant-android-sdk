@@ -44,5 +44,5 @@ open class Transaction : Model {
     open var type: String? = null
     open var updatedAt: String? = null
     open var userId: String? = null
-    open var channel: String = "android"
+    open var channel: String? = "android"
 }
