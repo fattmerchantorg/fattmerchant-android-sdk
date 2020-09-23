@@ -17,11 +17,16 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         testOptions {
-            unitTests.all {
+            unitTests {
                 includeAndroidResources true
                 returnDefaultValues true
-                jvmArgs '-noverify'
             }
+        }
+    }
+
+    testOptions {
+        unitTests.all {
+            jvmArgs '-noverify'
         }
     }
 
