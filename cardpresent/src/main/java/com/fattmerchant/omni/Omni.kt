@@ -162,7 +162,7 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
                 }
 
             } catch (e: OmniException) {
-                onFail(e.detail ?: e.message ?: "Could not connect mobile reader")
+                onFail(e.detail ?: e.message)
             }
         }
     }
@@ -331,7 +331,7 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
     }
 
     /**
-     * Attempts to cancel a current mobile reader [transaction]
+     * Attempts to cancel a current mobile reader [Transaction]
      *
      * @param completion
      * @param error a block to run in case an error occurs

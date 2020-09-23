@@ -108,7 +108,7 @@ internal interface MobileReaderDriver {
     suspend fun performTransaction(request: TransactionRequest, signatureProvider: SignatureProviding?, transactionUpdateListener: TransactionUpdateListener?): TransactionResult
 
     /**
-     * Attempts to void the given [transaction]
+     * Attempts to void the given [Transaction]
      *
      * @param transaction
      * @return the result of the operation
@@ -117,7 +117,7 @@ internal interface MobileReaderDriver {
     suspend fun voidTransaction(transaction: Transaction): TransactionResult
 
     /**
-     * Attempts to refund the given [transaction]
+     * Attempts to refund the given [Transaction]
      *
      * @param transaction
      * @return the result of the operation
@@ -126,7 +126,7 @@ internal interface MobileReaderDriver {
     suspend fun refundTransaction(transaction: Transaction, refundAmount: Amount? = null): TransactionResult
 
     /**
-     * Attempts to cancel a current mobile reader [transaction]
+     * Attempts to cancel a current mobile reader [Transaction]
      *
      * @param error
      * @return the result of the operation

@@ -65,11 +65,11 @@ class FattmerchantClient(override var configuration: FattmerchantConfiguration) 
     private fun configure() {
         // Add headers
         val interceptor = Interceptor { chain ->
-            val requestBuilder = chain.request()?.newBuilder()
-                    ?.addHeader("Accept", "application/json")
-                    ?.addHeader("Content-Type", "application/json")
+            val requestBuilder = chain.request().newBuilder()
+                    .addHeader("Accept", "application/json")
+                    .addHeader("Content-Type", "application/json")
 
-            chain.proceed(requestBuilder!!.build())
+            chain.proceed(requestBuilder.build())
         }
 
         val client = OkHttpClient.Builder()
