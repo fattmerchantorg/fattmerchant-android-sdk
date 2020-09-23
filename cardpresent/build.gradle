@@ -1,16 +1,16 @@
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.github.dcendents.android-maven'
 
 group='com.github.fattmerchantorg'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 30
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 28
+        targetSdkVersion 30
         versionCode 7
         versionName "1.2.0"
 
@@ -62,8 +62,8 @@ dependencies {
 
     androidTestCompile 'net.zetetic:android-database-sqlcipher:3.5.1'
 
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.2'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.2.2'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.6'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.6'
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.1'
 
     // ChipDNA (NMI)
@@ -82,7 +82,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.8.0'
     implementation 'com.github.smart-fun:XmlToJson:1.4.4'
-    api 'org.slf4j:slf4j-api:1.7.25'
+    api 'org.slf4j:slf4j-api:1.7.30'
     api 'com.github.tony19:logback-android:2.0.0'
     api 'com.googlecode.libphonenumber:libphonenumber:8.5.0'
     implementation 'com.squareup.retrofit2:converter-scalars:2.3.0'
