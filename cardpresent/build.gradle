@@ -86,7 +86,7 @@ dependencies {
     implementation 'net.zetetic:android-database-sqlcipher:4.4.0@aar'
 
     // AnywhereCommerce
-    implementation project(':com.anywherecommerce.android.sdk-release')
+    api project(':com.anywherecommerce.android.sdk-release')
 //    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.0'
