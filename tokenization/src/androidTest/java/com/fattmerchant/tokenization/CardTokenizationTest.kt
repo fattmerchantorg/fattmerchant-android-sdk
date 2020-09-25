@@ -1,6 +1,5 @@
 package com.fattmerchant.tokenization
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.fattmerchant.tokenization.models.BankAccount
 import com.fattmerchant.tokenization.models.CreditCard
 import com.fattmerchant.tokenization.models.PaymentMethod

@@ -2,9 +2,9 @@ package com.fattmerchant.fmsampleclient
 
 import android.content.Context
 import android.os.AsyncTask
-import android.util.Log
 import com.creditcall.chipdnamobile.*
 import org.xmlpull.v1.XmlPullParserException
+import timber.log.Timber
 import java.io.IOException
 import java.lang.ref.WeakReference
 import java.text.SimpleDateFormat
@@ -85,14 +85,14 @@ class ChipDnaHelper(
 
             override fun doInBackground(vararg params: SelectablePinPad?): Parameters {
                 val pinpad = params.first()!!
-                var requestParams = Parameters()
+                val requestParams = Parameters()
                 requestParams.add(ParameterKeys.PinPadName, pinpad.name)
                 requestParams.add(ParameterKeys.PinPadConnectionType, pinpad.connectionType)
                 return ChipDnaMobile.getInstance().setProperties(requestParams)
             }
 
             override fun onPostExecute(result: Parameters) {
-                Log.d("connectpintask", result.toString())
+                Timber.d("connectpintask %s", result.toString())
                 delegate?.get()?.processFinish(result)
             }
 
@@ -106,7 +106,7 @@ class ChipDnaHelper(
         params.add(ParameterKeys.AmountType, ParameterValues.AmountTypeActual)
         params.add(ParameterKeys.Currency, "USD")
 
-        val userRef = String.format("CDM-%s", SimpleDateFormat("yy-MM-dd-HH.mm.ss").format(Date()))
+        val userRef = String.format("CDM-%s", SimpleDateFormat("yy-MM-dd-HH.mm.ss", Locale.ROOT).format(Date()))
         params.add(ParameterKeys.UserReference, userRef)
         params.add(ParameterKeys.TransactionType, ParameterValues.Sale)
         params.add(ParameterKeys.PaymentMethod, ParameterValues.Card)
@@ -114,13 +114,13 @@ class ChipDnaHelper(
         doAuthorizeTransaction(params)
     }
 
-    fun doAuthorizeTransaction(params: Parameters) {
-        Log.d("doAuthorizeTran", params.toString())
+    private fun doAuthorizeTransaction(params: Parameters) {
+        Timber.d("doAuthorizeTran %s", params.toString())
 
         var p = Parameters()
 
         val response = ChipDnaMobile.getInstance().startTransaction(params)
-        if (response.containsKey(ParameterKeys.Result) && response.getValue(ParameterKeys.Result).equals(ParameterValues.FALSE)) {
+        if (response.containsKey(ParameterKeys.Result) && response.getValue(ParameterKeys.Result) == ParameterValues.FALSE) {
 
         }
     }
@@ -134,7 +134,7 @@ class ChipDnaHelper(
         ChipDnaMobile.getInstance().getAvailablePinPads(parameters)
     }
 
-    fun registerListeners() {
+    private fun registerListeners() {
         ChipDnaMobile.getInstance().addConnectAndConfigureFinishedListener(this)
 
         val transactionListener = TransactionListener()
@@ -185,7 +185,7 @@ class ChipDnaHelper(
 
         requestParameters.add(ParameterKeys.ApiKey, apiKey)
         requestParameters.add(ParameterKeys.Environment, environment)
-        requestParameters.add(ParameterKeys.ApplicationIdentifier, appId?.toUpperCase())
+        requestParameters.add(ParameterKeys.ApplicationIdentifier, appId?.toUpperCase(Locale.ROOT))
 
         // Once all changes have been made a call to .setProperties() is required in order for the changes to take effect.
         // Parameters are passed within this method and added to the ChipDna Mobile status object.
@@ -197,13 +197,13 @@ class ChipDnaHelper(
      */
 
     override fun onConnectAndConfigureFinished(params: Parameters?) {
-        System.out.println("Connected and configured")
+        println("Connected and configured")
     }
 
     fun connectForReal() {
-        var response = ChipDnaMobile.getInstance().connectAndConfigure(ChipDnaMobile.getInstance().getStatus(null))
+        val response = ChipDnaMobile.getInstance().connectAndConfigure(ChipDnaMobile.getInstance().getStatus(null))
         registerListeners()
-        Log.d("connectforreal", response.toString())
+        Timber.d("connectforreal %s", response.toString())
     }
 
     override fun onAvailablePinPads(parameters: Parameters?) {
@@ -227,7 +227,7 @@ class ChipDnaHelper(
 
     private inner class ProcessReceiptListener : IProcessReceiptFinishedListener {
         override fun onProcessReceiptFinishedListener(parameters: Parameters) {
-            Log.d("receipt", parameters.toString())
+            Timber.d("receipt %s", parameters.toString())
         }
     }
 
@@ -235,15 +235,15 @@ class ChipDnaHelper(
         IDeferredAuthorizationListener, ISignatureVerificationListener, IVoiceReferralListener,
         IPartialApprovalListener, IForceAcceptanceListener, IVerifyIdListener {
         override fun onTransactionUpdateListener(parameters: Parameters) {
-            Log.d("transaction", (parameters.getValue(ParameterKeys.TransactionUpdate)))
+            Timber.d("transaction %s", (parameters.getValue(ParameterKeys.TransactionUpdate)))
         }
 
         override fun onTransactionFinishedListener(parameters: Parameters) {
-            Log.d("transactionFinished", parameters.toString())
+            Timber.d("transactionFinished %s", parameters.toString())
         }
 
         override fun onSignatureVerification(parameters: Parameters) {
-            Log.d("transaction","Signature Check Required")
+            Timber.d("transaction %s","Signature Check Required")
 
             if (parameters.getValue(ParameterKeys.ResponseRequired) != ParameterValues.TRUE) {
                 // Signature handled on PINpad. No call to ChipDna Mobile required.
@@ -261,7 +261,7 @@ class ChipDnaHelper(
         }
 
         override fun onVoiceReferral(parameters: Parameters) {
-            Log.d("transaction", "Voice Referral Check Required")
+            Timber.d("transaction %s", "Voice Referral Check Required")
 
             if (parameters.getValue(ParameterKeys.ResponseRequired) != ParameterValues.TRUE) {
                 // Voice referral handled on PINpad. No call to ChipDna Mobile required.
@@ -280,19 +280,19 @@ class ChipDnaHelper(
           */
 
         override fun onVerifyId(parameters: Parameters) {
-            Log.d("transaction", parameters.toString())
+            Timber.d("transaction %s", parameters.toString())
         }
 
         override fun onDeferredAuthorizationListener(parameters: Parameters) {
-            Log.d("transaction", parameters.toString())
+            Timber.d("transaction %s", parameters.toString())
         }
 
         override fun onForceAcceptance(parameters: Parameters) {
-            Log.d("transaction", parameters.toString())
+            Timber.d("transaction %s", parameters.toString())
         }
 
         override fun onPartialApproval(parameters: Parameters) {
-            Log.d("transaction", parameters.toString())
+            Timber.d("transaction %s", parameters.toString())
         }
     }
 }

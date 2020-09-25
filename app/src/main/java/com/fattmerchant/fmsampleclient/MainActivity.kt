@@ -97,7 +97,7 @@ class MainActivity : AppCompatActivity() {
                     })
                 }
             }, {
-                updateStatus(it.message ?: "Could not get transactions")
+                updateStatus(it.message)
             })
         }
     }

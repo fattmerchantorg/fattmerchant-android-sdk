@@ -1,6 +1,7 @@
 package com.fattmerchant.omni.usecase
 
 import com.fattmerchant.omni.data.models.OmniException
+import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.data.repository.MobileReaderDriverRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
@@ -13,7 +14,7 @@ class CancelCurrentTransactionException(message: String? = null) : OmniException
 }
 
 /**
- * Cancels a current mobile reader [transaction]
+ * Cancels a current mobile reader [Transaction]
  */
 internal class CancelCurrentTransaction(
         override val coroutineContext: CoroutineContext,
@@ -21,9 +22,9 @@ internal class CancelCurrentTransaction(
 ) : CoroutineScope {
 
     /**
-     * Attempt to cancel a current mobile reader [transaction]
+     * Attempt to cancel a current mobile reader [Transaction]
      *
-     * @return result of cancelling [transaction] attempt
+     * @return result of cancelling [Transaction] attempt
      */
     suspend fun start(error: (OmniException) -> Unit): Boolean {
        val drivers = mobileReaderDriverRepository.getInitializedDrivers()

@@ -51,7 +51,8 @@
                     android:layout_height="match_parent"
                     android:hint="Amount"
                     android:inputType="numberDecimal"
-                    android:text="0.01" />
+                    android:text="0.01"
+                    tools:ignore="HardcodedText" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -59,43 +60,50 @@
                 android:id="@+id/buttonInitialize"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Initialize" />
+                android:text="Initialize"
+                tools:ignore="HardcodedText" />
 
             <Button
                 android:id="@+id/buttonPerformSale"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Perform sale" />
+                android:text="Perform sale"
+                tools:ignore="HardcodedText" />
 
             <Button
                 android:id="@+id/buttonConnectReader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Connect reader" />
+                android:text="Connect reader"
+                tools:ignore="HardcodedText" />
 
             <Button
                 android:id="@+id/buttonConnectedReaderDetails"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Get Connected Reader Details" />
+                android:text="Get Connected Reader Details"
+                tools:ignore="HardcodedText" />
 
             <Button
                 android:id="@+id/buttonDisconnectReader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Disconnect Reader" />
+                android:text="Disconnect Reader"
+                tools:ignore="HardcodedText" />
 
             <Button
                 android:id="@+id/buttonRefundPreviousTransaction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Refund A Transaction" />
+                android:text="Refund A Transaction"
+                tools:ignore="HardcodedText" />
 
             <Button
                 android:id="@+id/buttonCancelTransaction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Cancel Transaction" />
+                android:text="Cancel Transaction"
+                tools:ignore="HardcodedText" />
         </LinearLayout>
 
     </FrameLayout>

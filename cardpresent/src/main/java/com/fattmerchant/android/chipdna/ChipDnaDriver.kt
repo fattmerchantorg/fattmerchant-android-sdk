@@ -329,7 +329,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
             externalId = result[ParameterKeys.TransactionId]
             cardHolderFirstName = firstName
             cardHolderLastName = lastName
-            cardType = result[ParameterKeys.CardSchemeId]?.toLowerCase()
+            cardType = result[ParameterKeys.CardSchemeId]?.toLowerCase(Locale.ROOT)
             cardExpiration = ccExpiration
             success = result[ParameterKeys.TransactionResult] == ParameterValues.Approved
 
@@ -369,7 +369,6 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
 
         return if (result[ParameterKeys.TransactionResult] == ParameterValues.Approved) {
             TransactionResult().apply {
-                this.request = request
                 success = true
                 transactionType = "refund"
                 amount = Amount(cents = amountCents)
