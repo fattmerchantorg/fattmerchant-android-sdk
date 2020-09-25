@@ -1,6 +1,7 @@
 package com.fattmerchant.omni.data
 
 import com.fattmerchant.omni.data.models.CatalogItem
+import com.fattmerchant.omni.data.models.Transaction
 
 /**
  * A request for a transaction

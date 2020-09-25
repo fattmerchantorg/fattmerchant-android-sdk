@@ -1,2 +1,3 @@
+include ':com.anywherecommerce.android.sdk-release'
 include ':tokenization', ':cardpresent'
 
