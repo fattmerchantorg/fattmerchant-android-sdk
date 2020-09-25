@@ -176,6 +176,10 @@ internal class TakeMobileReaderPayment(
                 type = "charge"
                 method = "card"
                 source = "Android|CPSDK|${result.source}"
+                if(result.source == "AWC") {
+                    isRefundable = false
+                    isVoidable = false
+                }
                 customerId = customer.id
                 invoiceId = invoice.id
                 response = gatewayResponse
