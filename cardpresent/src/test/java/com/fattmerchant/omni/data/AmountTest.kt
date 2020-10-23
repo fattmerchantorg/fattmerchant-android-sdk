@@ -1,7 +1,8 @@
 package com.fattmerchant.omni.data
 
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
+import org.junit.Test
+
+import org.junit.Assert.*
 
 class AmountTest {
 
@@ -34,11 +35,11 @@ class AmountTest {
 
     @Test
     fun dollars() {
-        assertEquals(Amount(50).dollars(), 0.50)
-        assertEquals(Amount(50.30).dollars(), 50.30)
-        assertEquals(Amount(50.30f).dollars(), 50.30)
-        assertEquals(Amount(50.309).dollars(), 50.30)
-        assertEquals(Amount(0.09).dollars(), 0.09)
+        assertEquals(Amount(50).dollars(), 0.50, 0.0)
+        assertEquals(Amount(50.30).dollars(), 50.30, 0.0)
+        assertEquals(Amount(50.30f).dollars(), 50.30, 0.0)
+        assertEquals(Amount(50.309).dollars(), 50.30, 0.0)
+        assertEquals(Amount(0.09).dollars(), 0.09, 0.0)
     }
 
     @Test

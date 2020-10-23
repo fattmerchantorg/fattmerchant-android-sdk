@@ -1,7 +1,6 @@
 package com.fattmerchant.omni
 
 import com.fattmerchant.omni.data.models.MobileReaderConnectionStatus
-import com.fattmerchant.omni.data.MobileReader
 
 interface MobileReaderConnectionStatusListener {
 

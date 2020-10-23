@@ -51,8 +51,7 @@
                     android:layout_height="match_parent"
                     android:hint="Amount"
                     android:inputType="numberDecimal"
-                    android:text="0.01"
-                    tools:ignore="HardcodedText" />
+                    android:text="0.01" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -60,50 +59,43 @@
                 android:id="@+id/buttonInitialize"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Initialize"
-                tools:ignore="HardcodedText" />
+                android:text="Initialize" />
 
             <Button
                 android:id="@+id/buttonPerformSale"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Perform sale"
-                tools:ignore="HardcodedText" />
+                android:text="Perform sale" />
 
             <Button
                 android:id="@+id/buttonConnectReader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Connect reader"
-                tools:ignore="HardcodedText" />
+                android:text="Connect reader" />
 
             <Button
                 android:id="@+id/buttonConnectedReaderDetails"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Get Connected Reader Details"
-                tools:ignore="HardcodedText" />
+                android:text="Get Connected Reader Details" />
 
             <Button
                 android:id="@+id/buttonDisconnectReader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Disconnect Reader"
-                tools:ignore="HardcodedText" />
+                android:text="Disconnect Reader" />
 
             <Button
                 android:id="@+id/buttonRefundPreviousTransaction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Refund A Transaction"
-                tools:ignore="HardcodedText" />
+                android:text="Refund A Transaction" />
 
             <Button
                 android:id="@+id/buttonCancelTransaction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Cancel Transaction"
-                tools:ignore="HardcodedText" />
+                android:text="Cancel Transaction" />
         </LinearLayout>
 
     </FrameLayout>
