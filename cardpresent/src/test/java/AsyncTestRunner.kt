@@ -1,20 +1,20 @@
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
+import org.junit.After
+import org.junit.Before
 
 interface AsyncTestRunner {
 
     val mainThreadSurrogate: ExecutorCoroutineDispatcher
     val scope: CoroutineScope
 
-    @BeforeAll
+    @Before
     fun setUp() {
         Dispatchers.setMain(mainThreadSurrogate)
     }
 
-    @AfterAll
+    @After
     fun tearDown() {
         Dispatchers.resetMain()
         mainThreadSurrogate.close()

@@ -8,7 +8,8 @@ import com.fattmerchant.android.chipdna.withTransactionRequest
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.TransactionRequest
 import com.fattmerchant.omni.data.models.Transaction
-import org.junit.jupiter.api.Test
+import junit.framework.Assert.assertFalse
+import org.junit.Test
 
 class ChipDnaUtilsTest {
 
@@ -32,7 +33,7 @@ class ChipDnaUtilsTest {
     fun `does not add customer vault request parameter if tokenization not requested`() {
         val request = TransactionRequest(amount, false)
         val params = Parameters().withTransactionRequest(request)
-        assert(!params.containsKey(ParameterKeys.CustomerVaultCommand))
+        assertFalse(params.containsKey(ParameterKeys.CustomerVaultCommand))
     }
 
     @Test

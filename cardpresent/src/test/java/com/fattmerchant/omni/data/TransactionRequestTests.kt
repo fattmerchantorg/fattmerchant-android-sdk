@@ -1,6 +1,6 @@
 package com.fattmerchant.omni.data
 
-import org.junit.jupiter.api.Test
+import org.junit.Test
 
 class TransactionRequestTests {
 

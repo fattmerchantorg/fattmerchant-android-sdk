@@ -115,7 +115,7 @@ class OmniApi {
      * @return the voided or refunded transaction
      */
     internal suspend fun postVoidOrRefund(transactionId: String, total: String? = null, error: (Error) -> Unit): Transaction? {
-        val body = mutableMapOf<String?, Any?>()
+        val body = mutableMapOf<String, Any>()
         total?.let {
             body["total"] = it
         }
