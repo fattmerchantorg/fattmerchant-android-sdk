@@ -182,7 +182,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
                 if (params[ParameterKeys.Result] == ParameterValues.TRUE) {
                     // Reader is connected. Add the serial number to the list of familiar ones
                     // And return the hydrated mobile reader
-                    getConnectedReader(null)?.let { connectedReader ->
+                    Companion.getConnectedReader(null)?.let { connectedReader ->
                         connectedReader.serialNumber()?.let { familiarSerialNumbers.add(it) }
                         cont.resume(connectedReader)
                     }
