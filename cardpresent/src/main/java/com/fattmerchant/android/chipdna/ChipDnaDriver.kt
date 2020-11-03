@@ -331,6 +331,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
             cardHolderLastName = lastName
             cardType = result[ParameterKeys.CardSchemeId]?.toLowerCase()
             cardExpiration = ccExpiration
+            this.source = this@ChipDnaDriver.source
             success = result[ParameterKeys.TransactionResult] == ParameterValues.Approved
 
             result[ParameterKeys.CustomerVaultId]?.let { token ->
