@@ -6,14 +6,13 @@ apply plugin: 'com.github.dcendents.android-maven'
 group='com.github.fattmerchantorg'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
 
     defaultConfig {
         minSdkVersion 23
         targetSdkVersion 28
         versionCode 7
-        versionName "1.2.0"
-
+        versionName "1.2.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         testOptions {
@@ -22,6 +21,12 @@ android {
                 returnDefaultValues = true
             }
 
+        }
+    }
+
+    testOptions {
+        unitTests.all {
+            jvmArgs '-noverify'
         }
     }
 
