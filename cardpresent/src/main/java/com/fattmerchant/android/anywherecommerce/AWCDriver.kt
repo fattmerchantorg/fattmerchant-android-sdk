@@ -1,20 +1,15 @@
 package com.fattmerchant.android.anywherecommerce
 
 import android.app.Application
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.content.Context
 import android.os.Handler
 import com.anywherecommerce.android.sdk.*
 import com.anywherecommerce.android.sdk.devices.*
 import com.anywherecommerce.android.sdk.util.Amount as ANPAmount
-import com.anywherecommerce.android.sdk.devices.bbpos.BBPOSDevice
 import com.anywherecommerce.android.sdk.endpoints.AnyPayTransaction
-import com.anywherecommerce.android.sdk.endpoints.anywherecommerce.AnywhereCommerce
 import com.anywherecommerce.android.sdk.endpoints.worldnet.WorldnetEndpoint
 import com.anywherecommerce.android.sdk.models.Signature
 import com.anywherecommerce.android.sdk.models.TransactionType
-import com.anywherecommerce.android.sdk.services.CardReaderConnectionService
 import com.anywherecommerce.android.sdk.transactions.listener.CardTransactionListener
 import com.anywherecommerce.android.sdk.transactions.listener.TransactionListener
 import com.fattmerchant.omni.MobileReaderConnectionStatusListener
@@ -23,15 +18,10 @@ import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.data.*
 import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.data.MobileReaderDriver.*
-import com.fattmerchant.omni.data.models.Merchant
 import com.fattmerchant.omni.data.models.MobileReaderDetails
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.usecase.CancelCurrentTransactionException
-import com.fattmerchant.omni.usecase.TakeMobileReaderPayment
-import kotlinx.coroutines.android.HandlerDispatcher
 import kotlinx.coroutines.suspendCancellableCoroutine
-import java.util.*
-import kotlin.concurrent.timerTask
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -149,7 +139,10 @@ internal class AWCDriver: MobileReaderDriver {
 
     override suspend fun disconnect(reader: MobileReader, error: (OmniException) -> Unit): Boolean {
         // TODO("Please implement the omniException bit")
-        CardReaderController.getConnectedReader().disconnect()
+        CardReaderController.getConnectedReader()?.disconnect() ?: run {
+            error(OmniException("Unable to disconnect reader", "Card reader is null"))
+        }
+
         return true
     }
 
