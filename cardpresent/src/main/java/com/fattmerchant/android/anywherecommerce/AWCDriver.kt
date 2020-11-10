@@ -138,7 +138,6 @@ internal class AWCDriver: MobileReaderDriver {
             = CardReaderController.getConnectedReader()?.toMobileReader()
 
     override suspend fun disconnect(reader: MobileReader, error: (OmniException) -> Unit): Boolean {
-        // TODO("Please implement the omniException bit")
         CardReaderController.getConnectedReader()?.disconnect() ?: run {
             error(OmniException("Unable to disconnect reader", "Card reader is null"))
         }
