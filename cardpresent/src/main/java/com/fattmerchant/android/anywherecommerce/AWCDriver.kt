@@ -157,18 +157,17 @@ internal class AWCDriver: MobileReaderDriver {
             transaction.useCardReader(CardReaderController.getConnectedReader())
 
             // Register signature
-            transaction.setOnSignatureRequiredListener {
-                transactionUpdateListener?.onTransactionUpdate(TransactionUpdate.PromptProvideSignature)
-
-                if (signatureProvider != null) {
-                    signatureProvider.signatureRequired { signature ->
+            if (signatureProvider != null) {
+                transaction.setOnSignatureRequiredListener {
+                    transactionUpdateListener?.onTransactionUpdate(TransactionUpdate.PromptProvideSignature)
+                    signatureProvider.signatureRequired {
                         transactionUpdateListener?.onTransactionUpdate(TransactionUpdate.SignatureProvided)
                         transaction.signature = Signature() //TODO: Take care of the signature
                         transaction.proceed()
                     }
-                } else {
-                    transaction.proceed()
                 }
+            } else {
+                transaction.proceed()
             }
 
             currentTransaction = transaction
