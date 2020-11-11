@@ -209,7 +209,7 @@ internal class AWCDriver: MobileReaderDriver {
     }
 
     override suspend fun refundTransaction(transaction: Transaction, refundAmount: Amount?): TransactionResult {
-        return suspendCancellableCoroutine {
+        return suspendCancellableCoroutine { continuation ->
             val refund = AnyPayTransaction()
             refund.endpoint = endpoint
             refund.transactionType = TransactionType.REFUND
@@ -220,11 +220,17 @@ internal class AWCDriver: MobileReaderDriver {
             refund.execute(object: TransactionListener {
                 override fun onTransactionCompleted() {
                     val result = TransactionResult.from(refund)
-                    it.resume(result)
+
+                    // AWC is returning a negative approved amount so we want to use our total instead
+                    if(refund.approvedAmount.isLessThan(0.00)) {
+                        result.amount = refundAmount
+                    }
+
+                    continuation.resume(result)
                 }
 
                 override fun onTransactionFailed(p0: MeaningfulError?) {
-                    it.resumeWithException(RefundTransactionException(p0?.detail ?: "Could not perform refund"))
+                    continuation.resumeWithException(RefundTransactionException(p0?.detail ?: "Could not perform refund"))
                 }
             })
         }
