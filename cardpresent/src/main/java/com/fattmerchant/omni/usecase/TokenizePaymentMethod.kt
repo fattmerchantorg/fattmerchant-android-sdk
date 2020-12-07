@@ -63,7 +63,10 @@ internal class TokenizePaymentMethod(
                     merchantId = customer?.merchantId
                     customerId = customer?.id
                     method = "bank"
-                    this.cardLastFour = cardLastFour
+                    bankAccount = bank.bankAccount
+                    bankRouting = bank.bankRouting
+                    bankName = bank.bankName
+                    bankType = bank.bankType
                     personName = bank.personName
                     tokenize = true
                 }
