@@ -55,4 +55,24 @@ open class PaymentMethod : Model {
      * @note If this field is not `null`, then `tokenize` must be `false`
      */
     internal var paymentToken: String? = null
+
+    /**
+     * The card number
+     */
+    internal var cardNumber: String? = null
+
+    /**
+     * The card CVV
+     */
+    internal var cardCvv: String? = null
+
+    /**
+     * The bank account number
+     */
+    internal var bankAccount: String? = null
+
+    /**
+     * The bank routing number
+     */
+    internal var bankRouting: String? = null
 }
