@@ -20,13 +20,13 @@ internal class TokenizePaymentMethod(
         var lastName: String? = null
         var customer: Customer? = null
 
-        creditCard?.let {
-            firstName = it.firstName()
-            lastName = it.lastName()
+        creditCard?.personName?.let {
+            firstName = creditCard.firstName()
+            lastName = creditCard.lastName()
         }.run {
-            bankAccount?.let {
-                firstName = it.firstName()
-                lastName = it.lastName()
+            bankAccount?.personName?.let {
+                firstName = bankAccount.firstName()
+                lastName = bankAccount.lastName()
             }?.run {
                 failure(OmniException("No name supplied."))
                 return@coroutineScope null
@@ -55,6 +55,7 @@ internal class TokenizePaymentMethod(
                 method = "card"
                 this.cardLastFour = cardLastFour
                 personName = card.personName
+                cardNumber = card.cardNumber
                 tokenize = true
             }
         }.run {

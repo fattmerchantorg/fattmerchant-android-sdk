@@ -1,6 +1,7 @@
 package com.fattmerchant.omni.data
 
 import com.fattmerchant.omni.data.models.CatalogItem
+import com.fattmerchant.omni.data.models.CreditCard
 
 /**
  * A request for a transaction
@@ -16,6 +17,9 @@ data class TransactionRequest(
 
     /** The id of the invoice we want to apply the transaction to */
     var invoiceId: String? = null,
+
+    /** The [CreditCard] to charge */
+    var card: CreditCard? = null,
 
     /** A list of [CatalogItem]s to associate with the [Transaction]
      *
@@ -74,5 +78,5 @@ data class TransactionRequest(
      * @param lineItems The [CatalogItem]s to be added to the transaction
      * */
     constructor(amount: Amount, lineItems: List<CatalogItem>?)
-            : this(amount, true, null, lineItems)
+            : this(amount, true, null, null ,lineItems)
 }

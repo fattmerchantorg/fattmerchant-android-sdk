@@ -1,5 +1,6 @@
 package com.fattmerchant.omni.networking
 
+import com.fattmerchant.omni.data.TransactionResult
 import com.fattmerchant.omni.data.models.*
 import com.google.gson.FieldNamingPolicy
 import io.ktor.client.HttpClient
@@ -157,6 +158,9 @@ class OmniApi {
         return post(url, JsonParser.toJson(paymentMethod), error)
     }
 
+    internal suspend fun charge(chargeRequest: ChargeRequest, error: (Error) -> Unit): Transaction? {
+        return post("charge", JsonParser.toJson(chargeRequest), error)
+    }
 
     private suspend inline fun <reified T> post(urlString: String, body: String, error: (Error) -> Unit): T? =
         this.request<T>(
