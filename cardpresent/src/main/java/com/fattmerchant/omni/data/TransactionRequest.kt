@@ -78,5 +78,5 @@ data class TransactionRequest(
      * @param lineItems The [CatalogItem]s to be added to the transaction
      * */
     constructor(amount: Amount, lineItems: List<CatalogItem>?)
-            : this(amount, true, null, null ,lineItems)
+            : this(amount, true, null, null, lineItems)
 }

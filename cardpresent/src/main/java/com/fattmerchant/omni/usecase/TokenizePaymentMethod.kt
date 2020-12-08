@@ -7,7 +7,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlin.coroutines.CoroutineContext
 
-/// Tokenizes a payment method
 internal class TokenizePaymentMethod(
         val customerRepository: CustomerRepository,
         val paymentMethodRepository: PaymentMethodRepository,
@@ -39,8 +38,8 @@ internal class TokenizePaymentMethod(
             } ?: return@coroutineScope null
         }?.run {
             customer = customerRepository.create(Customer().apply {
-                this.firstname =  firstName?: "NO"
-                this.lastname = lastName?: "NAME"
+                this.firstname =  firstName?: "SWIPE"
+                this.lastname = lastName?: "CUSTOMER"
             }) { exception ->
                 failure(exception)
             } ?: return@coroutineScope null
