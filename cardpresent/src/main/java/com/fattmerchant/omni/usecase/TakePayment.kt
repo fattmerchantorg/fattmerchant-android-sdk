@@ -24,7 +24,11 @@ internal class TakePayment(val customerRepository: CustomerRepository,
             failure(OmniException("No payment method provided"))
         }?: return@coroutineScope null
 
-        val tokenizeJob = TokenizePaymentMethod(customerRepository, paymentMethodRepository, request.card, coroutineContext = coroutineContext)
+        val tokenizeJob = TokenizePaymentMethod(
+                customerRepository = customerRepository,
+                paymentMethodRepository = paymentMethodRepository,
+                creditCard = request.card,
+                coroutineContext = coroutineContext)
 
         val tokenizedPaymentMethod = tokenizeJob.start {
             failure(it)
