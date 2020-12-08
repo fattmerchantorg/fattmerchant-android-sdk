@@ -36,7 +36,7 @@ internal class TokenizePaymentMethod(
             customer = customerRepository.getById(it) { exception ->
                 failure(exception)
             } ?: return@coroutineScope null
-        }?.run {
+        }.run {
             customer = customerRepository.create(Customer().apply {
                 this.firstname =  firstName?: "SWIPE"
                 this.lastname = lastName?: "CUSTOMER"
@@ -49,18 +49,16 @@ internal class TokenizePaymentMethod(
 
         creditCard?.let { card ->
             paymentMethod = PaymentMethod().apply {
-                merchantId = customer?.merchantId
                 customerId = customer?.id
                 method = "card"
-                this.cardLastFour = cardLastFour
                 personName = card.personName
                 cardNumber = card.cardNumber
-                tokenize = true
+                addressZip = card.addressZip
+                cardExp = card.cardExp
             }
         }.run {
             bankAccount?.let {  bank ->
                 paymentMethod = PaymentMethod().apply {
-                    merchantId = customer?.merchantId
                     customerId = customer?.id
                     method = "bank"
                     bankAccount = bank.bankAccount
@@ -68,7 +66,6 @@ internal class TokenizePaymentMethod(
                     bankName = bank.bankName
                     bankType = bank.bankType
                     personName = bank.personName
-                    tokenize = true
                 }
             }?.run {
                 failure(OmniException("No credit card or bank information was supplied."))

@@ -20,9 +20,10 @@ internal class TakePayment(val customerRepository: CustomerRepository,
 
     suspend fun start(failure: (OmniException) -> Unit): Transaction? = coroutineScope {
 
-        request.card?.let {
-            failure(OmniException("No payment method provided"))
-        }?: return@coroutineScope null
+        if(request.card == null) {
+            failure(OmniException("No payment method provided."))
+            return@coroutineScope null
+        }
 
         val tokenizeJob = TokenizePaymentMethod(
                 customerRepository = customerRepository,
@@ -40,7 +41,6 @@ internal class TakePayment(val customerRepository: CustomerRepository,
                 failure(OmniException("Charging the payment method was unsuccessful."))
             }
         }?: return@coroutineScope null
-
     }
 
     private fun createChargeRequest(amount: Amount, paymentMethodId: String): ChargeRequest {

@@ -60,6 +60,16 @@ data class TransactionRequest(
     constructor(amount: Amount) : this(amount, true)
 
     /**
+     * Initializes a Transaction with the given [Amount] and [CreditCard]
+     *
+     * Note that this will request tokenization
+     *
+     * @param amount The [Amount] to be collected during the transaction
+     * @param creditCard The [CreditCard] used for the transaction
+     * */
+    constructor(amount: Amount, creditCard: CreditCard) : this(amount, true, null, creditCard)
+
+    /**
      * Initializes a Transaction with the given [Amount] and invoiceId
      *
      * Note that this will request tokenization

@@ -26,7 +26,7 @@ open class PaymentMethod : Model {
     open var isDefault: Int? = null
     open var isUsableInVt: Boolean? = null
     open var merchantId: String? = null
-    open var meta: String? = null
+    open var meta: Any? = null
     open var method: String? = null
     open var nickname: String? = null
     open var personName: String? = null

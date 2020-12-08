@@ -78,23 +78,23 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
             merchant.emvPassword()?.let { nmiDetails.securityKey = it }
             mutatedArgs["nmi"] = nmiDetails
 
-            val mobileReaderDetails = omniApi.getMobileReaderSettings {
-                error(OmniException("Could not get reader settings", it.message))
-            } ?: return@launch
+            omniApi.getMobileReaderSettings {
+                // error(OmniException("Could not get reader settings", it.message))
+            }?.let { mobileReaderDetails ->
+                mobileReaderDetails.nmi?.let {
+                    mutatedArgs["nmi"] = it
+                }
 
-            mobileReaderDetails.nmi?.let {
-                mutatedArgs["nmi"] = it
+                mobileReaderDetails.anywhereCommerce?.let {
+                    mutatedArgs["awc"] = it
+                }
+
+                InitializeDrivers(
+                        mobileReaderDriverRepository,
+                        mutatedArgs,
+                        coroutineContext
+                ).start(error)
             }
-
-            mobileReaderDetails.anywhereCommerce?.let {
-                mutatedArgs["awc"] = it
-            }
-
-            InitializeDrivers(
-                    mobileReaderDriverRepository,
-                    mutatedArgs,
-                    coroutineContext
-            ).start(error)
 
             initialized = true
 
