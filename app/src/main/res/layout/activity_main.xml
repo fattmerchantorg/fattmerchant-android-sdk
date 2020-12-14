@@ -62,6 +62,12 @@
                 android:text="Initialize" />
 
             <Button
+                android:id="@+id/buttonPerformSaleWithReader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Perform sale with reader" />
+
+            <Button
                 android:id="@+id/buttonPerformSale"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

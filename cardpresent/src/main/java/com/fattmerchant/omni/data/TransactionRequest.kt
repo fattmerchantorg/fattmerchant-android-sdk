@@ -1,6 +1,9 @@
 package com.fattmerchant.omni.data
 
+import com.fattmerchant.omni.data.models.BankAccount
 import com.fattmerchant.omni.data.models.CatalogItem
+import com.fattmerchant.omni.data.models.CreditCard
+import com.fattmerchant.omni.data.models.Transaction
 
 /**
  * A request for a transaction
@@ -16,6 +19,12 @@ data class TransactionRequest(
 
     /** The id of the invoice we want to apply the transaction to */
     var invoiceId: String? = null,
+
+    /** The [CreditCard] to charge */
+    var card: CreditCard? = null,
+
+    /** The [BankAccount] to charge */
+    var bankAccount: BankAccount? = null,
 
     /** A list of [CatalogItem]s to associate with the [Transaction]
      *
@@ -56,6 +65,26 @@ data class TransactionRequest(
     constructor(amount: Amount) : this(amount, true)
 
     /**
+     * Initializes a Transaction with the given [Amount] and [CreditCard]
+     *
+     * Note that this will request tokenization
+     *
+     * @param amount The [Amount] to be collected during the transaction
+     * @param creditCard The [CreditCard] used for the transaction
+     * */
+    constructor(amount: Amount, creditCard: CreditCard) : this(amount, true, null, creditCard)
+
+    /**
+     * Initializes a Transaction with the given [Amount] and [BankAccount]
+     *
+     * Note that this will request tokenization
+     *
+     * @param amount The [Amount] to be collected during the transaction
+     * @param bankAccount The [BankAccount] used for the transaction
+     * */
+    constructor(amount: Amount, bankAccount: BankAccount) : this(amount, true, bankAccount = bankAccount)
+
+    /**
      * Initializes a Transaction with the given [Amount] and invoiceId
      *
      * Note that this will request tokenization
@@ -74,5 +103,5 @@ data class TransactionRequest(
      * @param lineItems The [CatalogItem]s to be added to the transaction
      * */
     constructor(amount: Amount, lineItems: List<CatalogItem>?)
-            : this(amount, true, null, lineItems)
+            : this(amount, true, lineItems = lineItems)
 }

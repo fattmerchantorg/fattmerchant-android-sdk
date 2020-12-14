@@ -3,10 +3,7 @@ package com.fattmerchant.omni
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.TransactionRequest
-import com.fattmerchant.omni.data.models.Invoice
-import com.fattmerchant.omni.data.models.MobileReaderDetails
-import com.fattmerchant.omni.data.models.OmniException
-import com.fattmerchant.omni.data.models.Transaction
+import com.fattmerchant.omni.data.models.*
 import com.fattmerchant.omni.data.repository.*
 import com.fattmerchant.omni.networking.OmniApi
 import com.fattmerchant.omni.usecase.*
@@ -81,23 +78,23 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
             merchant.emvPassword()?.let { nmiDetails.securityKey = it }
             mutatedArgs["nmi"] = nmiDetails
 
-            val mobileReaderDetails = omniApi.getMobileReaderSettings {
-                error(OmniException("Could not get reader settings", it.message))
-            } ?: return@launch
+            omniApi.getMobileReaderSettings {
+                // error(OmniException("Could not get reader settings", it.message))
+            }?.let { mobileReaderDetails ->
+                mobileReaderDetails.nmi?.let {
+                    mutatedArgs["nmi"] = it
+                }
 
-            mobileReaderDetails.nmi?.let {
-                mutatedArgs["nmi"] = it
+                mobileReaderDetails.anywhereCommerce?.let {
+                    mutatedArgs["awc"] = it
+                }
+
+                InitializeDrivers(
+                        mobileReaderDriverRepository,
+                        mutatedArgs,
+                        coroutineContext
+                ).start(error)
             }
-
-            mobileReaderDetails.anywhereCommerce?.let {
-                mutatedArgs["awc"] = it
-            }
-
-            InitializeDrivers(
-                    mobileReaderDriverRepository,
-                    mutatedArgs,
-                    coroutineContext
-            ).start(error)
 
             initialized = true
 
@@ -188,6 +185,37 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
             )
 
             onDisconnected(job.start(onFail))
+        }
+    }
+
+    /**
+     * Charges a transaction
+     *
+     * @param transactionRequest a [TransactionRequest] object that includes all the information needed to
+     * run this transaction including [TransactionRequest.amount] and [TransactionRequest.tokenize]
+     * @param completion a block to run once the transaction is finished. Receives the completed
+     * [Transaction]
+     * @param error a block to run if an error is thrown. Receives an [OmniException]
+     */
+    fun pay(transactionRequest: TransactionRequest, completion: (Transaction) -> Unit, error: (OmniException) -> Unit) {
+        coroutineScope.launch {
+            val takePaymentJob = TakePayment(
+                    customerRepository = customerRepository,
+                    paymentMethodRepository = paymentMethodRepository,
+                    request = transactionRequest,
+                    omniApi = omniApi,
+                    coroutineContext = coroutineContext)
+
+            currentJob = takePaymentJob
+
+            val result = takePaymentJob.start {
+                error(it)
+                return@start
+            }
+
+            result?.let {
+                completion(it)
+            }
         }
     }
 

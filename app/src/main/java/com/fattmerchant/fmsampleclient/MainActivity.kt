@@ -7,12 +7,12 @@ import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
-import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.TransactionRequest
 import com.fattmerchant.omni.data.TransactionUpdate
+import com.fattmerchant.omni.data.models.CreditCard
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.networking.OmniApi
@@ -44,8 +44,8 @@ class MainActivity : AppCompatActivity() {
         showApiKeyDialog()
     }
 
-    private fun setupPerformSaleButton() {
-        buttonPerformSale.setOnClickListener {
+    private fun setupPerformSaleWithReaderButton() {
+        buttonPerformSaleWithReader.setOnClickListener {
             val amount = Amount(getAmount())
             updateStatus("Attempting to charge ${amount.dollarsString()}")
             val request = TransactionRequest(amount)
@@ -59,6 +59,32 @@ class MainActivity : AppCompatActivity() {
 
             Omni.shared()?.takeMobileReaderTransaction(request, {
 
+                val msg = if (it.success == true) {
+                    "Successfully executed transaction"
+                } else {
+                    "Transaction declined"
+                }
+
+                runOnUiThread {
+                    updateStatus(msg)
+                }
+
+                transaction = it
+            }, {
+                updateStatus("Couldn't perform sale: ${it.message}. ${it.detail}")
+            })
+        }
+
+        buttonPerformSaleWithReader.isEnabled = true
+    }
+
+    private fun setupPerformSaleButton() {
+        buttonPerformSale.setOnClickListener {
+            val amount = Amount(getAmount())
+            updateStatus("Attempting to charge ${amount.dollarsString()}")
+            val request = TransactionRequest(amount, CreditCard("Test Payment", "4111111111111111", "0224", "32812"))
+
+            Omni.shared()?.pay(request, {
                 val msg = if (it.success == true) {
                     "Successfully executed transaction"
                 } else {
@@ -169,12 +195,13 @@ class MainActivity : AppCompatActivity() {
                 dialog.dismiss()
                 // If you want to not use the apikey dialog, modify the initializeOmni call like below
                 // initializeOmni("insert api key here")
-                initializeOmni("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6ImU3MTJhZThlLTIwOWUtNGNkYi05MDMwLTc1NWU2OWFmMTI0NiIsImdvZFVzZXIiOnRydWUsImJyYW5kIjoiZmF0dG1lcmNoYW50Iiwic3ViIjoiMzBjNmVlYjYtNjRiNi00N2Y2LWJjZjYtNzg3YTljNTg3OThiIiwiaXNzIjoiaHR0cDovL2FwaWRldjAxLmZhdHRsYWJzLmNvbS9hdXRoZW50aWNhdGUiLCJpYXQiOjE1OTg3MTI1MDksImV4cCI6MTU5ODc5ODkwOSwibmJmIjoxNTk4NzEyNTA5LCJqdGkiOiJIYzVpRWwxOXdYbVR2UE5zIn0.BjjAvWCrmVfe4Njs_GVXi73JZLWHXgmqoAx1oDYqCdg")
+                initializeOmni("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6IjRjMTc2ZGFhLTg1OGUtNDIzYi1hOGQ1LTU4NTA5ZDA0MTExMiIsImdvZFVzZXIiOnRydWUsImJyYW5kIjoiZmF0dG1lcmNoYW50LXNhbmRib3giLCJzdWIiOiIxMjgwZGQ0ZC0xMjYxLTRhYjUtOGRmYi1jYWYxZjdkOGNlMzQiLCJpc3MiOiJodHRwOi8vYXBpZGV2MDEuZmF0dGxhYnMuY29tL2F1dGhlbnRpY2F0ZSIsImlhdCI6MTYwNzQ0ODkxMSwiZXhwIjoxNjA3NTM1MzExLCJuYmYiOjE2MDc0NDg5MTEsImp0aSI6ImVnZFdsSmFUYTBWRDFwUTIifQ.jnrptnoG6Z5PQ6xf_O-2FEvR91k3kPFvvVeJrCNMOOw")
             }.show()
     }
 
     private fun setupButtons() {
         setupInitializeButton()
+        setupPerformSaleWithReaderButton()
         setupPerformSaleButton()
         setupRefundButton()
         setupConnectReaderButton()
@@ -227,7 +254,7 @@ class MainActivity : AppCompatActivity() {
                             updateStatus("Connected to [${reader.getName()}]")
 
                             runOnUiThread {
-                                buttonPerformSale.isEnabled = true
+                                buttonPerformSaleWithReader.isEnabled = true
                             }
                         }, { error ->
                             updateStatus("Error connecting: $error")
