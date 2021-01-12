@@ -97,7 +97,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
             ?: throw InitializeMobileReaderDriverException("merchant not found")
 
         val apiKey = merchant.emvPassword()
-            ?: throw InitializeMobileReaderDriverException("emvTerminalSecret not found")
+            ?: throw InitializeMobileReaderDriverException("emv_password not found")
 
         val params = Parameters().apply {
             add(ParameterKeys.Password, "password")
