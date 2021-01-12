@@ -97,7 +97,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
             ?: throw InitializeMobileReaderDriverException("merchant not found")
 
         val apiKey = merchant.emvPassword()
-            ?: throw InitializeMobileReaderDriverException("emvTerminalSecret not found")
+            ?: throw InitializeMobileReaderDriverException("emv_password not found")
 
         val params = Parameters().apply {
             add(ParameterKeys.Password, "password")
@@ -124,6 +124,8 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         val parameters = Parameters().apply {
             add(ParameterKeys.SearchConnectionTypeBluetooth, ParameterValues.TRUE)
         }
+        if (!ChipDnaMobile.isInitialized()) { return emptyList() }
+
         ChipDnaMobile.getInstance().clearAllAvailablePinPadsListeners()
 
         val pinPads = suspendCancellableCoroutine<List<SelectablePinPad>> { cont ->
@@ -144,6 +146,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         }
     }
 
+    @UseExperimental(InternalCoroutinesApi::class)
     override suspend fun connectReader(reader: MobileReader): Boolean {
 
         val requestParams = Parameters()
@@ -163,7 +166,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
                 }
 
                 val error = params[ParameterKeys.ErrorDescription]
-                cont.resumeWithException(ConnectReaderException(error))
+                cont.tryResumeWithException(ConnectReaderException(error))
             }
 
             ChipDnaMobile.getInstance().addConnectAndConfigureFinishedListener(connectAndConfigureListener)
