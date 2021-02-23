@@ -12,9 +12,14 @@ enum class MobileReaderConnectionStatus(val status: String) {
     DISCONNECTED("disconnected"),
 
     /** The reader is performing an update
-     * - Note: This might be a long-running operation
+     * - Note: This includes TMS and Config updates
      */
-    UPDATING("updating"),
+    UPDATING_CONFIGURATION("updatingConfiguration"),
+
+    /** The reader is performing an update on the firmware
+     * - Note: This is a long running operation
+     */
+    UPDATING_FIRMWARE("updatingFirmware"),
 
     /** The reader is performing a reboot */
     REBOOTING("rebooting");

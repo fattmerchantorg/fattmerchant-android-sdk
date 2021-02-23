@@ -127,7 +127,7 @@ internal fun Parameters.withTransactionRequest(request: TransactionRequest) = Pa
  * ChipDna hands us a ton of configuration updates during the mobile reader connection process
  * The ones we care about are:
  *  - Connecting
- *  - Permorming Tms Update
+ *  - Performing Tms Update
  *  - Updating Pinpad Firmware
  *  - Rebooting
  *  - Registering
@@ -135,12 +135,10 @@ internal fun Parameters.withTransactionRequest(request: TransactionRequest) = Pa
  * @param chipDnaConfigurationUpdate
  */
 fun MobileReaderConnectionStatus.Companion.from(chipDnaConfigurationUpdate: String): MobileReaderConnectionStatus? = when(chipDnaConfigurationUpdate) {
+    ParameterValues.Registering,
     ParameterValues.Connecting -> MobileReaderConnectionStatus.CONNECTING
-
-    ParameterValues.UpdatingPinPadFirmware,
-    ParameterValues.PerformingTmsUpdate,
-    ParameterValues.Registering -> MobileReaderConnectionStatus.UPDATING
-
+    ParameterValues.PerformingTmsUpdate -> MobileReaderConnectionStatus.UPDATING_CONFIGURATION
+    ParameterValues.UpdatingPinPadFirmware -> MobileReaderConnectionStatus.UPDATING_FIRMWARE
     ParameterValues.RebootingPinPad -> MobileReaderConnectionStatus.REBOOTING
 
     else -> null
