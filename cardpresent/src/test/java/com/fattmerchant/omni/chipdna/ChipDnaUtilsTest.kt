@@ -2,7 +2,6 @@ package com.fattmerchant.omni.chipdna
 
 
 import com.creditcall.chipdnamobile.ParameterKeys
-import com.creditcall.chipdnamobile.Parameters
 import com.fattmerchant.android.chipdna.extractUserReference
 import com.fattmerchant.android.chipdna.withTransactionRequest
 import com.fattmerchant.omni.data.Amount
@@ -19,7 +18,7 @@ class ChipDnaUtilsTest {
     @Test
     fun `adds customer vault request parameter if tokenization requested`() {
         val request = TransactionRequest(amount)
-        val params = Parameters().withTransactionRequest(request)
+        val params = withTransactionRequest(request)
         assert(params.containsKey(ParameterKeys.CustomerVaultCommand))
     }
 
@@ -32,7 +31,7 @@ class ChipDnaUtilsTest {
     @Test
     fun `does not add customer vault request parameter if tokenization not requested`() {
         val request = TransactionRequest(amount, false)
-        val params = Parameters().withTransactionRequest(request)
+        val params = withTransactionRequest(request)
         assertFalse(params.containsKey(ParameterKeys.CustomerVaultCommand))
     }
 

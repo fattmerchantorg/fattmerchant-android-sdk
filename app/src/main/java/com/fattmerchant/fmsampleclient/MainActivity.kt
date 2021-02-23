@@ -8,10 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
 import com.fattmerchant.omni.TransactionUpdateListener
-import com.fattmerchant.omni.data.Amount
-import com.fattmerchant.omni.data.MobileReader
-import com.fattmerchant.omni.data.TransactionRequest
-import com.fattmerchant.omni.data.TransactionUpdate
+import com.fattmerchant.omni.UserNotificationListener
+import com.fattmerchant.omni.data.*
 import com.fattmerchant.omni.data.models.CreditCard
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.models.Transaction
@@ -54,6 +52,16 @@ class MainActivity : AppCompatActivity() {
             Omni.shared()?.transactionUpdateListener = object: TransactionUpdateListener {
                 override fun onTransactionUpdate(transactionUpdate: TransactionUpdate) {
                     updateStatus("${transactionUpdate.value} | ${transactionUpdate.userFriendlyMessage}")
+                }
+            }
+
+            Omni.shared()?.userNotificationListener = object: UserNotificationListener {
+                override fun onUserNotification(userNotification: UserNotification) {
+                    updateStatus("${userNotification.value} | ${userNotification.userFriendlyMessage}")
+                }
+
+                override fun onRawUserNotification(userNotification: String) {
+                    updateStatus(userNotification)
                 }
             }
 
@@ -195,7 +203,7 @@ class MainActivity : AppCompatActivity() {
                 dialog.dismiss()
                 // If you want to not use the apikey dialog, modify the initializeOmni call like below
                 // initializeOmni("insert api key here")
-                initializeOmni("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6IjRjMTc2ZGFhLTg1OGUtNDIzYi1hOGQ1LTU4NTA5ZDA0MTExMiIsImdvZFVzZXIiOnRydWUsImJyYW5kIjoiZmF0dG1lcmNoYW50LXNhbmRib3giLCJzdWIiOiIxMjgwZGQ0ZC0xMjYxLTRhYjUtOGRmYi1jYWYxZjdkOGNlMzQiLCJpc3MiOiJodHRwOi8vYXBpZGV2MDEuZmF0dGxhYnMuY29tL2F1dGhlbnRpY2F0ZSIsImlhdCI6MTYwNzQ0ODkxMSwiZXhwIjoxNjA3NTM1MzExLCJuYmYiOjE2MDc0NDg5MTEsImp0aSI6ImVnZFdsSmFUYTBWRDFwUTIifQ.jnrptnoG6Z5PQ6xf_O-2FEvR91k3kPFvvVeJrCNMOOw")
+                initializeOmni("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6ImViNDhlZjk5LWFhNzgtNDk2ZS05YjAxLTQyMWY4ZGFmNzMyMyIsImdvZFVzZXIiOnRydWUsImJyYW5kIjoiZmF0dG1lcmNoYW50Iiwic3ViIjoiMTI4MGRkNGQtMTI2MS00YWI1LThkZmItY2FmMWY3ZDhjZTM0IiwiaXNzIjoiaHR0cDovL2FwaWRldjAxLmZhdHRsYWJzLmNvbS9hdXRoZW50aWNhdGUiLCJpYXQiOjE2MTQxMTM1NDMsImV4cCI6MTYxNDE5OTk0MywibmJmIjoxNjE0MTEzNTQzLCJqdGkiOiJ0THZiVWlkZW55UkF6aDNnIn0.p2_9RVIpsfcDbJOKJ2trsqXqpnpPPpLR3fOQwnkEMqA")
             }.show()
     }
 

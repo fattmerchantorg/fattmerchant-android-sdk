@@ -4,6 +4,7 @@ import com.fattmerchant.android.anywherecommerce.AWCDriver
 import com.fattmerchant.android.chipdna.ChipDnaDriver
 import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
+import com.fattmerchant.omni.UserNotificationListener
 import com.fattmerchant.omni.data.*
 import com.fattmerchant.omni.data.models.*
 import com.fattmerchant.omni.data.repository.*
@@ -20,6 +21,7 @@ internal class TakeMobileReaderPayment(
     val request: TransactionRequest,
     val signatureProvider: SignatureProviding? = null,
     val transactionUpdateListener: TransactionUpdateListener? = null,
+    val userNotificationListener: UserNotificationListener? = null,
     override val coroutineContext: CoroutineContext
 ) : CoroutineScope {
 
@@ -97,7 +99,7 @@ internal class TakeMobileReaderPayment(
         val result: TransactionResult
 
         try {
-            result = reader.performTransaction(request, signatureProvider, transactionUpdateListener)
+            result = reader.performTransaction(request, signatureProvider, transactionUpdateListener, userNotificationListener)
         } catch (e: MobileReaderDriver.PerformTransactionException) {
             onError(TakeMobileReaderPaymentException(e.detail))
             return@coroutineScope null

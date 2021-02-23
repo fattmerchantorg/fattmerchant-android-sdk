@@ -2,12 +2,8 @@ package com.fattmerchant.android.chipdna
 
 import android.content.Context
 import com.creditcall.chipdnamobile.*
-import com.fattmerchant.omni.MobileReaderConnectionStatusListener
-import com.fattmerchant.omni.OmniGeneralException
-import com.fattmerchant.omni.SignatureProviding
-import com.fattmerchant.omni.TransactionUpdateListener
+import com.fattmerchant.omni.*
 import com.fattmerchant.omni.data.*
-import com.fattmerchant.omni.data.models.Merchant
 import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.data.MobileReaderDriver.*
 import com.fattmerchant.omni.data.models.MobileReaderConnectionStatus
@@ -243,8 +239,8 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
         return true
     }
 
-    override suspend fun performTransaction(request: TransactionRequest, signatureProvider: SignatureProviding?, transactionUpdateListener: TransactionUpdateListener?): TransactionResult {
-        val paymentRequestParams = Parameters().withTransactionRequest(request)
+    override suspend fun performTransaction(request: TransactionRequest, signatureProvider: SignatureProviding?, transactionUpdateListener: TransactionUpdateListener?, userNotificationListener: UserNotificationListener?): TransactionResult {
+        val paymentRequestParams = withTransactionRequest(request)
 
         val result = suspendCancellableCoroutine<Parameters> { cont ->
 
@@ -263,6 +259,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
 
             transactionListener.signatureProvider = signatureProvider
             transactionListener.transactionUpdateListener = transactionUpdateListener
+            transactionListener.userNotificationListener = userNotificationListener
             ChipDnaMobile.getInstance().addUserNotificationListener(transactionListener)
             ChipDnaMobile.getInstance().addApplicationSelectionListener(transactionListener)
             ChipDnaMobile.getInstance().addTransactionUpdateListener(transactionListener)
