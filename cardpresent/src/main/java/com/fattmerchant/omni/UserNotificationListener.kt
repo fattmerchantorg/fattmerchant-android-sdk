@@ -1,7 +1,6 @@
 package com.fattmerchant.omni
 
 import com.fattmerchant.omni.data.UserNotification
-import com.creditcall.chipdnamobile.UserNotification as ChipDnaUserNotification
 
 /**
  * Listens to user notification updates
@@ -37,7 +36,6 @@ interface UserNotificationListener {
      * *FallforwardInsertSwipeCard* - Indicates that fallforward from Contactless to Insert/Swipe has occurred.
      *
      * *TryCardAgain* - Indicates that the card should be tried again.
-     * @see ChipDnaUserNotification
      */
     fun onRawUserNotification(userNotification: String)
 }
