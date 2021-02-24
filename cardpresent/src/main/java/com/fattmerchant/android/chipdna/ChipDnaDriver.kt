@@ -147,6 +147,8 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
         val parameters = Parameters().apply {
             add(ParameterKeys.SearchConnectionTypeBluetooth, ParameterValues.TRUE)
         }
+        if (!ChipDnaMobile.isInitialized()) { return emptyList() }
+
         ChipDnaMobile.getInstance().clearAllAvailablePinPadsListeners()
 
         val pinPads = suspendCancellableCoroutine<List<SelectablePinPad>> { cont ->
@@ -167,6 +169,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
         }
     }
 
+    @InternalCoroutinesApi
     override suspend fun connectReader(reader: MobileReader): MobileReader? {
 
         val requestParams = Parameters()
@@ -191,7 +194,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
                 }
 
                 val error = params[ParameterKeys.ErrorDescription]
-                cont.resumeWithException(ConnectReaderException(error))
+                cont.tryResumeWithException(ConnectReaderException(error))
             }
 
             ChipDnaMobile.getInstance().addConnectAndConfigureFinishedListener(connectAndConfigureListener)
