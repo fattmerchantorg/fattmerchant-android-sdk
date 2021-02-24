@@ -45,6 +45,9 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
     /** Receives notifications about transaction events such as when a card is swiped */
     open var transactionUpdateListener: TransactionUpdateListener? = null
 
+    /** Receives user notifications that are used for prompts */
+    open var userNotificationListener: UserNotificationListener? = null
+
     /** Receives notifications about reader connection events */
     open var mobileReaderConnectionStatusListener: MobileReaderConnectionStatusListener? = null
 
@@ -63,7 +66,9 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
 
             val merchant = omniApi.getSelf {
                 error(OmniException("Could not get reader settings", it.message))
-            }?.merchant ?: return@launch
+            }?.merchant ?: run {
+                error(error(OmniException("Could not get reader settings", "Merchant object is null")))
+            }
 
             val mutatedArgs = args.toMutableMap()
 
@@ -278,6 +283,7 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
                     request = request,
                     signatureProvider = signatureProvider,
                     transactionUpdateListener = transactionUpdateListener,
+                    userNotificationListener = userNotificationListener,
                     coroutineContext = coroutineContext
             )
 

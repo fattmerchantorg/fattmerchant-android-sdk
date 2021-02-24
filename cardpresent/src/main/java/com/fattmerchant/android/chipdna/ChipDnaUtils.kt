@@ -1,19 +1,19 @@
 package com.fattmerchant.android.chipdna
 
-import android.bluetooth.BluetoothClass
 import com.creditcall.chipdnamobile.DeviceStatus
 import com.creditcall.chipdnamobile.ParameterKeys
 import com.creditcall.chipdnamobile.ParameterValues
 import com.creditcall.chipdnamobile.Parameters
-import com.creditcall.chipdnamobile.TransactionUpdate as ChipDnaTransactionUpdate
-import com.fattmerchant.android.chipdna.ChipDnaDriver
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.TransactionRequest
 import com.fattmerchant.omni.data.TransactionUpdate
+import com.fattmerchant.omni.data.UserNotification
 import com.fattmerchant.omni.data.models.MobileReaderConnectionStatus
 import com.fattmerchant.omni.data.models.Transaction
 import java.text.SimpleDateFormat
 import java.util.*
+import com.creditcall.chipdnamobile.TransactionUpdate as ChipDnaTransactionUpdate
+import com.creditcall.chipdnamobile.UserNotification as ChipDnaUserNotification
 
 /**
  * Makes an instance of [MobileReader] for the given [pinPad]
@@ -67,6 +67,27 @@ fun mapTransactionUpdate(transactionUpdate: String): TransactionUpdate? {
 }
 
 /**
+ * Maps a ChipDna UserNotification to an Omni UserNotification
+ *
+ * @param userNotification the value of a ChipDnaUserNotification
+ * @return an Omni [UserNotification]
+ */
+fun mapUserNotification(userNotification: String): UserNotification? {
+    return when (userNotification) {
+        ChipDnaUserNotification.TryCardAgain.value -> UserNotification.TryCardAgain
+        ChipDnaUserNotification.ChipReadErrorApplicationNotSupportedPleaseRetry.value -> UserNotification.ChipReadErrorApplicationNotSupportedPleaseRetry
+        ChipDnaUserNotification.ICCFallforward.value -> UserNotification.FallforwardInsertCard
+        ChipDnaUserNotification.ICCMSRFallforward.value -> UserNotification.FallforwardInsertSwipeCard
+        ChipDnaUserNotification.MSRFallback.value -> UserNotification.FallbackSwipeCard
+        ChipDnaUserNotification.MSRFallforward.value -> UserNotification.FallforwardSwipeCard
+        ChipDnaUserNotification.PresentOneCardOnly.value -> UserNotification.PresentOneCardOnly
+        ChipDnaUserNotification.ReferToDevice.value -> UserNotification.ReferToDevice
+        else -> UserNotification(userNotification)
+    }
+}
+
+
+/**
  * Tries to get the parameter by key.
  *
  * @return null if not found
@@ -107,7 +128,7 @@ internal fun extractCardEaseReference(transaction: Transaction): String? =
 internal fun generateUserReference(): String =
         String.format("CDM-%s", SimpleDateFormat("yy-MM-dd-HH.mm.ss", Locale.US).format(Date()))
 
-internal fun Parameters.withTransactionRequest(request: TransactionRequest) = Parameters().apply {
+internal fun withTransactionRequest(request: TransactionRequest) = Parameters().apply {
     add(ParameterKeys.Amount, request.amount.centsString())
     add(ParameterKeys.AmountType, ParameterValues.AmountTypeActual)
     add(ParameterKeys.Currency, "USD")

@@ -15,6 +15,7 @@ import com.anywherecommerce.android.sdk.transactions.listener.TransactionListene
 import com.fattmerchant.omni.MobileReaderConnectionStatusListener
 import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
+import com.fattmerchant.omni.UserNotificationListener
 import com.fattmerchant.omni.data.*
 import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.data.MobileReaderDriver.*
@@ -147,7 +148,7 @@ internal class AWCDriver: MobileReaderDriver {
 
     var transactionUpdateDelay = 0.0
 
-    override suspend fun performTransaction(request: TransactionRequest, signatureProvider: SignatureProviding?, transactionUpdateListener: TransactionUpdateListener?): TransactionResult {
+    override suspend fun performTransaction(request: TransactionRequest, signatureProvider: SignatureProviding?, transactionUpdateListener: TransactionUpdateListener?, userNotificationListener: UserNotificationListener?): TransactionResult {
         return suspendCancellableCoroutine { cancellableContinuation ->
             // Create AnyPayTransaction
             val transaction = AnyPayTransaction()

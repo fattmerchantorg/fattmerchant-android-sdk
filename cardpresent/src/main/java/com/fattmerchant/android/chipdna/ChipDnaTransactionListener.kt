@@ -3,6 +3,7 @@ package com.fattmerchant.android.chipdna
 import com.creditcall.chipdnamobile.*
 import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
+import com.fattmerchant.omni.UserNotificationListener
 import com.fattmerchant.omni.data.TransactionUpdate
 
 internal class ChipDnaTransactionListener : ITransactionUpdateListener, ITransactionFinishedListener,
@@ -17,6 +18,9 @@ internal class ChipDnaTransactionListener : ITransactionUpdateListener, ITransac
 
     /** Gets notified of transaction events */
     var transactionUpdateListener: TransactionUpdateListener? = null
+
+    /** Gets notified of user notifications */
+    var userNotificationListener: UserNotificationListener? = null
 
     override fun onTransactionFinishedListener(parameters: Parameters) {
         onFinish?.invoke(parameters)
@@ -57,11 +61,19 @@ internal class ChipDnaTransactionListener : ITransactionUpdateListener, ITransac
         }
     }
 
+    override fun onUserNotification(parameters: Parameters?) {
+        parameters?.getValue(ParameterKeys.UserNotification)?.let {
+            userNotificationListener?.onRawUserNotification(it)
+            mapUserNotification(it)?.let { userNotification ->
+                userNotificationListener?.onUserNotification(userNotification)
+            }
+        }
+    }
+
     override fun onVoiceReferral(parameters: Parameters) {}
     override fun onVerifyId(parameters: Parameters) {}
     override fun onDeferredAuthorizationListener(parameters: Parameters) {}
     override fun onForceAcceptance(parameters: Parameters) {}
     override fun onPartialApproval(parameters: Parameters) {}
     override fun onApplicationSelection(p0: Parameters?) {}
-    override fun onUserNotification(p0: Parameters?) {}
 }
