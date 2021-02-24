@@ -20,13 +20,13 @@ open class UserNotification(var value: String, val userFriendlyMessage: String? 
         /** Indicates that fallback to Swipe has occurred */
         val FallbackSwipeCard = UserNotification("Prompt User Fallback Swipe Card", "Please swipe your card.")
 
-        /** Indicates that fallforward from Contactless to Swipe has occurred */
+        /** Indicates that fallforward to Swipe has occurred */
         val FallforwardSwipeCard = UserNotification("Prompt User Fallforward Swipe Card", "Please swipe your card.")
 
-        /** Indicates that fallforward from Contactless to Insert has occurred */
-        val FallforwardInsertCard = UserNotification("Prompt User Fallback Insert Card", "Please insert your card.")
+        /** Indicates that fallforward to Insert has occurred */
+        val FallforwardInsertCard = UserNotification("Prompt User Fallforward Insert Card", "Please insert your card.")
 
-        /** Indicates that fallforward from Contactless to Insert/Swipe has occurred */
+        /** Indicates that fallforward to Insert/Swipe has occurred */
         val FallforwardInsertSwipeCard = UserNotification("Prompt User Fallforward Insert Swipe Card", "Please insert or swipe your card.")
 
         /** Indicates that the card should be tried again */
