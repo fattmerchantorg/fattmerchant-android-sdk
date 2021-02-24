@@ -2,17 +2,17 @@ package com.fattmerchant.fmsampleclient
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.EditText
+import androidx.appcompat.app.AppCompatActivity
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
-import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.TransactionRequest
 import com.fattmerchant.omni.data.TransactionUpdate
+import com.fattmerchant.omni.data.models.CreditCard
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.networking.OmniApi
@@ -24,6 +24,9 @@ import java.util.logging.Logger
 class MainActivity : AppCompatActivity() {
 
     val log = Logger.getLogger("MainActivity")
+
+    var connectedReader: MobileReader? = null
+
     fun log(msg: String?) {
         log.info("[${Thread.currentThread().name}] $msg")
     }
@@ -41,8 +44,8 @@ class MainActivity : AppCompatActivity() {
         showApiKeyDialog()
     }
 
-    private fun setupPerformSaleButton() {
-        buttonPerformSale.setOnClickListener {
+    private fun setupPerformSaleWithReaderButton() {
+        buttonPerformSaleWithReader.setOnClickListener {
             val amount = Amount(getAmount())
             updateStatus("Attempting to charge ${amount.dollarsString()}")
             val request = TransactionRequest(amount)
@@ -56,6 +59,32 @@ class MainActivity : AppCompatActivity() {
 
             Omni.shared()?.takeMobileReaderTransaction(request, {
 
+                val msg = if (it.success == true) {
+                    "Successfully executed transaction"
+                } else {
+                    "Transaction declined"
+                }
+
+                runOnUiThread {
+                    updateStatus(msg)
+                }
+
+                transaction = it
+            }, {
+                updateStatus("Couldn't perform sale: ${it.message}. ${it.detail}")
+            })
+        }
+
+        buttonPerformSaleWithReader.isEnabled = true
+    }
+
+    private fun setupPerformSaleButton() {
+        buttonPerformSale.setOnClickListener {
+            val amount = Amount(getAmount())
+            updateStatus("Attempting to charge ${amount.dollarsString()}")
+            val request = TransactionRequest(amount, CreditCard("Test Payment", "4111111111111111", "0224", "32812"))
+
+            Omni.shared()?.pay(request, {
                 val msg = if (it.success == true) {
                     "Successfully executed transaction"
                 } else {
@@ -100,25 +129,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupVoidButton() {
-        buttonVoidPreviousTransaction.setOnClickListener {
-            updateStatus("Fetching list of transactions")
-            Omni.shared()?.getTransactions({ transactions ->
-
-                // Figure out which transactions are refundable
-                val voidableTransactions = transactions.filter {
-                    it.source?.contains("CPSDK") == true && it.isVoided == false
+        buttonCancelTransaction.setOnClickListener {
+            Omni.shared()?.cancelMobileReaderTransaction({
+                if (it) {
+                    updateStatus("Transaction cancelled")
+                } else {
+                    updateStatus("Transaction not cancelled")
                 }
 
-                chooseTransaction(voidableTransactions) { transactionToRefund ->
-                    updateStatus("Trying to void ${transactionToRefund.pretty()}")
-                    Omni.shared()?.voidMobileReaderTransaction(transactionToRefund, {
-                        updateStatus("Voided ${transactionToRefund.pretty()}")
-                    }, {
-                        updateStatus("Error Voiding: ${it.message} ${it.detail}")
-                    })
-                }
             }, {
-                updateStatus(it.message ?: "Could not get transactions")
+                updateStatus(it)
             })
         }
     }
@@ -175,15 +195,17 @@ class MainActivity : AppCompatActivity() {
                 dialog.dismiss()
                 // If you want to not use the apikey dialog, modify the initializeOmni call like below
                 // initializeOmni("insert api key here")
-                initializeOmni("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6ImViNDhlZjk5LWFhNzgtNDk2ZS05YjAxLTQyMWY4ZGFmNzMyMyIsImdvZFVzZXIiOnRydWUsImJyYW5kIjoiZmF0dG1lcmNoYW50Iiwic3ViIjoiMzBjNmVlYjYtNjRiNi00N2Y2LWJjZjYtNzg3YTljNTg3OThiIiwiaXNzIjoiaHR0cDovL2FwaWRldi5mYXR0bGFicy5jb20vYXV0aGVudGljYXRlIiwiaWF0IjoxNTkxOTAxMjEwLCJleHAiOjE1OTE5ODc2MTAsIm5iZiI6MTU5MTkwMTIxMCwianRpIjoiMGdjUTBtUno2dUR2OHBaOCJ9.5lnby6KfWgnRhBdzu51PaFbnKqoCSiA6JBiSzyo6y5s")
+                initializeOmni("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6IjRjMTc2ZGFhLTg1OGUtNDIzYi1hOGQ1LTU4NTA5ZDA0MTExMiIsImdvZFVzZXIiOnRydWUsImJyYW5kIjoiZmF0dG1lcmNoYW50LXNhbmRib3giLCJzdWIiOiIxMjgwZGQ0ZC0xMjYxLTRhYjUtOGRmYi1jYWYxZjdkOGNlMzQiLCJpc3MiOiJodHRwOi8vYXBpZGV2MDEuZmF0dGxhYnMuY29tL2F1dGhlbnRpY2F0ZSIsImlhdCI6MTYwNzQ0ODkxMSwiZXhwIjoxNjA3NTM1MzExLCJuYmYiOjE2MDc0NDg5MTEsImp0aSI6ImVnZFdsSmFUYTBWRDFwUTIifQ.jnrptnoG6Z5PQ6xf_O-2FEvR91k3kPFvvVeJrCNMOOw")
             }.show()
     }
 
     private fun setupButtons() {
         setupInitializeButton()
+        setupPerformSaleWithReaderButton()
         setupPerformSaleButton()
         setupRefundButton()
         setupConnectReaderButton()
+        setupDisconnectReaderButton()
         setupVoidButton()
         setupReaderDetailsButton()
         setupDisconnectReaderButton()
@@ -227,10 +249,12 @@ class MainActivity : AppCompatActivity() {
                         updateStatus("Trying to connect to [${selected.getName()}]")
 
                         Omni.shared()?.connectReader(selected, { reader ->
+                            this.connectedReader = reader
+                            buttonDisconnectReader.isEnabled = true
                             updateStatus("Connected to [${reader.getName()}]")
 
                             runOnUiThread {
-                                buttonPerformSale.isEnabled = true
+                                buttonPerformSaleWithReader.isEnabled = true
                             }
                         }, { error ->
                             updateStatus("Error connecting: $error")
@@ -267,7 +291,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initializeOmni(apiKey: String) {
         Omni.initialize(
-            InitParams(applicationContext, apiKey, OmniApi.Environment.DEV), {
+            InitParams(applicationContext, application, apiKey, OmniApi.Environment.DEV), {
                 runOnUiThread {
                     updateStatus("Initialized")
                     buttonRefundPreviousTransaction.isEnabled = true

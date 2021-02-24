@@ -3,9 +3,7 @@ package com.fattmerchant.omni
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.TransactionRequest
-import com.fattmerchant.omni.data.models.Invoice
-import com.fattmerchant.omni.data.models.OmniException
-import com.fattmerchant.omni.data.models.Transaction
+import com.fattmerchant.omni.data.models.*
 import com.fattmerchant.omni.data.repository.*
 import com.fattmerchant.omni.networking.OmniApi
 import com.fattmerchant.omni.usecase.*
@@ -47,6 +45,9 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
     /** Receives notifications about transaction events such as when a card is swiped */
     open var transactionUpdateListener: TransactionUpdateListener? = null
 
+    /** Receives notifications about reader connection events */
+    open var mobileReaderConnectionStatusListener: MobileReaderConnectionStatusListener? = null
+
     internal open lateinit var mobileReaderDriverRepository: MobileReaderDriverRepository
     internal var coroutineScope = MainScope()
     private var currentJob: CoroutineScope? = null
@@ -59,21 +60,41 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
      */
     internal fun initialize(args: Map<String, Any>, completion: () -> Unit, error: (OmniException) -> Unit) {
         coroutineScope.launch {
-            // Verify that the apiKey corresponds to a real merchant
-            val merchant = omniApi.getMerchant {
-                error(OmniException("Could not initialize Omni", it.message))
-            } ?: return@launch
 
-            // Get the nmiApiKey from the merchant
-            val argsWithMerchant = args.toMutableMap().apply {
-                set("merchant", merchant)
+            val merchant = omniApi.getSelf {
+                error(OmniException("Could not get reader settings", it.message))
+            }?.merchant ?: return@launch
+
+            val mutatedArgs = args.toMutableMap()
+
+            // AWC
+            val awcDetails = MobileReaderDetails.AWCDetails()
+            merchant.emvTerminalId()?.let { awcDetails.terminalId = it }
+            merchant.emvTerminalSecret()?.let { awcDetails.terminalSecret = it }
+            mutatedArgs["awc"] = awcDetails
+
+            // NMI
+            val nmiDetails = MobileReaderDetails.NMIDetails()
+            merchant.emvPassword()?.let { nmiDetails.securityKey = it }
+            mutatedArgs["nmi"] = nmiDetails
+
+            omniApi.getMobileReaderSettings {
+                // error(OmniException("Could not get reader settings", it.message))
+            }?.let { mobileReaderDetails ->
+                mobileReaderDetails.nmi?.let {
+                    mutatedArgs["nmi"] = it
+                }
+
+                mobileReaderDetails.anywhereCommerce?.let {
+                    mutatedArgs["awc"] = it
+                }
+
+                InitializeDrivers(
+                        mobileReaderDriverRepository,
+                        mutatedArgs,
+                        coroutineContext
+                ).start(error)
             }
-
-            InitializeDrivers(
-                    mobileReaderDriverRepository,
-                    argsWithMerchant,
-                    coroutineContext
-            ).start(error)
 
             initialized = true
 
@@ -124,14 +145,15 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
     fun connectReader(mobileReader: MobileReader, onConnected: (MobileReader) -> Unit, onFail: (String) -> Unit) {
         coroutineScope.launch {
             try {
-                val connected = ConnectMobileReader(
+                val connectedReader = ConnectMobileReader(
                         coroutineContext,
                         mobileReaderDriverRepository,
-                        mobileReader
+                        mobileReader,
+                        mobileReaderConnectionStatusListener
                 ).start()
 
-                if (connected) {
-                    onConnected(mobileReader)
+                if (connectedReader != null) {
+                    onConnected(connectedReader)
                 } else {
                     onFail("Could not connect to mobile reader")
                 }
@@ -163,6 +185,37 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
             )
 
             onDisconnected(job.start(onFail))
+        }
+    }
+
+    /**
+     * Charges a transaction
+     *
+     * @param transactionRequest a [TransactionRequest] object that includes all the information needed to
+     * run this transaction including [TransactionRequest.amount] and [TransactionRequest.tokenize]
+     * @param completion a block to run once the transaction is finished. Receives the completed
+     * [Transaction]
+     * @param error a block to run if an error is thrown. Receives an [OmniException]
+     */
+    fun pay(transactionRequest: TransactionRequest, completion: (Transaction) -> Unit, error: (OmniException) -> Unit) {
+        coroutineScope.launch {
+            val takePaymentJob = TakePayment(
+                    customerRepository = customerRepository,
+                    paymentMethodRepository = paymentMethodRepository,
+                    request = transactionRequest,
+                    omniApi = omniApi,
+                    coroutineContext = coroutineContext)
+
+            currentJob = takePaymentJob
+
+            val result = takePaymentJob.start {
+                error(it)
+                return@start
+            }
+
+            result?.let {
+                completion(it)
+            }
         }
     }
 
@@ -231,7 +284,7 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
             currentJob = takePaymentJob
 
             val result = takePaymentJob.start {
-                error(OmniException("Could not take mobile reader transaction", it.message))
+                error(it)
                 return@start
             }
 
@@ -297,10 +350,29 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
                     mobileReaderDriverRepository,
                     transactionRepository,
                     transaction,
-                    refundAmount
+                    refundAmount,
+                    omniApi
             ).start {
                 error(it)
             }?.let { completion(it) }
+        }
+    }
+
+    /**
+     * Attempts to cancel a current mobile reader [transaction]
+     *
+     * @param completion
+     * @param error a block to run in case an error occurs
+     */
+    fun cancelMobileReaderTransaction(
+            completion: (Boolean) -> Unit,
+            error: (error: OmniException) -> Unit
+    ) {
+        coroutineScope.launch {
+            completion(CancelCurrentTransaction(
+                    coroutineContext,
+                    mobileReaderDriverRepository
+            ).start(error))
         }
     }
 

@@ -26,7 +26,7 @@ open class PaymentMethod : Model {
     open var isDefault: Int? = null
     open var isUsableInVt: Boolean? = null
     open var merchantId: String? = null
-    open var meta: String? = null
+    open var meta: Any? = null
     open var method: String? = null
     open var nickname: String? = null
     open var personName: String? = null
@@ -55,4 +55,24 @@ open class PaymentMethod : Model {
      * @note If this field is not `null`, then `tokenize` must be `false`
      */
     internal var paymentToken: String? = null
+
+    /**
+     * The card number
+     */
+    internal var cardNumber: String? = null
+
+    /**
+     * The card CVV
+     */
+    internal var cardCvv: String? = null
+
+    /**
+     * The bank account number
+     */
+    internal var bankAccount: String? = null
+
+    /**
+     * The bank routing number
+     */
+    internal var bankRouting: String? = null
 }

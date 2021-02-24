@@ -3,7 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/cardpresent/cardpresent.iml" filepath="$PROJECT_DIR$/cardpresent/cardpresent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cardpresent/com.github.fattmerchantorg-cardpresent.iml" filepath="$PROJECT_DIR$/.idea/modules/cardpresent/com.github.fattmerchantorg-cardpresent.iml" group="fattmerchant-android-sdk/cardpresent" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tokenization/com.github.fattmerchantorg-tokenization.iml" filepath="$PROJECT_DIR$/.idea/modules/tokenization/com.github.fattmerchantorg-tokenization.iml" group="fattmerchant-android-sdk/tokenization" />
       <module fileurl="file://$PROJECT_DIR$/fattmerchant-android-sdk.iml" filepath="$PROJECT_DIR$/fattmerchant-android-sdk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fattmerchant-fattmerchant-android-sdk.iml" filepath="$PROJECT_DIR$/.idea/modules/fattmerchant-fattmerchant-android-sdk.iml" group="fattmerchant-android-sdk" />
       <module fileurl="file://$PROJECT_DIR$/tokenization/tokenization.iml" filepath="$PROJECT_DIR$/tokenization/tokenization.iml" />
     </modules>
   </component>
