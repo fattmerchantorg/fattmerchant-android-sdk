@@ -1,10 +1,8 @@
 package com.fattmerchant.omni.usecase
 
-import com.fattmerchant.android.Omni
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.repository.MobileReaderDriverRepository
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.awaitAll
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -26,19 +24,24 @@ internal class InitializeDrivers(
         // Get all the drivers
         val drivers = mobileReaderDriverRepository.getDrivers()
 
+        var error: OmniException? = null
+
         // One by one, try to initialize them
         val initializedDrivers = drivers.map {
             try {
                 it.initialize(args)
             } catch (e: Throwable) {
+                if (e is OmniException) {
+                    error = e
+                }
                 false
             }
         }
 
-        if (initializedDrivers.contains(true)) {
-            return
-        } else {
-            onError(InitializeDriversException.NoMobileReadersFound)
+        when {
+            initializedDrivers.contains(true) -> return
+            error != null -> onError(error!!)
+            else -> onError(InitializeDriversException.NoMobileReadersFound)
         }
     }
 }
