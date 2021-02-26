@@ -170,6 +170,20 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
     }
 
     /**
+     * Attempts to connect to the given [MobileReader]
+     *
+     * returns a [MobileReader]
+     */
+    suspend fun connectReader(mobileReader: MobileReader): MobileReader? = withContext(Dispatchers.Main){
+        return@withContext ConnectMobileReader(
+                coroutineContext,
+                mobileReaderDriverRepository,
+                mobileReader,
+                mobileReaderConnectionStatusListener
+        ).start()
+    }
+
+    /**
      * Attempts to disconnect the given [MobileReader]
      *
      * @param mobileReader the [MobileReader] to disconnect
