@@ -186,15 +186,6 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
                     return@IConnectAndConfigureFinishedListener
                 }
 
-                if(params.containsKey(ParameterKeys.Errors)) {
-                    if(params[ParameterKeys.Errors]?.contains("DeviceRebooting") == true) {
-                        ChipDnaMobile.getInstance().addConnectAndConfigureFinishedListener(connectAndConfigureListener)
-                        ChipDnaMobile.getInstance().connectAndConfigure(requestParams)
-                    }
-
-                    return@IConnectAndConfigureFinishedListener
-                }
-
                 val error = params[ParameterKeys.ErrorDescription]
                 cont.resumeWithException(ConnectReaderException(error))
             }
