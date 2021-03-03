@@ -118,8 +118,8 @@ internal class TakeMobileReaderPayment(
         // Create customer
         val customer = customerRepository.create(
             Customer().apply {
-                firstname = result.cardHolderFirstName ?: "SWIPE"
-                lastname = result.cardHolderLastName ?: "CUSTOMER"
+                firstname = if(result.isFromMobileDevice) "Mobile Device" else result.cardHolderFirstName ?: "SWIPE"
+                lastname = if(result.isFromMobileDevice) "Customer" else result.cardHolderLastName ?: "CUSTOMER"
             }
         ) {
             onError(it)

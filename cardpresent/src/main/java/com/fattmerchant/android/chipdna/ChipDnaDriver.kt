@@ -327,10 +327,11 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
             externalId = result[ParameterKeys.TransactionId]
             cardHolderFirstName = firstName
             cardHolderLastName = lastName
-            cardType = result[ParameterKeys.CardSchemeId]?.toLowerCase()
+            cardType = result[ParameterKeys.CardSchemeId]?.toLowerCase(Locale.ROOT)
             cardExpiration = ccExpiration
             this.source = this@ChipDnaDriver.source
             success = result[ParameterKeys.TransactionResult] == ParameterValues.Approved
+            isFromMobileDevice = result[ParameterKeys.Par] != null
 
             result[ParameterKeys.CustomerVaultId]?.let { token ->
                 paymentToken = "nmi_$token"
