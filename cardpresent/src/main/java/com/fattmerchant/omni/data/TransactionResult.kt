@@ -39,6 +39,9 @@ open class TransactionResult {
     /** Sale, Refund, etc */
     var transactionType: String? = null
 
+    /** CONTACTLESS, etc */
+    var transactionSource: String? = null
+
     /** [Amount] of money that was exchanged */
     var amount: Amount? = null
 
@@ -77,7 +80,4 @@ open class TransactionResult {
      *  transaction. For example, "Insufficient Funds"
      */
     internal var message: String? = null
-
-    /** Is the transaction from a mobile device? Does the transaction have a device PAN associated? */
-    var isFromMobileDevice: Boolean = false
 }

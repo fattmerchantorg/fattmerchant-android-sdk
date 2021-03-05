@@ -313,6 +313,8 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
         val addressState = result[ParameterKeys.BillingState]
         var ccExpiration: String? = null
 
+        val receiptData = ChipDnaMobileSerializer.deserializeReceiptData(result[ParameterKeys.ReceiptData])
+
         // Try to add the cc expiration
         result[ParameterKeys.TransactionId]?.let { transactionId ->
             ccExpiration = TransactionGateway.getTransactionCcExpiration(securityKey, transactionId)
@@ -331,7 +333,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
             cardExpiration = ccExpiration
             this.source = this@ChipDnaDriver.source
             success = result[ParameterKeys.TransactionResult] == ParameterValues.Approved
-            isFromMobileDevice = result[ParameterKeys.Par] != null
+            transactionSource = receiptData[ReceiptFieldKey.TRANSACTION_SOURCE]?.value
 
             result[ParameterKeys.CustomerVaultId]?.let { token ->
                 paymentToken = "nmi_$token"
