@@ -39,6 +39,9 @@ open class TransactionResult {
     /** Sale, Refund, etc */
     var transactionType: String? = null
 
+    /** CONTACTLESS, etc */
+    var transactionSource: String? = null
+
     /** [Amount] of money that was exchanged */
     var amount: Amount? = null
 
