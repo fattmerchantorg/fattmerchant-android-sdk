@@ -167,5 +167,6 @@ fun MobileReaderConnectionStatus.Companion.from(chipDnaConfigurationUpdate: Stri
 
 fun MobileReaderConnectionStatus.Companion.from(chipDnaDeviceStatus: DeviceStatus.DeviceStatusEnum) = when(chipDnaDeviceStatus) {
     DeviceStatus.DeviceStatusEnum.DeviceStatusDisconnected -> MobileReaderConnectionStatus.DISCONNECTED
+    DeviceStatus.DeviceStatusEnum.DeviceStatusConnected -> MobileReaderConnectionStatus.CONNECTED
     else -> null
 }

@@ -197,6 +197,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
 
     override suspend fun disconnect(reader: MobileReader, error: (OmniException) -> Unit): Boolean {
         ChipDnaMobile.dispose(null)
+        mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(MobileReaderConnectionStatus.DISCONNECTED)
         initialize(initArgs)
         return true
     }
