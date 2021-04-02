@@ -22,11 +22,11 @@ internal class TokenizePaymentMethod(
         creditCard?.personName?.let {
             firstName = creditCard.firstName()
             lastName = creditCard.lastName()
-        }.run {
+        } ?: run {
             bankAccount?.personName?.let {
                 firstName = bankAccount.firstName()
                 lastName = bankAccount.lastName()
-            }?.run {
+            } ?: run {
                 failure(OmniException("No name supplied."))
                 return@coroutineScope null
             }
@@ -36,7 +36,7 @@ internal class TokenizePaymentMethod(
             customer = customerRepository.getById(it) { exception ->
                 failure(exception)
             } ?: return@coroutineScope null
-        }.run {
+        } ?: run {
             customer = customerRepository.create(Customer().apply {
                 this.firstname =  firstName?: "SWIPE"
                 this.lastname = lastName?: "CUSTOMER"
@@ -56,7 +56,7 @@ internal class TokenizePaymentMethod(
                 addressZip = card.addressZip
                 cardExp = card.cardExp
             }
-        }.run {
+        } ?: run {
             bankAccount?.let {  bank ->
                 paymentMethod = PaymentMethod().apply {
                     customerId = customer?.id
@@ -67,7 +67,7 @@ internal class TokenizePaymentMethod(
                     bankType = bank.bankType
                     personName = bank.personName
                 }
-            }?.run {
+            } ?: run {
                 failure(OmniException("No credit card or bank information was supplied."))
                 return@coroutineScope null
             }

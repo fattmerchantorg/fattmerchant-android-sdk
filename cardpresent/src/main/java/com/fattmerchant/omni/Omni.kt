@@ -238,6 +238,48 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
         }
     }
 
+    fun tokenize(bankAccount: BankAccount, completion: (PaymentMethod) -> Unit, error: (OmniException) -> Unit) {
+        coroutineScope.launch {
+            val tokenizeJob = TokenizePaymentMethod(
+                    customerRepository = customerRepository,
+                    paymentMethodRepository = paymentMethodRepository,
+                    bankAccount = bankAccount,
+                    coroutineContext = coroutineContext
+            )
+
+            currentJob = tokenizeJob
+            val result = tokenizeJob.start {
+                error(it)
+                return@start
+            }
+
+            result?.let {
+                completion(it)
+            }
+        }
+    }
+
+    fun tokenize(creditCard: CreditCard, completion: (PaymentMethod) -> Unit, error: (OmniException) -> Unit) {
+        coroutineScope.launch {
+            val tokenizeJob = TokenizePaymentMethod(
+                    customerRepository = customerRepository,
+                    paymentMethodRepository = paymentMethodRepository,
+                    creditCard = creditCard,
+                    coroutineContext = coroutineContext
+            )
+
+            currentJob = tokenizeJob
+            val result = tokenizeJob.start {
+                error(it)
+                return@start
+            }
+
+            result?.let {
+                completion(it)
+            }
+        }
+    }
+
     /**
      * Captures a mobile reader transaction
      *

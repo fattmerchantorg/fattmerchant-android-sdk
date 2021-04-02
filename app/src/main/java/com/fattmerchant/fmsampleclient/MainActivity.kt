@@ -10,9 +10,7 @@ import com.fattmerchant.android.Omni
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.UserNotificationListener
 import com.fattmerchant.omni.data.*
-import com.fattmerchant.omni.data.models.CreditCard
-import com.fattmerchant.omni.data.models.OmniException
-import com.fattmerchant.omni.data.models.Transaction
+import com.fattmerchant.omni.data.models.*
 import com.fattmerchant.omni.networking.OmniApi
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
@@ -112,6 +110,41 @@ class MainActivity : AppCompatActivity() {
         buttonPerformSale.isEnabled = true
     }
 
+    private fun setupTokenizeCardButton() {
+        buttonTokenizeCard.setOnClickListener {
+            Omni.shared()?.tokenize(CreditCard.testCreditCard(), {
+                val msg = "Successfully tokenized credit card"
+                runOnUiThread {
+                    updateStatus(msg)
+                    updateStatus(it)
+                }
+            }, {
+                runOnUiThread {
+                    updateStatus("Couldn't tokenize card: ${it.message}. ${it.detail}")
+                }
+            })
+        }
+    }
+
+    private fun setupTokenizeBankButton() {
+        buttonTokenizeBank.setOnClickListener {
+            var andre3000 = BankAccount.testBankAccount().apply {
+                personName = "Andree Threestacks"
+            }
+            Omni.shared()?.tokenize(andre3000, {
+                val msg = "Successfully tokenized bank account"
+                runOnUiThread {
+                    updateStatus(msg)
+                    updateStatus(it)
+                }
+            }, {
+                runOnUiThread {
+                    updateStatus("Couldn't tokenize card: ${it.message}. ${it.detail}")
+                }
+            })
+        }
+    }
+
     private fun setupRefundButton() {
         buttonRefundPreviousTransaction.setOnClickListener {
             updateStatus("Fetching list of transactions")
@@ -203,7 +236,7 @@ class MainActivity : AppCompatActivity() {
                 dialog.dismiss()
                 // If you want to not use the apikey dialog, modify the initializeOmni call like below
                 // initializeOmni("insert api key here")
-                initializeOmni("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6ImViNDhlZjk5LWFhNzgtNDk2ZS05YjAxLTQyMWY4ZGFmNzMyMyIsImdvZFVzZXIiOnRydWUsImJyYW5kIjoiZmF0dG1lcmNoYW50Iiwic3ViIjoiMTI4MGRkNGQtMTI2MS00YWI1LThkZmItY2FmMWY3ZDhjZTM0IiwiaXNzIjoiaHR0cDovL2FwaWRldjAxLmZhdHRsYWJzLmNvbS9hdXRoZW50aWNhdGUiLCJpYXQiOjE2MTQxMTM1NDMsImV4cCI6MTYxNDE5OTk0MywibmJmIjoxNjE0MTEzNTQzLCJqdGkiOiJ0THZiVWlkZW55UkF6aDNnIn0.p2_9RVIpsfcDbJOKJ2trsqXqpnpPPpLR3fOQwnkEMqA")
+                initializeOmni("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6IjI5ZDY0ODNkLWUzYjctNGMwZS1hM2U4LTBlYWU3MjIwZmMxOCIsImdvZFVzZXIiOnRydWUsImJyYW5kIjoiZmF0dG1lcmNoYW50LXNhbmRib3giLCJzdWIiOiIzMGM2ZWViNi02NGI2LTQ3ZjYtYmNmNi03ODdhOWM1ODc5OGIiLCJpc3MiOiJodHRwOi8vYXBpZGV2LmZhdHRsYWJzLmNvbS9hdXRoZW50aWNhdGUiLCJpYXQiOjE2MTYzNTI2MDcsImV4cCI6MTYxNjQzOTAwNywibmJmIjoxNjE2MzUyNjA3LCJqdGkiOiJMWEVXMWs3QmZuMXNiek9IIn0.4VQeqTWycKA8hb_s5SUCOobDcK48R9Dl7144Sg86YPA")
             }.show()
     }
 
@@ -217,6 +250,8 @@ class MainActivity : AppCompatActivity() {
         setupVoidButton()
         setupReaderDetailsButton()
         setupDisconnectReaderButton()
+        setupTokenizeBankButton()
+        setupTokenizeCardButton()
     }
 
     private fun Transaction.pretty(): String {
@@ -288,6 +323,14 @@ class MainActivity : AppCompatActivity() {
     private fun updateStatus(msg: String) = runOnUiThread {
         val newText = formatMessage(msg) + "\n" + textView.text
         textView.text = newText
+    }
+
+    private fun updateStatus(paymentMethod: PaymentMethod) = runOnUiThread {
+        var message = "PaymentMethod: "
+        message += "\n\t id: ${paymentMethod.id ?: ""}"
+        message += "\n\t customerId: ${paymentMethod.customerId}"
+        message += "\n\t method: ${paymentMethod.method ?: ""}"
+        updateStatus(message)
     }
 
     private fun updateStatus(exception: OmniException) = updateStatus("[${exception.message}] ${exception.detail}")
