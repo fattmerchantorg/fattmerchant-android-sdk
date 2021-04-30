@@ -1,9 +1,12 @@
 package com.fattmerchant.fmsampleclient
 
+import android.Manifest
 import android.app.AlertDialog
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
@@ -17,7 +20,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.logging.Logger
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), PermissionsManager {
 
     val log = Logger.getLogger("MainActivity")
 
@@ -40,11 +43,27 @@ class MainActivity : AppCompatActivity() {
         showApiKeyDialog()
     }
 
+    override var permissionRequestLauncherCallback: ((Boolean) -> Unit)? = null
+    override fun getActivity(): AppCompatActivity {
+        return this
+    }
+
+    override fun getContext(): Context {
+        return this
+    }
+
+    override var permissionRequestLauncher
+            = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+        permissionRequestLauncherCallback?.invoke(isGranted)
+    }
+
     private fun setupPerformSaleWithReaderButton() {
         buttonPerformSaleWithReader.setOnClickListener {
             val amount = Amount(getAmount())
             updateStatus("Attempting to charge ${amount.dollarsString()}")
             val request = TransactionRequest(amount)
+
+            request.invoiceId = ""
 
             // Listen to transaction updates delivered by the Omni SDK
             Omni.shared()?.transactionUpdateListener = object: TransactionUpdateListener {
@@ -236,7 +255,7 @@ class MainActivity : AppCompatActivity() {
                 dialog.dismiss()
                 // If you want to not use the apikey dialog, modify the initializeOmni call like below
                 // initializeOmni("insert api key here")
-                initializeOmni("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6IjI5ZDY0ODNkLWUzYjctNGMwZS1hM2U4LTBlYWU3MjIwZmMxOCIsImdvZFVzZXIiOnRydWUsImJyYW5kIjoiZmF0dG1lcmNoYW50LXNhbmRib3giLCJzdWIiOiIzMGM2ZWViNi02NGI2LTQ3ZjYtYmNmNi03ODdhOWM1ODc5OGIiLCJpc3MiOiJodHRwOi8vYXBpZGV2LmZhdHRsYWJzLmNvbS9hdXRoZW50aWNhdGUiLCJpYXQiOjE2MTYzNTI2MDcsImV4cCI6MTYxNjQzOTAwNywibmJmIjoxNjE2MzUyNjA3LCJqdGkiOiJMWEVXMWs3QmZuMXNiek9IIn0.4VQeqTWycKA8hb_s5SUCOobDcK48R9Dl7144Sg86YPA")
+                initializeOmni("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6ImU3MTJhZThlLTIwOWUtNGNkYi05MDMwLTc1NWU2OWFmMTI0NiIsImdvZFVzZXIiOnRydWUsImJyYW5kIjoiZmF0dG1lcmNoYW50Iiwic3ViIjoiMTI4MGRkNGQtMTI2MS00YWI1LThkZmItY2FmMWY3ZDhjZTM0IiwiaXNzIjoiaHR0cDovL2FwaWRldjAxLmZhdHRsYWJzLmNvbS9hdXRoZW50aWNhdGUiLCJpYXQiOjE2MTk4MDYzOTUsImV4cCI6MTYxOTg5Mjc5NSwibmJmIjoxNjE5ODA2Mzk1LCJqdGkiOiJxdllTNERKamxMUmhkSHIxIn0.V5J7StK9qpO76It94milWpXZIxbHBBmUyHjwLZGFw4w")
             }.show()
     }
 
@@ -279,31 +298,38 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun searchAndConnectReader() {
-        updateStatus("Searching for readers...")
-        Omni.shared()?.getAvailableReaders {
-            val readers = it.map { it.getName() }.toTypedArray()
-            updateStatus("Found readers: ${it.map { it.getName() }}")
+        runIfPermissionGranted(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                R.string.permission_rationale_title,
+                R.string.permission_rationale_message_fine_location,
+                R.string.permission_denied_title,
+                R.string.permission_rationale_message_fine_location) {
+            updateStatus("Searching for readers...")
+            Omni.shared()?.getAvailableReaders {
+                val readers = it.map { it.getName() }.toTypedArray()
+                updateStatus("Found readers: ${it.map { it.getName() }}")
 
-            runOnUiThread {
-                AlertDialog.Builder(this@MainActivity)
-                    .setItems(readers) { dialog, which ->
-                        val selected = it[which]
+                runOnUiThread {
+                    AlertDialog.Builder(this@MainActivity)
+                            .setItems(readers) { dialog, which ->
+                                val selected = it[which]
 
-                        updateStatus("Trying to connect to [${selected.getName()}]")
+                                updateStatus("Trying to connect to [${selected.getName()}]")
 
-                        Omni.shared()?.connectReader(selected, { reader ->
-                            this.connectedReader = reader
-                            buttonDisconnectReader.isEnabled = true
-                            updateStatus("Connected to [${reader.getName()}]")
+                                Omni.shared()?.connectReader(selected, { reader ->
+                                    this.connectedReader = reader
+                                    buttonDisconnectReader.isEnabled = true
+                                    updateStatus("Connected to [${reader.getName()}]")
 
-                            runOnUiThread {
-                                buttonPerformSaleWithReader.isEnabled = true
-                            }
-                        }, { error ->
-                            updateStatus("Error connecting: $error")
-                        })
+                                    runOnUiThread {
+                                        buttonPerformSaleWithReader.isEnabled = true
+                                    }
+                                }, { error ->
+                                    updateStatus("Error connecting: $error")
+                                })
 
-                    }.create().show()
+                            }.create().show()
+                }
             }
         }
     }
