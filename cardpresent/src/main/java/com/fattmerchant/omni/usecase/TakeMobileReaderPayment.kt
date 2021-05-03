@@ -79,7 +79,7 @@ internal class TakeMobileReaderPayment(
         // Check if we are passing an invoice id
         request.invoiceId?.let {
             if (it.isBlank()) {
-                onError(TakeMobileReaderPaymentException("Cannot pass blank invoice id."))
+                onError(TakeMobileReaderPaymentException("Could not create invoice."))
                 return@coroutineScope  null
             }
             // Check if the invoice exists
