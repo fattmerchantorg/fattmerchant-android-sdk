@@ -78,6 +78,10 @@ internal class TakeMobileReaderPayment(
 
         // Check if we are passing an invoice id
         request.invoiceId?.let {
+            if (it.isBlank()) {
+                onError(TakeMobileReaderPaymentException("Could not create invoice."))
+                return@coroutineScope  null
+            }
             // Check if the invoice exists
             invoice = invoiceRepository.getById(it) {
                 onError(TakeMobileReaderPaymentException("Invoice with given id not found"))
