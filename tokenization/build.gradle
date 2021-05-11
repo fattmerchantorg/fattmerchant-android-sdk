@@ -6,11 +6,11 @@ apply plugin: 'com.github.dcendents.android-maven'
 group='com.github.fattmerchantorg'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 30
 
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 28
+        targetSdkVersion 30
         versionCode 7
         versionName "1.2.0"
 
