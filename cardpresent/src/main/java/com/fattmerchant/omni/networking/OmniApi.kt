@@ -1,5 +1,6 @@
 package com.fattmerchant.omni.networking
 
+import com.fattmerchant.omni.data.TransactionResult
 import com.fattmerchant.omni.data.models.*
 import com.google.gson.FieldNamingPolicy
 import io.ktor.client.HttpClient
@@ -14,6 +15,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.content.TextContent
 import io.ktor.http.isSuccess
+import org.json.JSONObject
 
 class OmniApi {
 
@@ -47,12 +49,28 @@ class OmniApi {
     internal suspend fun getSelf(error: (Error) -> Unit): Self? = get("self", error)
 
     /**
+     * Gets the mobile reader settings which the [token] corresponds to
+     *
+     * @param error
+     * @return
+     */
+    internal suspend fun getMobileReaderSettings(error: (Error) -> Unit): MobileReaderDetails? = get("team/gateway/hardware/mobile", error)
+
+    /**
      * Gets the merchant which the [token] corresponds to
      *
      * @param error
      * @return
      */
     internal suspend fun getMerchant(error: (Error) -> Unit): Merchant? = getSelf(error)?.merchant
+
+    /**
+     * Gets the invoice which the [id] corresponds to
+     *
+     * @param error
+     * @return the found invoice
+     */
+    internal suspend fun getInvoice(id: String, error: (Error) -> Unit): Invoice? = get("invoice/${id}", error)
 
     /**
      * Creates a new invoice in Omni
@@ -91,6 +109,22 @@ class OmniApi {
         post("transaction", JsonParser.toJson(transaction), error)
 
     /**
+     * Posts a void-or-refund to Omni
+     *
+     * @param transactionId the id of the transaction to void or refund
+     * @param total the amount in dollars to void or refund
+     * @return the voided or refunded transaction
+     */
+    internal suspend fun postVoidOrRefund(transactionId: String, total: String? = null, error: (Error) -> Unit): Transaction? {
+        val body = mutableMapOf<Any?, Any?>()
+        total?.let {
+            body["total"] = it
+        }
+        return post("transaction/${transactionId}/void-or-refund", JSONObject(body).toString(), error)
+    }
+
+
+    /**
      * Gets a list of transactions from Omni
      *
      * @return the list of transactions
@@ -124,6 +158,9 @@ class OmniApi {
         return post(url, JsonParser.toJson(paymentMethod), error)
     }
 
+    internal suspend fun charge(chargeRequest: ChargeRequest, error: (Error) -> Unit): Transaction? {
+        return post("charge", JsonParser.toJson(chargeRequest), error)
+    }
 
     private suspend inline fun <reified T> post(urlString: String, body: String, error: (Error) -> Unit): T? =
         this.request<T>(

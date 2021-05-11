@@ -1,7 +1,10 @@
 package com.fattmerchant.omni.usecase
 
+import com.fattmerchant.android.anywherecommerce.AWCDriver
+import com.fattmerchant.android.chipdna.ChipDnaDriver
 import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
+import com.fattmerchant.omni.UserNotificationListener
 import com.fattmerchant.omni.data.*
 import com.fattmerchant.omni.data.models.*
 import com.fattmerchant.omni.data.repository.*
@@ -18,6 +21,7 @@ internal class TakeMobileReaderPayment(
     val request: TransactionRequest,
     val signatureProvider: SignatureProviding? = null,
     val transactionUpdateListener: TransactionUpdateListener? = null,
+    val userNotificationListener: UserNotificationListener? = null,
     override val coroutineContext: CoroutineContext
 ) : CoroutineScope {
 
@@ -28,17 +32,34 @@ internal class TakeMobileReaderPayment(
         internal fun transactionMetaFrom(result: TransactionResult): Map<String, Any> {
             val transactionMeta = mutableMapOf<String, Any>()
 
-            result.userReference?.let {
-                transactionMeta["nmiUserRef"] = it
+            when {
+                result.source.contains(ChipDnaDriver().source) -> {
+                    result.userReference?.let {
+                        transactionMeta["nmiUserRef"] = it
+                    }
+
+                    result.localId?.let {
+                        transactionMeta["cardEaseReference"] = it
+                    }
+
+                    result.externalId?.let {
+                        transactionMeta["nmiTransactionId"] = it
+                    }
+                }
+
+                result.source.contains(AWCDriver().source) -> {
+                    result.externalId?.let {
+                        transactionMeta["awcTransactionId"] = it
+                    }
+                }
             }
 
-            result.localId?.let {
-                transactionMeta["cardEaseReference"] = it
-            }
-
-            result.externalId?.let {
-                transactionMeta["nmiTransactionId"] = it
-            }
+            result.request?.lineItems?.let { transactionMeta["lineItems"] = it }
+            result.request?.subtotal?.let { transactionMeta["subtotal"] = it }
+            result.request?.tax?.let { transactionMeta["tax"] = it }
+            result.request?.tip?.let { transactionMeta["tip"] = it }
+            result.request?.memo?.let { transactionMeta["memo"] = it }
+            result.request?.reference?.let { transactionMeta["reference"] = it }
 
             return transactionMeta
         }
@@ -53,22 +74,36 @@ internal class TakeMobileReaderPayment(
             return@coroutineScope null
         }
 
-        // Create invoice
-        val invoice: Invoice = invoiceRepository.create(
-            Invoice().apply {
-                total = request.amount.dollarsString()
-                url = "https://qa.fattpay.com/#/bill/"
-                meta = mapOf("subtotal" to request.amount.dollarsString())
+        var invoice = Invoice()
+
+        // Check if we are passing an invoice id
+        request.invoiceId?.let {
+            if (it.isBlank()) {
+                onError(TakeMobileReaderPaymentException("Could not create invoice."))
+                return@coroutineScope  null
             }
-        ) {
-            onError(it)
-        } ?: return@coroutineScope null
+            // Check if the invoice exists
+            invoice = invoiceRepository.getById(it) {
+                onError(TakeMobileReaderPaymentException("Invoice with given id not found"))
+            } ?: return@coroutineScope null
+        } ?: run {
+            // If not create the invoice
+            invoice = invoiceRepository.create(
+                    Invoice().apply {
+                        total = request.amount.dollarsString()
+                        url = "https://fattpay.com/#/bill/"
+                        meta = mapOf("subtotal" to request.amount.dollarsString())
+                    }
+            ) {
+                onError(it)
+            } ?: return@coroutineScope null
+        }
 
         // Take the mobile reader payment
         val result: TransactionResult
 
         try {
-            result = reader.performTransaction(request, signatureProvider, transactionUpdateListener)
+            result = reader.performTransaction(request, signatureProvider, transactionUpdateListener, userNotificationListener)
         } catch (e: MobileReaderDriver.PerformTransactionException) {
             onError(TakeMobileReaderPaymentException(e.detail))
             return@coroutineScope null
@@ -87,8 +122,8 @@ internal class TakeMobileReaderPayment(
         // Create customer
         val customer = customerRepository.create(
             Customer().apply {
-                firstname = result.cardHolderFirstName ?: "SWIPE"
-                lastname = result.cardHolderLastName ?: "CUSTOMER"
+                firstname = if(result.transactionSource.equals("contactless", true)) "Mobile Device" else result.cardHolderFirstName ?: "SWIPE"
+                lastname = if(result.transactionSource.equals("contactless", true)) "Customer" else result.cardHolderLastName ?: "CUSTOMER"
             }
         ) {
             onError(it)
@@ -146,7 +181,11 @@ internal class TakeMobileReaderPayment(
                 meta = transactionMeta
                 type = "charge"
                 method = "card"
-                source = "Android|CPSDK|NMI"
+                source = "Android|CPSDK|${result.source}"
+                if(result.source == "AWC") {
+                    isRefundable = false
+                    isVoidable = false
+                }
                 customerId = customer.id
                 invoiceId = invoice.id
                 response = gatewayResponse
@@ -164,7 +203,7 @@ internal class TakeMobileReaderPayment(
      * @return a [MobileReaderDriver], if found
      */
     private suspend fun getAvailableMobileReaderDriver(repo: MobileReaderDriverRepository): MobileReaderDriver? = repo
-        .getDrivers()
+        .getInitializedDrivers()
         .firstOrNull { it.isReadyToTakePayment() }
 
 }

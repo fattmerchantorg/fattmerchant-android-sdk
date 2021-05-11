@@ -4,14 +4,16 @@ import com.creditcall.chipdnamobile.DeviceStatus
 import com.creditcall.chipdnamobile.ParameterKeys
 import com.creditcall.chipdnamobile.ParameterValues
 import com.creditcall.chipdnamobile.Parameters
-import com.creditcall.chipdnamobile.TransactionUpdate as ChipDnaTransactionUpdate
-import com.fattmerchant.android.chipdna.ChipDnaDriver
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.TransactionRequest
 import com.fattmerchant.omni.data.TransactionUpdate
+import com.fattmerchant.omni.data.UserNotification
+import com.fattmerchant.omni.data.models.MobileReaderConnectionStatus
 import com.fattmerchant.omni.data.models.Transaction
 import java.text.SimpleDateFormat
 import java.util.*
+import com.creditcall.chipdnamobile.TransactionUpdate as ChipDnaTransactionUpdate
+import com.creditcall.chipdnamobile.UserNotification as ChipDnaUserNotification
 
 /**
  * Makes an instance of [MobileReader] for the given [pinPad]
@@ -65,6 +67,27 @@ fun mapTransactionUpdate(transactionUpdate: String): TransactionUpdate? {
 }
 
 /**
+ * Maps a ChipDna UserNotification to an Omni UserNotification
+ *
+ * @param userNotification the value of a ChipDnaUserNotification
+ * @return an Omni [UserNotification]
+ */
+fun mapUserNotification(userNotification: String): UserNotification? {
+    return when (userNotification) {
+        ChipDnaUserNotification.TryCardAgain.value -> UserNotification.TryCardAgain
+        ChipDnaUserNotification.ChipReadErrorApplicationNotSupportedPleaseRetry.value -> UserNotification.ChipReadErrorApplicationNotSupportedPleaseRetry
+        ChipDnaUserNotification.ICCFallforward.value -> UserNotification.FallforwardInsertCard
+        ChipDnaUserNotification.ICCMSRFallforward.value -> UserNotification.FallforwardInsertSwipeCard
+        ChipDnaUserNotification.MSRFallback.value -> UserNotification.FallbackSwipeCard
+        ChipDnaUserNotification.MSRFallforward.value -> UserNotification.FallforwardSwipeCard
+        ChipDnaUserNotification.PresentOneCardOnly.value -> UserNotification.PresentOneCardOnly
+        ChipDnaUserNotification.ReferToDevice.value -> UserNotification.ReferToDevice
+        else -> UserNotification(userNotification)
+    }
+}
+
+
+/**
  * Tries to get the parameter by key.
  *
  * @return null if not found
@@ -105,7 +128,7 @@ internal fun extractCardEaseReference(transaction: Transaction): String? =
 internal fun generateUserReference(): String =
         String.format("CDM-%s", SimpleDateFormat("yy-MM-dd-HH.mm.ss", Locale.US).format(Date()))
 
-internal fun Parameters.withTransactionRequest(request: TransactionRequest) = Parameters().apply {
+internal fun withTransactionRequest(request: TransactionRequest) = Parameters().apply {
     add(ParameterKeys.Amount, request.amount.centsString())
     add(ParameterKeys.AmountType, ParameterValues.AmountTypeActual)
     add(ParameterKeys.Currency, "USD")
@@ -117,4 +140,33 @@ internal fun Parameters.withTransactionRequest(request: TransactionRequest) = Pa
     if (request.tokenize) {
         add(ParameterKeys.CustomerVaultCommand, ParameterValuesAddCustomer)
     }
+}
+
+/**
+ * Initializes a `MobileReaderConnectionStatus` object from the given ChipDnaConfigurationUpdate
+ *
+ * ChipDna hands us a ton of configuration updates during the mobile reader connection process
+ * The ones we care about are:
+ *  - Connecting
+ *  - Performing Tms Update
+ *  - Updating Pinpad Firmware
+ *  - Rebooting
+ *  - Registering
+ *
+ * @param chipDnaConfigurationUpdate
+ */
+fun MobileReaderConnectionStatus.Companion.from(chipDnaConfigurationUpdate: String): MobileReaderConnectionStatus? = when(chipDnaConfigurationUpdate) {
+    ParameterValues.Registering,
+    ParameterValues.Connecting -> MobileReaderConnectionStatus.CONNECTING
+    ParameterValues.PerformingTmsUpdate -> MobileReaderConnectionStatus.UPDATING_CONFIGURATION
+    ParameterValues.UpdatingPinPadFirmware -> MobileReaderConnectionStatus.UPDATING_FIRMWARE
+    ParameterValues.RebootingPinPad -> MobileReaderConnectionStatus.REBOOTING
+
+    else -> null
+}
+
+fun MobileReaderConnectionStatus.Companion.from(chipDnaDeviceStatus: DeviceStatus.DeviceStatusEnum) = when(chipDnaDeviceStatus) {
+    DeviceStatus.DeviceStatusEnum.DeviceStatusDisconnected -> MobileReaderConnectionStatus.DISCONNECTED
+    DeviceStatus.DeviceStatusEnum.DeviceStatusConnected -> MobileReaderConnectionStatus.CONNECTED
+    else -> null
 }

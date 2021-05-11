@@ -2,14 +2,14 @@ package com.fattmerchant.android.chipdna
 
 import android.content.Context
 import com.creditcall.chipdnamobile.*
-import com.fattmerchant.omni.OmniGeneralException
-import com.fattmerchant.omni.SignatureProviding
-import com.fattmerchant.omni.TransactionUpdateListener
+import com.fattmerchant.omni.*
 import com.fattmerchant.omni.data.*
-import com.fattmerchant.omni.data.models.Merchant
 import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.data.MobileReaderDriver.*
+import com.fattmerchant.omni.data.models.MobileReaderConnectionStatus
 import com.fattmerchant.omni.data.models.OmniException
+import com.fattmerchant.omni.usecase.CancelCurrentTransactionException
+import com.fattmerchant.omni.data.models.MobileReaderDetails
 import kotlinx.coroutines.*
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
@@ -19,7 +19,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
+internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfigurationUpdateListener, IDeviceUpdateListener {
 
     class ConnectReaderException(message: String? = null) :
         MobileReaderDriver.ConnectReaderException(mapDetailMessage(message)) {
@@ -66,6 +66,10 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
     /** A key used to communicate with TransactionGateway */
     private var securityKey: String = ""
 
+    override var familiarSerialNumbers: MutableList<String> = mutableListOf()
+    override val source: String = "NMI"
+    override var mobileReaderConnectionStatusListener: MobileReaderConnectionStatusListener? = null
+
     val log = Logger.getLogger("ChipDNA")
     fun log(msg: String?) {
         log.info("[${Thread.currentThread().name}] $msg")
@@ -93,11 +97,14 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         val appId = args["appId"] as? String
             ?: throw InitializeMobileReaderDriverException("appId not found")
 
-        val merchant = args["merchant"] as? Merchant
-            ?: throw InitializeMobileReaderDriverException("merchant not found")
+        val nmiDetails = args["nmi"] as? MobileReaderDetails.NMIDetails
+            ?: throw InitializeMobileReaderDriverException("nmi details not found")
 
-        val apiKey = merchant.emvPassword()
-            ?: throw InitializeMobileReaderDriverException("emv_password not found")
+        val apiKey = nmiDetails.securityKey
+
+        if (apiKey.isBlank()) {
+            throw InitializeMobileReaderDriverException("emvTerminalSecret not found")
+        }
 
         val params = Parameters().apply {
             add(ParameterKeys.Password, "password")
@@ -106,6 +113,10 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
 
         // Init
         ChipDnaMobile.initialize(appContext, params)
+
+        // Start listening to configuration updates
+        ChipDnaMobile.getInstance().addConfigurationUpdateListener(this)
+        ChipDnaMobile.getInstance().addDeviceUpdateListener(this)
 
         // Store security key and init args for later use
         securityKey = apiKey
@@ -120,12 +131,18 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         return result[ParameterKeys.Result] == ParameterValues.TRUE
     }
 
+    override suspend fun isOmniRefundsSupported(): Boolean {
+        return true
+    }
+
+    override suspend fun isInitialized(): Boolean {
+        return ChipDnaMobile.isInitialized()
+    }
+
     override suspend fun searchForReaders(args: Map<String, Any>): List<MobileReader> {
         val parameters = Parameters().apply {
             add(ParameterKeys.SearchConnectionTypeBluetooth, ParameterValues.TRUE)
         }
-        if (!ChipDnaMobile.isInitialized()) { return emptyList() }
-
         ChipDnaMobile.getInstance().clearAllAvailablePinPadsListeners()
 
         val pinPads = suspendCancellableCoroutine<List<SelectablePinPad>> { cont ->
@@ -146,8 +163,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         }
     }
 
-    @UseExperimental(InternalCoroutinesApi::class)
-    override suspend fun connectReader(reader: MobileReader): Boolean {
+    override suspend fun connectReader(reader: MobileReader): MobileReader? {
 
         val requestParams = Parameters()
         requestParams.add(ParameterKeys.PinPadName, reader.getName())
@@ -161,12 +177,17 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
                 ChipDnaMobile.getInstance().removeConnectAndConfigureFinishedListener(connectAndConfigureListener)
 
                 if (params[ParameterKeys.Result] == ParameterValues.TRUE) {
-                    cont.resume(true)
+                    // Reader is connected. Add the serial number to the list of familiar ones
+                    // And return the hydrated mobile reader
+                    Companion.getConnectedReader()?.let { connectedReader ->
+                        connectedReader.serialNumber()?.let { familiarSerialNumbers.add(it) }
+                        cont.resume(connectedReader)
+                    }
                     return@IConnectAndConfigureFinishedListener
                 }
 
                 val error = params[ParameterKeys.ErrorDescription]
-                cont.tryResumeWithException(ConnectReaderException(error))
+                cont.resumeWithException(ConnectReaderException(error))
             }
 
             ChipDnaMobile.getInstance().addConnectAndConfigureFinishedListener(connectAndConfigureListener)
@@ -176,6 +197,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
 
     override suspend fun disconnect(reader: MobileReader, error: (OmniException) -> Unit): Boolean {
         ChipDnaMobile.dispose(null)
+        mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(MobileReaderConnectionStatus.DISCONNECTED)
         initialize(initArgs)
         return true
     }
@@ -218,8 +240,8 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         return true
     }
 
-    override suspend fun performTransaction(request: TransactionRequest, signatureProvider: SignatureProviding?, transactionUpdateListener: TransactionUpdateListener?): TransactionResult {
-        val paymentRequestParams = Parameters().withTransactionRequest(request)
+    override suspend fun performTransaction(request: TransactionRequest, signatureProvider: SignatureProviding?, transactionUpdateListener: TransactionUpdateListener?, userNotificationListener: UserNotificationListener?): TransactionResult {
+        val paymentRequestParams = withTransactionRequest(request)
 
         val result = suspendCancellableCoroutine<Parameters> { cont ->
 
@@ -238,6 +260,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
 
             transactionListener.signatureProvider = signatureProvider
             transactionListener.transactionUpdateListener = transactionUpdateListener
+            transactionListener.userNotificationListener = userNotificationListener
             ChipDnaMobile.getInstance().addUserNotificationListener(transactionListener)
             ChipDnaMobile.getInstance().addApplicationSelectionListener(transactionListener)
             ChipDnaMobile.getInstance().addTransactionUpdateListener(transactionListener)
@@ -291,6 +314,8 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         val addressState = result[ParameterKeys.BillingState]
         var ccExpiration: String? = null
 
+        val receiptData = ChipDnaMobileSerializer.deserializeReceiptData(result[ParameterKeys.ReceiptData])
+
         // Try to add the cc expiration
         result[ParameterKeys.TransactionId]?.let { transactionId ->
             ccExpiration = TransactionGateway.getTransactionCcExpiration(securityKey, transactionId)
@@ -305,9 +330,11 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
             externalId = result[ParameterKeys.TransactionId]
             cardHolderFirstName = firstName
             cardHolderLastName = lastName
-            cardType = result[ParameterKeys.CardSchemeId]?.toLowerCase()
+            cardType = result[ParameterKeys.CardSchemeId]?.toLowerCase(Locale.ROOT)
             cardExpiration = ccExpiration
+            this.source = this@ChipDnaDriver.source
             success = result[ParameterKeys.TransactionResult] == ParameterValues.Approved
+            transactionSource = receiptData[ReceiptFieldKey.TRANSACTION_SOURCE]?.value
 
             result[ParameterKeys.CustomerVaultId]?.let { token ->
                 paymentToken = "nmi_$token"
@@ -355,6 +382,24 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         }
     }
 
+    override suspend fun cancelCurrentTransaction(error: ((OmniException) -> Unit)?): Boolean {
+        val result = ChipDnaMobile.getInstance().terminateTransaction(null)
+        result?.let {
+            val success = result[ParameterKeys.Result] == ParameterValues.TRUE
+            if (success) {
+                return success
+            } else {
+                val status = ChipDnaMobile.getInstance().getStatus(null)
+                val idle = status[ParameterKeys.ChipDnaStatus] == "IDLE"
+                if (idle) {
+                    error?.invoke(CancelCurrentTransactionException.NoTransactionToCancel)
+                } else {
+                    error?.invoke(CancelCurrentTransactionException.Unknown)
+                }
+            }
+        }
+        return false
+    }
 
     private fun setCredentials(appId: String, apiKey: String): Parameters {
         val params = Parameters().apply {
@@ -386,5 +431,23 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         }
 
         return availablePinPadsList
+    }
+
+    override fun onConfigurationUpdateListener(parameters: Parameters?) {
+        parameters[ParameterKeys.ConfigurationUpdate]?.let {
+            MobileReaderConnectionStatus.from(it)?.let {
+                mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(it)
+            }
+        }
+    }
+
+    override fun onDeviceUpdate(parameters: Parameters?) {
+        parameters[ParameterKeys.DeviceStatusUpdate]?.let { deviceStatusXml ->
+            ChipDnaMobileSerializer.deserializeDeviceStatus(deviceStatusXml)?.let { deviceStatus ->
+                MobileReaderConnectionStatus.from(deviceStatus.status)?.let {
+                    mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(it)
+                }
+            }
+        }
     }
 }

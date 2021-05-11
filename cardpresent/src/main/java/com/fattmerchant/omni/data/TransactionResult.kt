@@ -7,11 +7,16 @@ package com.fattmerchant.omni.data
  */
 open class TransactionResult {
 
+    companion object { }
+
     /** The [TransactionRequest] that initiated the transaction that gave this result */
     var request: TransactionRequest? = null
 
     /** True when transaction succeeded, false otherwise */
     var success: Boolean? = false
+
+    /** The place where the transaction took place. For example, "NMI" or "AWC" */
+    var source: String = ""
 
     /**
      * The masked card number
@@ -33,6 +38,9 @@ open class TransactionResult {
 
     /** Sale, Refund, etc */
     var transactionType: String? = null
+
+    /** CONTACTLESS, etc */
+    var transactionSource: String? = null
 
     /** [Amount] of money that was exchanged */
     var amount: Amount? = null
@@ -60,7 +68,16 @@ open class TransactionResult {
      */
     var externalId: String? = null
 
+    /** The gateway response in its entirety */
+    var gatewayResponse: String? = null
+
     /** The token that represents this payment method */
     internal var paymentToken: String? = null
 
+    /** A message to display with the transaction
+     *
+     *  In Omni, this is typically used to show an error describing what went wrong with the
+     *  transaction. For example, "Insufficient Funds"
+     */
+    internal var message: String? = null
 }
