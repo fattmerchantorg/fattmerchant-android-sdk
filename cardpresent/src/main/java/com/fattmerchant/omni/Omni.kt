@@ -384,6 +384,29 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
      * @param completion A block to execute with the new, voided [Transaction]
      * @param error a block to run in case an error occurs
      */
+    fun voidTransaction(
+        transactionId: String,
+        completion: (Transaction) -> Unit,
+        error: (OmniException) -> Unit
+    ) {
+        coroutineScope.launch {
+            VoidTransaction(
+                transactionId,
+                omniApi,
+                coroutineContext
+            ).start {
+                error(it)
+            }?.let { completion(it) }
+        }
+    }
+
+    /**
+     * Voids the given transaction and returns a new [Transaction] that represents the void in Omni
+     *
+     * @param transaction The transaction to void
+     * @param completion A block to execute with the new, voided [Transaction]
+     * @param error a block to run in case an error occurs
+     */
     fun voidMobileReaderTransaction(
             transaction: Transaction,
             completion: (Transaction) -> Unit,

@@ -134,6 +134,10 @@ class OmniApi {
         return post("/transaction/${transactionId}/capture", JSONObject(body).toString(), error)
     }
 
+    internal suspend fun voidTransaction(transactionId: String, error: (Error) -> Unit): Transaction? {
+        return post("/transaction/${transactionId}/void", "", error)
+    }
+
 
     /**
      * Gets a list of transactions from Omni
