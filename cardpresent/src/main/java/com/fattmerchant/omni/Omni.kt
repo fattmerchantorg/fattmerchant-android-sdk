@@ -357,6 +357,27 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
     }
 
     /**
+     * Captures a previously-authorized transaction
+     *
+     * @param transactionId The id of the transaction you want to capture
+     * @param amount the amount that you want to capture. If null, then the original transaction amount will be captured
+     * @param completion Called when the operation is completed successfully. Receives a transaction
+     * @param error Receives any errors that happened whiel attempting the operation
+     */
+    fun capturePreauthTransaction(
+        transactionId: String,
+        amount: Amount,
+        completion: (Transaction) -> Unit,
+        error: (OmniException) -> Unit
+    ) {
+        coroutineScope.launch {
+            CapturePreauthTransaction(transactionId, omniApi, amount, coroutineContext).start {
+                error(it)
+            }?.let { completion(it) }
+        }
+    }
+
+    /**
      * Voids the given transaction and returns a new [Transaction] that represents the void in Omni
      *
      * @param transaction The transaction to void

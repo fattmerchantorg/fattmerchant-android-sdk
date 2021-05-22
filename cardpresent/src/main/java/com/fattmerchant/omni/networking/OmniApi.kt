@@ -1,5 +1,6 @@
 package com.fattmerchant.omni.networking
 
+import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.TransactionResult
 import com.fattmerchant.omni.data.models.*
 import com.google.gson.FieldNamingPolicy
@@ -121,6 +122,16 @@ class OmniApi {
             body["total"] = it
         }
         return post("transaction/${transactionId}/void-or-refund", JSONObject(body).toString(), error)
+    }
+
+    internal suspend fun captureTransaction(transactionId: String, total: Amount?, error: (Error) -> Unit): Transaction? {
+        val body = mutableMapOf<Any?, Any?>()
+
+        total?.let {
+            body["total"] = it.dollars()
+        }
+
+        return post("/transaction/${transactionId}/capture", JSONObject(body).toString(), error)
     }
 
 
