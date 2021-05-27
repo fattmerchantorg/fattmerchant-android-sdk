@@ -19,9 +19,10 @@ class VoidTransaction(
         shouldn't be hitting this code for anything except NMI. With that assumption, we can get
         away with asking the Stax API to perform the capture for us
          */
-        omniApi.voidTransaction(transactionId) { error ->
+        val transaction = omniApi.voidTransaction(transactionId) { error ->
             failure(OmniException("Voiding the transaction was unsuccessful."))
         }
-        null
+
+        transaction
     }
 }

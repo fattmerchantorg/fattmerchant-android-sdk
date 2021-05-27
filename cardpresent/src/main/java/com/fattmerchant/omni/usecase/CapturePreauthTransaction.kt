@@ -21,9 +21,10 @@ class CapturePreauthTransaction(
         shouldn't be hitting this code for anything except NMI. With that assumption, we can get
         away with asking the Stax API to perform the capture for us
          */
-        omniApi.captureTransaction(transactionId, captureAmount) { error ->
+        val transaction = omniApi.captureTransaction(transactionId, captureAmount) { error ->
             failure(OmniException("Charging the payment method was unsuccessful."))
         }
-        null
+
+        transaction
     }
 }

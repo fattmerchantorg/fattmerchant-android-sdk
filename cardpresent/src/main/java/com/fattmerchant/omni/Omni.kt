@@ -366,7 +366,7 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
      */
     fun capturePreauthTransaction(
         transactionId: String,
-        amount: Amount,
+        amount: Amount? = null,
         completion: (Transaction) -> Unit,
         error: (OmniException) -> Unit
     ) {
