@@ -4,8 +4,13 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.method.ScrollingMovementMethod
+import android.text.style.ForegroundColorSpan
 import android.view.View
 import android.widget.EditText
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.fattmerchant.android.InitParams
@@ -20,7 +25,10 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.logging.Logger
 
+
 class MainActivity : AppCompatActivity(), PermissionsManager {
+
+    val staxKey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6ImViNDhlZjk5LWFhNzgtNDk2ZS05YjAxLTQyMWY4ZGFmNzMyMyIsImdvZFVzZXIiOnRydWUsImJyYW5kIjoiZmF0dG1lcmNoYW50Iiwic3ViIjoiMzBjNmVlYjYtNjRiNi00N2Y2LWJjZjYtNzg3YTljNTg3OThiIiwiaXNzIjoiaHR0cDovL2FwaWRldjAxLmZhdHRsYWJzLmNvbS9hdXRoZW50aWNhdGUiLCJpYXQiOjE2MjIxMjgyMzQsImV4cCI6MTYyMjIxNDYzNCwibmJmIjoxNjIyMTI4MjM0LCJqdGkiOiJUYU9RSnV0cElEeWx6MzNoIn0.FosF0OCb4wm3O3Uj98V23xiJ8PN9HDNAqx-k8nhlptA"
 
     val log = Logger.getLogger("MainActivity")
 
@@ -40,7 +48,9 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setupButtons()
-        showApiKeyDialog()
+        initializeOmni(staxKey)
+        textView.movementMethod = ScrollingMovementMethod()
+//        showApiKeyDialog()
     }
 
     override var permissionRequestLauncherCallback: ((Boolean) -> Unit)? = null
@@ -128,6 +138,78 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
 
         buttonPerformSale.isEnabled = true
     }
+
+    private fun setupPerformAuthButton() {
+        buttonPerformAuth.setOnClickListener {
+            val amount = Amount(getAmount())
+            updateStatus("Attempting to auth ${amount.dollarsString()}")
+            val request = TransactionRequest(amount)
+            request.preauth = true
+
+            Omni.shared()?.takeMobileReaderTransaction(request, {
+
+                val msg = if (it.success == true) {
+                    "Successfully authed transaction"
+                } else {
+                    "Transaction declined"
+                }
+
+                runOnUiThread {
+                    updateStatus(msg)
+                }
+
+                transaction = it
+            }, {
+                updateStatus("Couldn't perform auth: ${it.message}. ${it.detail}")
+            })
+        }
+    }
+
+    private fun setupCaptureLastAuthButton() {
+        buttonCaptureLastAuth.setOnClickListener {
+            if (transaction?.id == null) { return@setOnClickListener }
+            val transactionId = transaction?.id!!
+
+            val amount = Amount(getAmount())
+            updateStatus("Attempting to capture last auth")
+
+            Omni.shared()?.capturePreauthTransaction(transactionId, amount, {
+                val msg = if (it.success == true) {
+                    "Successfully captured transaction"
+                } else {
+                    "Transaction declined"
+                }
+
+                runOnUiThread {
+                    updateStatus(msg)
+                }
+            }, {
+                updateStatus("Couldn't perform capture: ${it.message}. ${it.detail}")
+            })
+        }
+    }
+
+    private fun setupVoidLastAuthButton() {
+        buttonVoidLastAuth.setOnClickListener {
+            if (transaction?.id == null) { return@setOnClickListener }
+            val transactionId = transaction?.id!!
+
+            Omni.shared()?.voidTransaction(transactionId, {
+                val msg = if (it.success == true) {
+                    "Successfully voided transaction"
+                } else {
+                    "Transaction declined"
+                }
+
+                runOnUiThread {
+                    updateStatus(msg)
+                }
+            }, {
+                updateStatus("Couldn't perform void: ${it.message}. ${it.detail}")
+            })
+        }
+    }
+
 
     private fun setupTokenizeCardButton() {
         buttonTokenizeCard.setOnClickListener {
@@ -248,14 +330,14 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
         val editText = EditText(this).apply { maxLines = 1 }
         updateStatus("Attempting to initialize CPSDK")
         AlertDialog.Builder(this)
-            .setTitle("Please provide an Omni api token")
+            .setTitle("Please provide a Stax api token")
             .setView(editText)
             .setCancelable(false)
             .setPositiveButton("Done") { dialog, _ ->
                 dialog.dismiss()
                 // If you want to not use the apikey dialog, modify the initializeOmni call like below
                 // initializeOmni("insert api key here")
-                initializeOmni("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6ImU3MTJhZThlLTIwOWUtNGNkYi05MDMwLTc1NWU2OWFmMTI0NiIsImdvZFVzZXIiOnRydWUsImJyYW5kIjoiZmF0dG1lcmNoYW50Iiwic3ViIjoiMTI4MGRkNGQtMTI2MS00YWI1LThkZmItY2FmMWY3ZDhjZTM0IiwiaXNzIjoiaHR0cDovL2FwaWRldjAxLmZhdHRsYWJzLmNvbS9hdXRoZW50aWNhdGUiLCJpYXQiOjE2MTk4MDYzOTUsImV4cCI6MTYxOTg5Mjc5NSwibmJmIjoxNjE5ODA2Mzk1LCJqdGkiOiJxdllTNERKamxMUmhkSHIxIn0.V5J7StK9qpO76It94milWpXZIxbHBBmUyHjwLZGFw4w")
+                initializeOmni("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6ImViNDhlZjk5LWFhNzgtNDk2ZS05YjAxLTQyMWY4ZGFmNzMyMyIsImdvZFVzZXIiOnRydWUsImJyYW5kIjoiZmF0dG1lcmNoYW50Iiwic3ViIjoiMzBjNmVlYjYtNjRiNi00N2Y2LWJjZjYtNzg3YTljNTg3OThiIiwiaXNzIjoiaHR0cDovL2FwaWRldjAxLmZhdHRsYWJzLmNvbS9hdXRoZW50aWNhdGUiLCJpYXQiOjE2MjIxMjgyMzQsImV4cCI6MTYyMjIxNDYzNCwibmJmIjoxNjIyMTI4MjM0LCJqdGkiOiJUYU9RSnV0cElEeWx6MzNoIn0.FosF0OCb4wm3O3Uj98V23xiJ8PN9HDNAqx-k8nhlptA")
             }.show()
     }
 
@@ -271,6 +353,9 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
         setupDisconnectReaderButton()
         setupTokenizeBankButton()
         setupTokenizeCardButton()
+        setupPerformAuthButton()
+        setupCaptureLastAuthButton()
+        setupVoidLastAuthButton()
     }
 
     private fun Transaction.pretty(): String {
@@ -363,10 +448,11 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
 
     private fun formatMessage(msg: String): String {
         val dateFormat = SimpleDateFormat("h:m:ss", Locale.US)
-        return "[${dateFormat.format(Date())}] $msg"
+        return "${dateFormat.format(Date())} | $msg"
     }
 
     private fun initializeOmni(apiKey: String) {
+        updateStatus("Trying to initialize")
         Omni.initialize(
             InitParams(applicationContext, application, apiKey, OmniApi.Environment.DEV), {
                 runOnUiThread {
