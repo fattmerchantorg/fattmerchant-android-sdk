@@ -7,7 +7,7 @@ package com.fattmerchant.omni.data.models
 open class Transaction : Model {
     override var id: String? = null
     open var authId: String? = null
-    open var childCaptures: Any? = null
+    open var childCaptures: List<Transaction>? = null
     open var createdAt: String? = null
     open var customerId: String? = null
     open var gateway: String? = null
