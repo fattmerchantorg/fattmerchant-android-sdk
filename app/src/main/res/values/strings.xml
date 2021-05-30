@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FM Sample Client</string>
+    <string name="app_name">Stax SDK Sample</string>
     <string name="permission_rationale_message_fine_location">SDK requires access to your location to communicate with your bluetooth card reader</string>
     <string name="permission_denied_message_fine_location">Location permission has been denied. As this is essential to communicating with the mobile readers, please grant SDK the Location permission in Settings.</string>
     <string name="permission_denied_title">Permission Denied</string>

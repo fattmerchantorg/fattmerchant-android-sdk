@@ -52,7 +52,16 @@ data class TransactionRequest(
     var memo: String? = null,
 
     /** A reference for the transaction */
-    var reference: String? = null
+    var reference: String? = null,
+
+    /**
+     * The option to perform a preauthorization
+     *
+     *  Set this to true if you would like to *only* authorize an amount. This means that the
+     *  transaction will only hold funds and you will need to capture it at a later date via the
+     *  Stax API or the SDK
+     */
+    var preauth: Boolean = false
 ) {
 
     /**

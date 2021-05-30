@@ -1,5 +1,6 @@
 package com.fattmerchant.omni.networking
 
+import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.TransactionResult
 import com.fattmerchant.omni.data.models.*
 import com.google.gson.FieldNamingPolicy
@@ -123,6 +124,14 @@ class OmniApi {
         return post("transaction/${transactionId}/void-or-refund", JSONObject(body).toString(), error)
     }
 
+    internal suspend fun captureTransaction(transactionId: String, total: Amount?, error: (Error) -> Unit): Transaction? {
+        return captureAuthedTransaction(transactionId, total, error)
+    }
+
+    internal suspend fun voidTransaction(transactionId: String, error: (Error) -> Unit): Transaction? {
+        return post("/transaction/${transactionId}/void", "", error)
+    }
+
 
     /**
      * Gets a list of transactions from Omni
@@ -185,6 +194,97 @@ class OmniApi {
     private suspend inline fun <reified T> request(method: HttpMethod, urlString: String, body: String? = null): T? =
         request(method, urlString, body) {}
 
+    private suspend inline fun captureAuthedTransaction(
+            transactionId: String,
+            captureAmount: Amount?,
+            error: ((Error) -> Unit)
+    ): Transaction? {
+        val url = environment.baseUrl() + "/transaction/${transactionId}/capture"
+
+        var body: String? = null
+
+        captureAmount?.let {
+            val b = mutableMapOf<Any?, Any?>()
+            b["total"] = it.dollars()
+
+            body = JSONObject(b).toString()
+        }
+
+        try {
+
+            // Make the request and wait for the response
+            val response = httpClient.request<HttpResponse>(url) {
+                headers.append("Authorization", "Bearer $token")
+                this.method = HttpMethod.Post
+                body?.let {
+                    this.body = TextContent(it, ContentType.Application.Json)
+                }
+            }
+
+            // Attempt to get the object we're expecting
+            if (response.status.isSuccess()) {
+                return response.receive()
+            }
+
+            val responseText = response.readText()
+
+            // Parse the transaction
+            val transaction = JsonParser.gson.fromJson(responseText, Transaction::class.java)
+
+            // Get the first child capture
+            val firstChildCapture = transaction.childCaptures?.firstOrNull()
+
+            // Return the message from the first child capture
+            val failedCaptureMessage = firstChildCapture?.message
+
+            // Read the error text, if possible
+            val errorText: String? = failedCaptureMessage ?: try {
+                (JsonParser.fromJson<Map<*, *>>(responseText)["error"] as? String)?.let {
+                    it
+                }
+            } catch (e: Exception) {
+                null
+            }
+
+            // Triage the error
+            when (response.status.value) {
+                in 300..399 -> {
+                    // Redirect
+                    error(Error(errorText ?: "Redirect"))
+                    return null
+                }
+
+                in 400..499 -> {
+                    // Client error
+                    if (isTokenExpired(responseText)) {
+                        error(Error("token_expired"))
+                        return null
+                    }
+
+                    error(Error(errorText ?: "Client error"))
+                    return null
+                }
+
+                in 500..599 -> {
+                    // Server error
+                    error(Error(errorText ?: "Server error"))
+                    return null
+                }
+            }
+            return null
+
+        } catch (e: NoTransformationFoundException) {
+            // We were expecting an object of type T, but couldn't transform the response body to T
+            print(e)
+            throw e
+        } catch (e: Exception) {
+            // This happens when there was an error executing the request
+            // This is a good place to look at that exception and do something with it before throwing it back
+            print(e)
+            throw e
+        }
+    }
+
     private suspend inline fun <reified T> request(
         method: HttpMethod,
         urlString: String,
@@ -212,7 +312,7 @@ class OmniApi {
             val responseText = response.readText()
 
             // Read the error text, if possible
-            val  errorText: String? = try {
+            val errorText: String? = try {
                 (JsonParser.fromJson<Map<*, *>>(responseText)["error"] as? String)?.let {
                     it
                 }

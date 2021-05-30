@@ -190,6 +190,13 @@ internal class TakeMobileReaderPayment(
                 invoiceId = invoice.id
                 response = gatewayResponse
                 token = result.externalId
+
+                if (request.preauth) {
+                    preAuth = true
+                    isCaptured = 0
+                    isVoidable = true
+                    type = "pre_auth"
+                }
             }
         ) {
             onError(it)
