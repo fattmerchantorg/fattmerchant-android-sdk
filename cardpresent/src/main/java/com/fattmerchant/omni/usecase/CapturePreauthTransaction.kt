@@ -8,6 +8,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlin.coroutines.CoroutineContext
 
+class CapturePreauthTransactionException(detail: String): OmniException("Could not get connected mobile reader", detail)
+
 class CapturePreauthTransaction(
     var transactionId: String,
     val omniApi: OmniApi,
@@ -22,7 +24,7 @@ class CapturePreauthTransaction(
         away with asking the Stax API to perform the capture for us
          */
         val transaction = omniApi.captureTransaction(transactionId, captureAmount) { error ->
-            failure(OmniException("Charging the payment method was unsuccessful."))
+            failure(CapturePreauthTransactionException(error.message ?: "Could not capture funds"))
         }
 
         transaction
