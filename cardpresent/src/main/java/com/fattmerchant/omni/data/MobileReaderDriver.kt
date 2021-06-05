@@ -94,6 +94,15 @@ internal interface MobileReaderDriver {
     suspend fun voidTransaction(transaction: Transaction): TransactionResult
 
     /**
+     * Attempts to void the transaction referenced in the transaction result
+     *
+     * @param transaction
+     * @return the result of the operation
+     */
+    @Throws(VoidTransactionException::class)
+    fun voidTransaction(transactionResult: TransactionResult, completion: (Boolean) -> Unit)
+
+    /**
      * Attempts to refund the given [transaction]
      *
      * @param transaction

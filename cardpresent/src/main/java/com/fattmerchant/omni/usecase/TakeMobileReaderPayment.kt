@@ -7,7 +7,10 @@ import com.fattmerchant.omni.data.models.*
 import com.fattmerchant.omni.data.repository.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.suspendCoroutine
 
 internal class TakeMobileReaderPayment(
     val mobileReaderDriverRepository: MobileReaderDriverRepository,
@@ -84,6 +87,12 @@ internal class TakeMobileReaderPayment(
             "****"
         }
 
+        val voidAndFail = { exception: OmniException ->
+            reader.voidTransaction(result) {
+                onError(exception)
+            }
+        }
+
         // Create customer
         val customer = customerRepository.create(
             Customer().apply {
@@ -91,7 +100,7 @@ internal class TakeMobileReaderPayment(
                 lastname = result.cardHolderLastName ?: "CUSTOMER"
             }
         ) {
-            onError(it)
+            voidAndFail(it)
         } ?: return@coroutineScope null
 
         // Create a PaymentMethod
@@ -108,7 +117,7 @@ internal class TakeMobileReaderPayment(
                 paymentToken = result.paymentToken
             }
         ) {
-            onError(it)
+            voidAndFail(it)
         } ?: return@coroutineScope null
 
         // Associate payment method and invoice with customer
@@ -117,7 +126,7 @@ internal class TakeMobileReaderPayment(
 
         // Update invoice
         invoiceRepository.update(invoice) {
-            onError(it)
+            voidAndFail(it)
         } ?: return@coroutineScope null
 
         // Create transaction
@@ -137,7 +146,7 @@ internal class TakeMobileReaderPayment(
             gatewayResponse = responseMap
         }
 
-        transactionRepository.create(
+        val createdTransaction = transactionRepository.create(
             Transaction().apply {
                 paymentMethodId = paymentMethod.id
                 total = request.amount.dollarsString()
@@ -153,7 +162,16 @@ internal class TakeMobileReaderPayment(
                 token = result.externalId
             }
         ) {
-            onError(it)
+            voidAndFail(it)
+        }
+
+        val successfullyCaptured = reader.capture(createdTransaction!!)
+
+        if (successfullyCaptured) {
+            return@coroutineScope createdTransaction
+        } else {
+            voidAndFail(TakeMobileReaderPaymentException("Could not capture transaction"))
+            return@coroutineScope null
         }
     }
 

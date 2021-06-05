@@ -339,6 +339,17 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         return TransactionResult()
     }
 
+    override fun voidTransaction(transactionResult: TransactionResult, completion: (Boolean) -> Unit) {
+        val userRef = transactionResult.userReference ?: return completion(false)
+
+        val params = Parameters().apply {
+            add(ParameterKeys.UserReference, userRef)
+        }
+
+        val result = ChipDnaMobile.getInstance().voidTransaction(params)
+        completion(result[ParameterKeys.Result] == ParameterValues.Approved)
+    }
+
     override suspend fun refundTransaction(transaction: Transaction, refundAmount: Amount?): TransactionResult {
         // Prepare Parameters for refunding
         val ref = extractCardEaseReference(transaction)
