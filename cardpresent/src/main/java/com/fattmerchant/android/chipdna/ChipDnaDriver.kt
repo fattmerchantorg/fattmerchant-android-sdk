@@ -101,7 +101,6 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
 
         val params = Parameters().apply {
             add(ParameterKeys.Password, "password")
-            add(ParameterKeys.AutoConfirm, ParameterValues.TRUE)
         }
 
         // Init
