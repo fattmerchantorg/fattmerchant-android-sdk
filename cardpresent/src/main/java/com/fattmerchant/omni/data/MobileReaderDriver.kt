@@ -80,6 +80,11 @@ internal interface MobileReaderDriver {
     suspend fun performTransaction(request: TransactionRequest, signatureProvider: SignatureProviding?, transactionUpdateListener: TransactionUpdateListener?): TransactionResult
 
     /**
+     * Captures an auth transaction
+     */
+    suspend fun capture(transaction: Transaction): Boolean
+
+    /**
      * Attempts to void the given [transaction]
      *
      * @param transaction
