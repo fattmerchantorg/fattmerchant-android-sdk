@@ -101,7 +101,6 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
 
         val params = Parameters().apply {
             add(ParameterKeys.Password, "password")
-            add(ParameterKeys.AutoConfirm, ParameterValues.TRUE)
         }
 
         // Init
@@ -315,6 +314,17 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         }
     }
 
+    override suspend fun capture(transaction: Transaction): Boolean {
+        val userRef = extractUserReference(transaction) ?: return false
+
+        val params = Parameters().apply {
+            add(ParameterKeys.UserReference, userRef)
+        }
+
+        val result = ChipDnaMobile.getInstance().confirmTransaction(params)
+        return result[ParameterKeys.Result] == ParameterValues.Approved
+    }
+
     override suspend fun voidTransaction(transaction: Transaction): TransactionResult {
         val ref = extractCardEaseReference(transaction)
 
@@ -327,6 +337,17 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         // TODO: Handle errors
 
         return TransactionResult()
+    }
+
+    override fun voidTransaction(transactionResult: TransactionResult, completion: (Boolean) -> Unit) {
+        val userRef = transactionResult.userReference ?: return completion(false)
+
+        val params = Parameters().apply {
+            add(ParameterKeys.UserReference, userRef)
+        }
+
+        val result = ChipDnaMobile.getInstance().voidTransaction(params)
+        completion(result[ParameterKeys.Result] == ParameterValues.Approved)
     }
 
     override suspend fun refundTransaction(transaction: Transaction, refundAmount: Amount?): TransactionResult {

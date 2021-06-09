@@ -111,7 +111,6 @@ internal fun Parameters.withTransactionRequest(request: TransactionRequest) = Pa
     add(ParameterKeys.Currency, "USD")
     add(ParameterKeys.UserReference, generateUserReference())
     add(ParameterKeys.PaymentMethod, ParameterValues.Card)
-    add(ParameterKeys.AutoConfirm, ParameterValues.TRUE)
     add(ParameterKeys.TransactionType, ParameterValues.Sale)
 
     if (request.tokenize) {
