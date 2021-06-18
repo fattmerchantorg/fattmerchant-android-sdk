@@ -67,7 +67,8 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
             val merchant = omniApi.getSelf {
                 error(OmniException("Could not get reader settings", it.message))
             }?.merchant ?: run {
-                error(error(OmniException("Could not get reader settings", "Merchant object is null")))
+                error(OmniException("Could not get reader settings", "Merchant object is null"))
+                return@launch
             }
 
             val mutatedArgs = args.toMutableMap()
