@@ -111,6 +111,11 @@ internal interface MobileReaderDriver {
                                    userNotificationListener: UserNotificationListener?): TransactionResult
 
     /**
+     * Captures an auth transaction
+     */
+    suspend fun capture(transaction: Transaction): Boolean
+
+    /**
      * Attempts to void the given [transaction]
      *
      * @param transaction
@@ -118,6 +123,15 @@ internal interface MobileReaderDriver {
      */
     @Throws(VoidTransactionException::class)
     suspend fun voidTransaction(transaction: Transaction): TransactionResult
+
+    /**
+     * Attempts to void the transaction referenced in the transaction result
+     *
+     * @param transaction
+     * @return the result of the operation
+     */
+    @Throws(VoidTransactionException::class)
+    fun voidTransaction(transactionResult: TransactionResult, completion: (Boolean) -> Unit)
 
     /**
      * Attempts to refund the given [transaction]
