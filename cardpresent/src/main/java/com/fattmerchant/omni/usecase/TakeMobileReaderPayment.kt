@@ -63,6 +63,19 @@ internal class TakeMobileReaderPayment(
 
             return transactionMeta
         }
+
+        internal fun invoiceMetaFrom(result: TransactionResult): Map<String, Any> {
+            val invoiceMeta = mutableMapOf<String, Any>()
+
+            result.request?.lineItems?.let { invoiceMeta["lineItems"] = it }
+            result.request?.subtotal?.let { invoiceMeta["subtotal"] = it }
+            result.request?.tax?.let { invoiceMeta["tax"] = it }
+            result.request?.tip?.let { invoiceMeta["tip"] = it }
+            result.request?.memo?.let { invoiceMeta["memo"] = it }
+            result.request?.reference?.let { invoiceMeta["reference"] = it }
+
+            return invoiceMeta
+        }
     }
 
     suspend fun start(onError: (OmniException) -> Unit): Transaction? = coroutineScope {
@@ -92,7 +105,6 @@ internal class TakeMobileReaderPayment(
                     Invoice().apply {
                         total = request.amount.dollarsString()
                         url = "https://fattpay.com/#/bill/"
-                        meta = mapOf("subtotal" to request.amount.dollarsString())
                     }
             ) {
                 onError(it)
@@ -149,6 +161,7 @@ internal class TakeMobileReaderPayment(
         // Associate payment method and invoice with customer
         invoice.paymentMethodId = paymentMethod.id
         invoice.customerId = customer.id
+        invoice.meta = invoiceMetaFrom(result)
 
         // Update invoice
         invoiceRepository.update(invoice) {

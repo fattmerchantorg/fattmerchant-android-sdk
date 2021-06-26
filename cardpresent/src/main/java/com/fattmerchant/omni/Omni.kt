@@ -66,21 +66,23 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
 
             val merchant = omniApi.getSelf {
                 error(OmniException("Could not get reader settings", it.message))
-            }?.merchant ?: run {
-                error(error(OmniException("Could not get reader settings", "Merchant object is null")))
+            }?.merchant
+
+            if (merchant == null) {
+                error(OmniException("Could not get reader settings", "Merchant object is null"))
             }
 
             val mutatedArgs = args.toMutableMap()
 
             // AWC
             val awcDetails = MobileReaderDetails.AWCDetails()
-            merchant.emvTerminalId()?.let { awcDetails.terminalId = it }
-            merchant.emvTerminalSecret()?.let { awcDetails.terminalSecret = it }
+            merchant?.emvTerminalId()?.let { awcDetails.terminalId = it }
+            merchant?.emvTerminalSecret()?.let { awcDetails.terminalSecret = it }
             mutatedArgs["awc"] = awcDetails
 
             // NMI
             val nmiDetails = MobileReaderDetails.NMIDetails()
-            merchant.emvPassword()?.let { nmiDetails.securityKey = it }
+            merchant?.emvPassword()?.let { nmiDetails.securityKey = it }
             mutatedArgs["nmi"] = nmiDetails
 
             omniApi.getMobileReaderSettings {
