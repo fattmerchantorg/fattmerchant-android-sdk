@@ -91,6 +91,15 @@ class OmniApi {
         post("transaction", JsonParser.toJson(transaction), error)
 
     /**
+     * Updates an transaction in Omni
+     *
+     * @param transaction
+     * @return the updated transaction
+     */
+    internal suspend fun updateTransaction(transaction: Transaction): Transaction? =
+            put("transaction/${transaction.id}", JsonParser.toJson(transaction))
+
+    /**
      * Gets a list of transactions from Omni
      *
      * @return the list of transactions
