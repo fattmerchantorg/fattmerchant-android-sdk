@@ -70,7 +70,7 @@ internal class AWCDriver: MobileReaderDriver {
         val awcArgs = args["awc"] as? MobileReaderDetails.AWCDetails
                 ?: throw InitializeMobileReaderDriverException("merchant not found")
 
-        missingAwcDetails = false
+        missingAwcDetails = awcArgs.terminalId.isBlank() || awcArgs.terminalSecret.isBlank()
 
         // Initialize the Terminal. This will allow us to interact with AnyPay later on
         SDKManager.initialize(application)
