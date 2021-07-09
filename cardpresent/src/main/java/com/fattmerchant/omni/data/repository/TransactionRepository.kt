@@ -17,4 +17,8 @@ internal interface TransactionRepository : ModelRepository<Transaction> {
         error(GetTransactionException(it.message))
     }
 
+    override suspend fun update(model: Transaction, error: (OmniException) -> Unit): Transaction? {
+        return omniApi.updateTransaction(model)
+    }
+
 }

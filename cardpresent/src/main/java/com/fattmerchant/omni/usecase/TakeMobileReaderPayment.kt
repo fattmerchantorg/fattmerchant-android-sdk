@@ -7,10 +7,7 @@ import com.fattmerchant.omni.data.models.*
 import com.fattmerchant.omni.data.repository.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.suspendCoroutine
 
 internal class TakeMobileReaderPayment(
     val mobileReaderDriverRepository: MobileReaderDriverRepository,
@@ -170,6 +167,13 @@ internal class TakeMobileReaderPayment(
         if (successfullyCaptured) {
             return@coroutineScope createdTransaction
         } else {
+            // Mark Stax transaction as failed
+            createdTransaction.success = false
+            createdTransaction.message = "Error capturing the transaction"
+
+            // Fail the transaction in Stax
+            transactionRepository.update(createdTransaction) { }
+
             voidAndFail(TakeMobileReaderPaymentException("Could not capture transaction"))
             return@coroutineScope null
         }

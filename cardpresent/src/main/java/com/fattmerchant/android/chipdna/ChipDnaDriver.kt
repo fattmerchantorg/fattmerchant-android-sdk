@@ -322,7 +322,7 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
         }
 
         val result = ChipDnaMobile.getInstance().confirmTransaction(params)
-        return result[ParameterKeys.Result] == ParameterValues.Approved
+        return result[ParameterKeys.TransactionResult] == ParameterValues.Approved
     }
 
     override suspend fun voidTransaction(transaction: Transaction): TransactionResult {
