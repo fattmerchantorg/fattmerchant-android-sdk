@@ -131,15 +131,23 @@ internal class TakeMobileReaderPayment(
             "****"
         }
 
-        // Create customer
-        val customer = customerRepository.create(
-            Customer().apply {
-                firstname = if(result.transactionSource.equals("contactless", true)) "Mobile Device" else result.cardHolderFirstName ?: "SWIPE"
-                lastname = if(result.transactionSource.equals("contactless", true)) "Customer" else result.cardHolderLastName ?: "CUSTOMER"
-            }
-        ) {
-            onError(it)
-        } ?: return@coroutineScope null
+        // Check if the invoice already has a customer associated with it
+        val customer = invoice.customerId?.let {
+            // Check if the invoice exists
+            customerRepository.getById(it) {
+                onError(TakeMobileReaderPaymentException("Customer with given id not found"))
+            } ?: return@coroutineScope null
+        } ?: run {
+            // If not create the invoice
+            customerRepository.create(
+                    Customer().apply {
+                        firstname = if(result.transactionSource.equals("contactless", true)) "Mobile Device" else result.cardHolderFirstName ?: "SWIPE"
+                        lastname = if(result.transactionSource.equals("contactless", true)) "Customer" else result.cardHolderLastName ?: "CUSTOMER"
+                    }
+            ) {
+                onError(it)
+            } ?: return@coroutineScope null
+        }
 
         // Create a PaymentMethod
         val paymentMethod = paymentMethodRepository.create(

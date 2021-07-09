@@ -92,6 +92,14 @@ class OmniApi {
         put("invoice/${invoice.id}", JsonParser.toJson(invoice))
 
     /**
+     * Gets the customer which the [id] corresponds to
+     *
+     * @param error
+     * @return the found customer
+     */
+    internal suspend fun getCustomer(id: String, error: (Error) -> Unit): Customer? = get("customer/${id}", error)
+
+    /**
      * Creates a new customer in Omni
      *
      * @param customer
