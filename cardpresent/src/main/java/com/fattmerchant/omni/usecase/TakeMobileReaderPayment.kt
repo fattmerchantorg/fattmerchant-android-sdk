@@ -104,7 +104,8 @@ internal class TakeMobileReaderPayment(
             invoice = invoiceRepository.create(
                     Invoice().apply {
                         total = request.amount.dollarsString()
-                        url = "https://fattpay.com/#/bill/"
+                        url = "https://fattpay.com/#/bill/",
+                        meta = mapOf("subtotal" to request.amount.dollarsString())
                     }
             ) {
                 onError(it)
