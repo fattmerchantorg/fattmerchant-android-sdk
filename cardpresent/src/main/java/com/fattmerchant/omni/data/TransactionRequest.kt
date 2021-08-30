@@ -48,6 +48,12 @@ data class TransactionRequest(
     /** The tip amount applied to the transaction */
     var tip: Double? = null,
 
+    /** The shipping amount applied to the transaction */
+    var shippingAmount: Double? = null,
+
+    /** The purchase order number for the transaction */
+    var poNumber: String? = null,
+
     /** A memo for the transaction */
     var memo: String? = null,
 
