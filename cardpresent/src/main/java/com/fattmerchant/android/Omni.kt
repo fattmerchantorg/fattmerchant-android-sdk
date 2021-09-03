@@ -1,5 +1,8 @@
 package com.fattmerchant.android
 
+import android.app.AlertDialog
+import android.widget.EditText
+import com.fattmerchant.omni.Environment
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.networking.OmniApi
 import kotlinx.coroutines.launch
@@ -52,7 +55,6 @@ class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
             val paramMap = mutableMapOf(
                 "apiKey" to params.apiKey,
                 "appContext" to params.appContext,
-                "environment" to params.environment,
                 "appId" to params.appId
             )
 
@@ -60,7 +62,7 @@ class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
                 paramMap["application"] = it
             }
 
-            initialize(paramMap, completion, error)
+            initialize(paramMap, params.environment, completion, error)
         }
 
         /**
@@ -71,10 +73,12 @@ class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
          *
          * @throws InitializationError if you don't pass an apiKey
          */
-        fun initialize(params: Map<String, Any>, completion: () -> Unit, error: (OmniException) -> Unit) {
+        fun initialize(params: Map<String, Any>, environment: Environment, completion: () -> Unit, error: (OmniException) -> Unit) {
             // Init the API
             val omniApi = OmniApi()
-            omniApi.environment = params["environment"] as? OmniApi.Environment ?: OmniApi.Environment.LIVE
+
+            omniApi.environment = environment
+
             omniApi.token = params["apiKey"] as? String ?: ""
 
             // Create the shared Omni object
@@ -90,6 +94,8 @@ class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
                 }
             }
         }
+
+
 
         fun shared(): Omni? = sharedInstance
     }
