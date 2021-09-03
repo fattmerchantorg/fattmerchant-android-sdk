@@ -1,5 +1,6 @@
 package com.fattmerchant.omni.networking
 
+import com.fattmerchant.omni.Environment
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.models.ChargeRequest
 import com.fattmerchant.omni.data.models.Customer
@@ -26,13 +27,10 @@ import org.json.JSONObject
 
 class OmniApi {
 
-    enum class Environment {
-        LIVE, DEV;
-
-        fun baseUrl(): String = when (this) {
-            LIVE -> "https://apiprod.fattlabs.com/"
-            DEV -> "https://apidev.fattlabs.com/"
-        }
+    private fun baseUrl(): String = when (environment) {
+        Environment.LIVE -> "https://apiprod.fattlabs.com/"
+        Environment.DEV -> "https://apidev.fattlabs.com/"
+        is Environment.QA -> "https://api-qa-${(environment as Environment.QA).qaBuildHash}.qabuilds.fattpay.com/"
     }
 
     private val httpClient = HttpClient {
@@ -221,7 +219,7 @@ class OmniApi {
         captureAmount: Amount?,
         error: ((Error) -> Unit)
     ): Transaction? {
-        val url = environment.baseUrl() + "/transaction/$transactionId/capture"
+        val url = baseUrl() + "/transaction/$transactionId/capture"
 
         var body: String? = null
 
@@ -312,7 +310,7 @@ class OmniApi {
         body: String? = null,
         error: ((Error) -> Unit)
     ): T? {
-        val url = environment.baseUrl() + urlString
+        val url = baseUrl() + urlString
 
         try {
 
