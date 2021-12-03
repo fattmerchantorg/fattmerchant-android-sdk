@@ -20,6 +20,12 @@ data class TransactionRequest(
     /** The id of the invoice we want to apply the transaction to */
     var invoiceId: String? = null,
 
+    /** The id of the [Customer] we want to apply the [Transaction] to
+     *
+     * Note that if there is a payment method created
+     * */
+    var customerId: String? = null,
+
     /** The [CreditCard] to charge */
     var card: CreditCard? = null,
 
