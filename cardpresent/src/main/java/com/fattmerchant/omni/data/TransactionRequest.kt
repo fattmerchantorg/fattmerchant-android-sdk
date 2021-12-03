@@ -87,7 +87,7 @@ data class TransactionRequest(
      * @param amount The [Amount] to be collected during the transaction
      * @param creditCard The [CreditCard] used for the transaction
      * */
-    constructor(amount: Amount, creditCard: CreditCard) : this(amount, true, null, creditCard)
+    constructor(amount: Amount, creditCard: CreditCard) : this(amount, true, null, null, creditCard)
 
     /**
      * Initializes a Transaction with the given [Amount] and [BankAccount]
