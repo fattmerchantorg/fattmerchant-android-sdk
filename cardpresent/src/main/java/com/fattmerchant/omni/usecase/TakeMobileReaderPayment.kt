@@ -119,6 +119,12 @@ internal class TakeMobileReaderPayment(
             "****"
         }
 
+        val voidAndFail = { exception: OmniException ->
+            reader.voidTransaction(result) {
+                onError(exception)
+            }
+        }
+
         // Create customer
         val customer = customerRepository.create(
             Customer().apply {
@@ -126,7 +132,7 @@ internal class TakeMobileReaderPayment(
                 lastname = if(result.transactionSource.equals("contactless", true)) "Customer" else result.cardHolderLastName ?: "CUSTOMER"
             }
         ) {
-            onError(it)
+            voidAndFail(it)
         } ?: return@coroutineScope null
 
         // Create a PaymentMethod
@@ -143,7 +149,7 @@ internal class TakeMobileReaderPayment(
                 paymentToken = result.paymentToken
             }
         ) {
-            onError(it)
+            voidAndFail(it)
         } ?: return@coroutineScope null
 
         // Associate payment method and invoice with customer
@@ -152,7 +158,7 @@ internal class TakeMobileReaderPayment(
 
         // Update invoice
         invoiceRepository.update(invoice) {
-            onError(it)
+            voidAndFail(it)
         } ?: return@coroutineScope null
 
         // Create transaction
@@ -172,7 +178,7 @@ internal class TakeMobileReaderPayment(
             gatewayResponse = responseMap
         }
 
-        transactionRepository.create(
+        val createdTransaction = transactionRepository.create(
             Transaction().apply {
                 paymentMethodId = paymentMethod.id
                 total = request.amount.dollarsString()
@@ -199,7 +205,23 @@ internal class TakeMobileReaderPayment(
                 }
             }
         ) {
-            onError(it)
+            voidAndFail(it)
+        }
+
+        val successfullyCaptured = reader.capture(createdTransaction!!)
+
+        if (successfullyCaptured) {
+            return@coroutineScope createdTransaction
+        } else {
+            // Mark Stax transaction as failed
+            createdTransaction.success = false
+            createdTransaction.message = "Error capturing the transaction"
+
+            // Fail the transaction in Stax
+            transactionRepository.update(createdTransaction) { }
+
+            voidAndFail(TakeMobileReaderPaymentException("Could not capture transaction"))
+            return@coroutineScope null
         }
     }
 
