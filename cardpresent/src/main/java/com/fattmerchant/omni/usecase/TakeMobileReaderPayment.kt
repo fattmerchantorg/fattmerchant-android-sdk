@@ -36,19 +36,6 @@ internal class TakeMobileReaderPayment(
         }
 
         var invoice = Invoice()
-        var customer: Customer? = null
-
-        // Try to get the customer by id. If we couldn't get it, throw an error
-        request.customerId?.let { customerId ->
-            val retrievedCustomer = customerRepository.getById(customerId) { }
-
-            if (retrievedCustomer != null) {
-                customer = retrievedCustomer
-            } else {
-                onError(TakeMobileReaderPaymentException("Could not retrieve customer with id $customerId"))
-                return@coroutineScope null
-            }
-        }
 
         // Check if we are passing an invoice id
         request.invoiceId?.let {
@@ -87,43 +74,101 @@ internal class TakeMobileReaderPayment(
             return@coroutineScope null
         }
 
-        // Create customer
-        if (customer == null) {
-            customer = customerRepository.create(
-                result.generateCustomer()
-            ) {
-                onError(it)
-            } ?: return@coroutineScope null
+        val voidAndFail = { exception: OmniException ->
+            reader.voidTransaction(result) {
+                onError(exception)
+            }
+        }
+
+        val customer = when {
+            invoice.customerId != null -> {
+                // Check if the invoice exists
+                customerRepository.getById(invoice.customerId!!) {
+                    voidAndFail(TakeMobileReaderPaymentException("Customer with given id not found"))
+                } ?: return@coroutineScope null
+            }
+
+            request.customerId != null -> {
+                customerRepository.getById(request.customerId!!) {
+                    voidAndFail(TakeMobileReaderPaymentException("Customer with given id not found"))
+                } ?: return@coroutineScope null
+            }
+
+            else -> {
+                customerRepository.create(
+                    Customer().apply {
+                        firstname = if(result.transactionSource.equals("contactless", true)) "Mobile Device" else result.cardHolderFirstName ?: "SWIPE"
+                        lastname = if(result.transactionSource.equals("contactless", true)) "Customer" else result.cardHolderLastName ?: "CUSTOMER"
+                    }
+                ) {
+                    voidAndFail(it)
+                } ?: return@coroutineScope null
+            }
+
         }
 
         // Create a PaymentMethod
         val paymentMethod = paymentMethodRepository.create(
             result.generatePaymentMethod().apply {
-                merchantId = customer?.merchantId
-                customerId = customer?.id
+                merchantId = customer.merchantId
+                customerId = customer.id
             }
         ) {
-            onError(it)
+            voidAndFail(it)
         } ?: return@coroutineScope null
 
         // Associate payment method and invoice with customer
         invoice.paymentMethodId = paymentMethod.id
-        invoice.customerId = customer?.id
+        invoice.customerId = customer.id
+
+        // If the invoice already has meta, then we don't want to replace it but rather merge in
+        // the new fields we have
+        invoice.meta = invoice.meta?.let {
+            val newMeta = it.toMutableMap()
+            newMeta.putAll(result.invoiceMeta())
+            newMeta
+        } ?: result.invoiceMeta()
 
         // Update invoice
         invoiceRepository.update(invoice) {
-            onError(it)
+            voidAndFail(it)
         } ?: return@coroutineScope null
 
         // Create transaction
-        transactionRepository.create(
+        val createdTransaction = transactionRepository.create(
             result.generateTransaction().apply {
                 paymentMethodId = paymentMethod.id
-                customerId = customer?.id
+                customerId = customer.id
                 invoiceId = invoice.id
             }
         ) {
-            onError(it)
+            voidAndFail(it)
+        }
+
+        // If we the transaction is preauth, we don't need to capture it
+        if (request.preauth) {
+            return@coroutineScope createdTransaction
+        }
+
+        // If the transaction is not an NMI one, then we don't need to do the auth capture step
+        if (!result.source.contains("NMI")) {
+            return@coroutineScope createdTransaction
+        }
+
+        val successfullyCaptured = reader.capture(createdTransaction!!)
+
+        if (successfullyCaptured) {
+            return@coroutineScope createdTransaction
+        } else {
+            // Mark Stax transaction as failed
+            createdTransaction.success = false
+            createdTransaction.message = "Error capturing the transaction"
+
+            // Fail the transaction in Stax
+            transactionRepository.update(createdTransaction) { }
+
+            voidAndFail(TakeMobileReaderPaymentException("Could not capture transaction"))
+            return@coroutineScope null
         }
     }
 

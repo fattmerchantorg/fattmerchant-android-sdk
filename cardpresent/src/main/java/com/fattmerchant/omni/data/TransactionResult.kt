@@ -145,6 +145,19 @@ open class TransactionResult {
         return transactionMeta
     }
 
+    internal fun invoiceMeta(): Map<String, Any> {
+        val invoiceMeta = mutableMapOf<String, Any>()
+
+        request?.lineItems?.let { invoiceMeta["lineItems"] = it }
+        request?.subtotal?.let { invoiceMeta["subtotal"] = it }
+        request?.tax?.let { invoiceMeta["tax"] = it }
+        request?.tip?.let { invoiceMeta["tip"] = it }
+        request?.memo?.let { invoiceMeta["memo"] = it }
+        request?.reference?.let { invoiceMeta["reference"] = it }
+
+        return invoiceMeta
+    }
+
     internal fun generateTransaction(): Transaction {
         val transactionMeta = transactionMeta()
 

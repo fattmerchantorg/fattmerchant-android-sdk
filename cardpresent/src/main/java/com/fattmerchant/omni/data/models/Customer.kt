@@ -9,8 +9,8 @@ open class Customer : Model {
     open var addressState: String? = null
     open var addressZip: String? = null
     open var allowInvoiceCreditCardPayments: Boolean? = null
-    open var ccEmails: String? = null
-    open var ccSms: String? = null
+    open var ccEmails: List<String>? = null
+    open var ccSms: List<String>? = null
     open var company: String? = null
     open var createdAt: String? = null
     open var deletedAt: String? = null

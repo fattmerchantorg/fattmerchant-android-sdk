@@ -37,6 +37,8 @@ internal class AWCDriver: MobileReaderDriver {
     /** The transaction currently underway */
     private var currentTransaction: AnyPayTransaction? = null
 
+    private var missingAwcDetails: Boolean = true
+
     override val source: String = "AWC"
 
     override var familiarSerialNumbers: MutableList<String> = mutableListOf()
@@ -68,6 +70,11 @@ internal class AWCDriver: MobileReaderDriver {
         val awcArgs = args["awc"] as? MobileReaderDetails.AWCDetails
                 ?: throw InitializeMobileReaderDriverException("merchant not found")
 
+        if (awcArgs.terminalId.isBlank() || awcArgs.terminalSecret.isBlank()) {
+            missingAwcDetails = true
+            throw InitializeMobileReaderDriverException("merchant not found")
+        }
+
         // Initialize the Terminal. This will allow us to interact with AnyPay later on
         SDKManager.initialize(application)
         Terminal.initialize()
@@ -98,7 +105,12 @@ internal class AWCDriver: MobileReaderDriver {
 
     }
 
-    override suspend fun isInitialized(): Boolean = Terminal.isInitialized() && endpoint != null
+    override suspend fun isInitialized(): Boolean {
+        if (missingAwcDetails) {
+            return false
+        }
+        return Terminal.isInitialized() && endpoint != null
+    }
 
     override suspend fun searchForReaders(args: Map<String, Any>): List<MobileReader> {
         return suspendCancellableCoroutine {
@@ -205,8 +217,19 @@ internal class AWCDriver: MobileReaderDriver {
         }
     }
 
+    override suspend fun capture(transaction: Transaction): Boolean {
+        return false
+    }
+
     override suspend fun voidTransaction(transaction: Transaction): TransactionResult {
-        TODO("Not yet implemented")
+        return TransactionResult()
+    }
+
+    override fun voidTransaction(
+        transactionResult: TransactionResult,
+        completion: (Boolean) -> Unit
+    ) {
+        completion(false)
     }
 
     override suspend fun refundTransaction(transaction: Transaction, refundAmount: Amount?): TransactionResult {
