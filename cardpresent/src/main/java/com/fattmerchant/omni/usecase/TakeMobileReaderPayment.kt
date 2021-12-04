@@ -63,6 +63,19 @@ internal class TakeMobileReaderPayment(
 
             return transactionMeta
         }
+
+        internal fun invoiceMetaFrom(result: TransactionResult): Map<String, Any> {
+            val invoiceMeta = mutableMapOf<String, Any>()
+
+            result.request?.lineItems?.let { invoiceMeta["lineItems"] = it }
+            result.request?.subtotal?.let { invoiceMeta["subtotal"] = it }
+            result.request?.tax?.let { invoiceMeta["tax"] = it }
+            result.request?.tip?.let { invoiceMeta["tip"] = it }
+            result.request?.memo?.let { invoiceMeta["memo"] = it }
+            result.request?.reference?.let { invoiceMeta["reference"] = it }
+
+            return invoiceMeta
+        }
     }
 
     suspend fun start(onError: (OmniException) -> Unit): Transaction? = coroutineScope {
@@ -125,15 +138,23 @@ internal class TakeMobileReaderPayment(
             }
         }
 
-        // Create customer
-        val customer = customerRepository.create(
-            Customer().apply {
-                firstname = if(result.transactionSource.equals("contactless", true)) "Mobile Device" else result.cardHolderFirstName ?: "SWIPE"
-                lastname = if(result.transactionSource.equals("contactless", true)) "Customer" else result.cardHolderLastName ?: "CUSTOMER"
-            }
-        ) {
-            voidAndFail(it)
-        } ?: return@coroutineScope null
+        // Check if the invoice already has a customer associated with it
+        val customer = invoice.customerId?.let {
+            // Check if the invoice exists
+            customerRepository.getById(it) {
+                voidAndFail(TakeMobileReaderPaymentException("Customer with given id not found"))
+            } ?: return@coroutineScope null
+        } ?: run {
+            // If not create the invoice
+            customerRepository.create(
+                    Customer().apply {
+                        firstname = if(result.transactionSource.equals("contactless", true)) "Mobile Device" else result.cardHolderFirstName ?: "SWIPE"
+                        lastname = if(result.transactionSource.equals("contactless", true)) "Customer" else result.cardHolderLastName ?: "CUSTOMER"
+                    }
+            ) {
+                voidAndFail(it)
+            } ?: return@coroutineScope null
+        }
 
         // Create a PaymentMethod
         val paymentMethod = paymentMethodRepository.create(
@@ -155,6 +176,7 @@ internal class TakeMobileReaderPayment(
         // Associate payment method and invoice with customer
         invoice.paymentMethodId = paymentMethod.id
         invoice.customerId = customer.id
+        invoice.meta = invoiceMetaFrom(result)
 
         // Update invoice
         invoiceRepository.update(invoice) {
