@@ -209,8 +209,8 @@ open class TransactionResult {
     internal fun generatePaymentMethod(): PaymentMethod {
         return PaymentMethod().apply {
             method = "card"
-            cardType = cardType
-            cardExp = cardExpiration
+            cardType = this@TransactionResult.cardType
+            cardExp = this@TransactionResult.cardExpiration
             this.cardLastFour = cardLastFour()
             personName = customerName()
             tokenize = false

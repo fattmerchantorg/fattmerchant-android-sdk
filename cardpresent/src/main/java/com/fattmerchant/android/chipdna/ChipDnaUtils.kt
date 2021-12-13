@@ -136,11 +136,6 @@ internal fun withTransactionRequest(request: TransactionRequest) = Parameters().
     add(ParameterKeys.PaymentMethod, ParameterValues.Card)
     add(ParameterKeys.TransactionType, ParameterValues.Sale)
 
-    // Only autoconfirm if this is a preauth transaction
-    if (!request.preauth){
-        add(ParameterKeys.AutoConfirm, ParameterValues.TRUE)
-    }
-
     if (request.tokenize) {
         add(ParameterKeys.CustomerVaultCommand, ParameterValuesAddCustomer)
     }

@@ -331,6 +331,8 @@ internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfiguratio
             cardHolderLastName = lastName
             cardType = result[ParameterKeys.CardSchemeId]?.toLowerCase(Locale.ROOT)
             cardExpiration = ccExpiration
+            amount = Amount(cents = result[ParameterKeys.Amount]?.toInt() ?: request.amount.cents)
+
             this.source = this@ChipDnaDriver.source
             success = result[ParameterKeys.TransactionResult] == ParameterValues.Approved
             transactionSource = receiptData[ReceiptFieldKey.TRANSACTION_SOURCE]?.value

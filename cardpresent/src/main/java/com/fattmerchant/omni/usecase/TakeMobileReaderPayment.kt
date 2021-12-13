@@ -143,7 +143,7 @@ internal class TakeMobileReaderPayment(
             }
         ) {
             voidAndFail(it)
-        }
+        } ?: return@coroutineScope null
 
         // If we the transaction is preauth, we don't need to capture it
         if (request.preauth) {
@@ -155,7 +155,7 @@ internal class TakeMobileReaderPayment(
             return@coroutineScope createdTransaction
         }
 
-        val successfullyCaptured = reader.capture(createdTransaction!!)
+        val successfullyCaptured = reader.capture(createdTransaction)
 
         if (successfullyCaptured) {
             return@coroutineScope createdTransaction
