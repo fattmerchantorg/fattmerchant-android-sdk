@@ -1,5 +1,4 @@
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 apply plugin: 'com.github.dcendents.android-maven'
 
@@ -84,6 +83,7 @@ dependencies {
     // AnywhereCommerce
     compileOnly files('libs/com.anywherecommerce.android.sdk-release.aar')
 //    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "com.dvmms:dejapay:2.0.20"
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.8.0'
     implementation 'com.github.smart-fun:XmlToJson:1.4.4'
