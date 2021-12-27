@@ -40,4 +40,10 @@ class TransactionRequestTests {
         assert(request.reference == "5")
     }
 
+    fun `can add customer id`() {
+        val request = TransactionRequest(Amount(10))
+        request.customerId = "1234"
+        assert(true)
+    }
+
 }

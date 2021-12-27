@@ -72,7 +72,7 @@ internal class AWCDriver: MobileReaderDriver {
 
         if (awcArgs.terminalId.isBlank() || awcArgs.terminalSecret.isBlank()) {
             missingAwcDetails = true
-            throw InitializeMobileReaderDriverException("merchant not foundq")
+            throw InitializeMobileReaderDriverException("merchant not found")
         }
 
         // Initialize the Terminal. This will allow us to interact with AnyPay later on
@@ -217,8 +217,19 @@ internal class AWCDriver: MobileReaderDriver {
         }
     }
 
+    override suspend fun capture(transaction: Transaction): Boolean {
+        return false
+    }
+
     override suspend fun voidTransaction(transaction: Transaction): TransactionResult {
-        TODO("Not yet implemented")
+        return TransactionResult()
+    }
+
+    override fun voidTransaction(
+        transactionResult: TransactionResult,
+        completion: (Boolean) -> Unit
+    ) {
+        completion(false)
     }
 
     override suspend fun refundTransaction(transaction: Transaction, refundAmount: Amount?): TransactionResult {

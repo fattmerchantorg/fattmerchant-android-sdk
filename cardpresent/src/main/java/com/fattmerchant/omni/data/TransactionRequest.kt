@@ -20,6 +20,12 @@ data class TransactionRequest(
     /** The id of the invoice we want to apply the transaction to */
     var invoiceId: String? = null,
 
+    /** The id of the [Customer] we want to apply the [Transaction] to
+     *
+     * Note that if there is a payment method created
+     * */
+    var customerId: String? = null,
+
     /** The [CreditCard] to charge */
     var card: CreditCard? = null,
 
@@ -47,6 +53,12 @@ data class TransactionRequest(
 
     /** The tip amount applied to the transaction */
     var tip: Double? = null,
+
+    /** The shipping amount applied to the transaction */
+    var shippingAmount: Double? = null,
+
+    /** The purchase order number for the transaction */
+    var poNumber: String? = null,
 
     /** A memo for the transaction */
     var memo: String? = null,
@@ -81,7 +93,7 @@ data class TransactionRequest(
      * @param amount The [Amount] to be collected during the transaction
      * @param creditCard The [CreditCard] used for the transaction
      * */
-    constructor(amount: Amount, creditCard: CreditCard) : this(amount, true, null, creditCard)
+    constructor(amount: Amount, creditCard: CreditCard) : this(amount, true, null, null, creditCard)
 
     /**
      * Initializes a Transaction with the given [Amount] and [BankAccount]
