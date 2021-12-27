@@ -78,6 +78,8 @@ open class TransactionResult {
     /** The gateway response in its entirety */
     var gatewayResponse: String? = null
 
+    var transactionMeta: MutableMap<String, Any>? = null
+
     /** The token that represents this payment method */
     internal var paymentToken: String? = null
 
@@ -111,7 +113,7 @@ open class TransactionResult {
     }
 
     internal fun transactionMeta(): Map<String, Any> {
-        val transactionMeta = mutableMapOf<String, Any>()
+        val transactionMeta = this.transactionMeta ?: mutableMapOf()
 
         when {
             source.contains(ChipDnaDriver().source) -> {
@@ -163,26 +165,33 @@ open class TransactionResult {
 
         var gatewayResponse: Map<String, Any>? = null
 
-        authCode?.let {
-            val responseMap = mapOf(
-                "gateway_specific_response_fields" to mapOf(
-                    "nmi" to mapOf(
-                        "authcode" to it
+        if (source.contains("nmi")) {
+            authCode?.let {
+                val responseMap = mapOf(
+                    "gateway_specific_response_fields" to mapOf(
+                        "nmi" to mapOf(
+                            "authcode" to it
+                        )
                     )
                 )
-            )
 
-            gatewayResponse = responseMap
+                gatewayResponse = responseMap
+            }
         }
 
         return Transaction().apply {
             total = amount?.dollarsString()
-            success = success
+            success = this@TransactionResult.success
             lastFour = cardLastFour()
             meta = transactionMeta
             type = "charge"
             method = "card"
-            source = "Android|CPSDK|${source}"
+            source = "Android|CPSDK|${this@TransactionResult.source}"
+
+            if (source?.contains("terminalservice.dejavoo") == true) {
+                source = "terminalservice.dejavoo"
+            }
+
             if(source == "AWC") {
                 isRefundable = false
                 isVoidable = false
