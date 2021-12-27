@@ -165,16 +165,18 @@ open class TransactionResult {
 
         var gatewayResponse: Map<String, Any>? = null
 
-        authCode?.let {
-            val responseMap = mapOf(
-                "gateway_specific_response_fields" to mapOf(
-                    "nmi" to mapOf(
-                        "authcode" to it
+        if (source.contains("nmi")) {
+            authCode?.let {
+                val responseMap = mapOf(
+                    "gateway_specific_response_fields" to mapOf(
+                        "nmi" to mapOf(
+                            "authcode" to it
+                        )
                     )
                 )
-            )
 
-            gatewayResponse = responseMap
+                gatewayResponse = responseMap
+            }
         }
 
         return Transaction().apply {
