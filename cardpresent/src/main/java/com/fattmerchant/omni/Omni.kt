@@ -466,6 +466,40 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
         }
     }
 
+    fun takePaymentTerminalTransaction(
+        request: TransactionRequest,
+        completion: (Transaction) -> Unit,
+        error: (OmniException) -> Unit
+    ) {
+        coroutineScope.launch {
+
+            if (currentJob is TakePaymentTerminalPayment && currentJob?.isActive == true) {
+                error(OmniException("Could not take mobile reader transaction", "Transaction in progress"))
+                return@launch
+            }
+
+            val takePaymentJob = TakePaymentTerminalPayment(
+                invoiceRepository = invoiceRepository,
+                customerRepository = customerRepository,
+                paymentMethodRepository = paymentMethodRepository,
+                transactionRepository = transactionRepository,
+                request = request,
+                mobileReaderDriverRepository = mobileReaderDriverRepository,
+                coroutineContext = coroutineContext
+            )
+
+            currentJob = takePaymentJob
+
+            val result = takePaymentJob.start {
+                error(it)
+                return@start
+            }
+
+            result?.let {
+                completion(it)
+            }
+        }
+    }
     /**
      * Attempts to cancel a current mobile reader [transaction]
      *

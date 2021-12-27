@@ -28,7 +28,7 @@ import java.util.logging.Logger
 
 class MainActivity : AppCompatActivity(), PermissionsManager {
 
-    val staxKey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6ImViNDhlZjk5LWFhNzgtNDk2ZS05YjAxLTQyMWY4ZGFmNzMyMyIsImdvZFVzZXIiOnRydWUsImJyYW5kIjoiZmF0dG1lcmNoYW50Iiwic3ViIjoiMzBjNmVlYjYtNjRiNi00N2Y2LWJjZjYtNzg3YTljNTg3OThiIiwiaXNzIjoiaHR0cDovL2FwaWRldjAxLmZhdHRsYWJzLmNvbS9hdXRoZW50aWNhdGUiLCJpYXQiOjE2MjIxMjgyMzQsImV4cCI6MTYyMjIxNDYzNCwibmJmIjoxNjIyMTI4MjM0LCJqdGkiOiJUYU9RSnV0cElEeWx6MzNoIn0.FosF0OCb4wm3O3Uj98V23xiJ8PN9HDNAqx-k8nhlptA"
+    val staxKey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6ImViNDhlZjk5LWFhNzgtNDk2ZS05YjAxLTQyMWY4ZGFmNzMyMyIsImdvZFVzZXIiOnRydWUsImJyYW5kIjoiZmF0dG1lcmNoYW50Iiwic3ViIjoiMzBjNmVlYjYtNjRiNi00N2Y2LWJjZjYtNzg3YTljNTg3OThiIiwiaXNzIjoiaHR0cDovL2FwaWRldjAxLmZhdHRsYWJzLmNvbS9hdXRoZW50aWNhdGUiLCJpYXQiOjE2NDA1NzA4MDAsImV4cCI6MTY0MDY1NzIwMCwibmJmIjoxNjQwNTcwODAwLCJqdGkiOiJ3SjlDa0tqRGNlRHRzMzBhIn0.WcFvqSf0wDungNBPOX4nWfiGAv4uX8sXRVfMMCNx6LU"
 
     val log = Logger.getLogger("MainActivity")
 
@@ -72,8 +72,7 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
             val amount = Amount(getAmount())
             updateStatus("Attempting to charge ${amount.dollarsString()}")
             val request = TransactionRequest(amount)
-
-            request.invoiceId = ""
+//            request.customerId = "bbe13c96-8bf6-4cb5-8d5c-24896cf0e0db"
 
             // Listen to transaction updates delivered by the Omni SDK
             Omni.shared()?.transactionUpdateListener = object: TransactionUpdateListener {
@@ -94,6 +93,32 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
 
             Omni.shared()?.takeMobileReaderTransaction(request, {
 
+                val msg = if (it.success == true) {
+                    "Successfully executed transaction"
+                } else {
+                    "Transaction declined"
+                }
+
+                runOnUiThread {
+                    updateStatus(msg)
+                }
+
+                transaction = it
+            }, {
+                updateStatus("Couldn't perform sale: ${it.message}. ${it.detail}")
+            })
+        }
+
+        buttonPerformSaleWithReader.isEnabled = true
+    }
+
+    private fun setupPerformSaleWithTerminalButton() {
+        buttonPerformSaleWithTerminal.setOnClickListener {
+            val amount = Amount(getAmount())
+            updateStatus("Attempting to charge ${amount.dollarsString()}")
+            val request = TransactionRequest(amount)
+
+            Omni.shared()?.takePaymentTerminalTransaction(request, {
                 val msg = if (it.success == true) {
                     "Successfully executed transaction"
                 } else {
@@ -344,6 +369,7 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
     private fun setupButtons() {
         setupInitializeButton()
         setupPerformSaleWithReaderButton()
+        setupPerformSaleWithTerminalButton()
         setupPerformSaleButton()
         setupRefundButton()
         setupConnectReaderButton()
@@ -453,8 +479,15 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
 
     private fun initializeOmni(apiKey: String) {
         updateStatus("Trying to initialize")
-        Omni.initialize(
-            InitParams(applicationContext, application, apiKey, OmniApi.Environment.DEV), {
+        Omni.initialize(mapOf(
+            "appContext" to applicationContext,
+            "environment" to OmniApi.Environment.DEV,
+            "authenticationKey" to "",
+            "tpn" to "",
+            "registerId" to "",
+            "apiKey" to apiKey,
+            "appName" to "stax_sdk_sample"
+        ), {
                 runOnUiThread {
                     updateStatus("Initialized")
                     buttonRefundPreviousTransaction.isEnabled = true
@@ -465,6 +498,19 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
         ) {
             updateStatus("${it.message}. ${it.detail}")
         }
+
+//        Omni.initialize(
+//            InitParams(applicationContext, application, apiKey, OmniApi.Environment.DEV), {
+//                runOnUiThread {
+//                    updateStatus("Initialized")
+//                    buttonRefundPreviousTransaction.isEnabled = true
+//                    buttonInitialize.visibility = View.GONE
+//                }
+//                Omni.shared()?.signatureProvider = SignatureProvider()
+//            }
+//        ) {
+//            updateStatus("${it.message}. ${it.detail}")
+//        }
     }
 
 }

@@ -38,6 +38,11 @@ internal class InitializeDrivers(
             }
         }
 
+        // Initialize the payment terminals
+        mobileReaderDriverRepository.getTerminal()?.let {
+            it.initialize(args)
+        }
+
         when {
             initializedDrivers.contains(true) -> return
             error != null -> onError(error!!)
