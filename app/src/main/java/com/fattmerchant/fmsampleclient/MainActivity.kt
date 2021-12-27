@@ -279,6 +279,7 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
                 // Figure out which transactions are refundable
                 val refundableTransactions = transactions.filter {
                     it.source?.contains("CPSDK") == true
+                            || it.source?.contains("terminalservice.dejavoo") == true
                 }
 
                 chooseTransaction(refundableTransactions) { transactionToRefund ->
@@ -296,16 +297,26 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
     }
 
     private fun setupVoidButton() {
-        buttonCancelTransaction.setOnClickListener {
-            Omni.shared()?.cancelMobileReaderTransaction({
-                if (it) {
-                    updateStatus("Transaction cancelled")
-                } else {
-                    updateStatus("Transaction not cancelled")
+        buttonVoidTransaction.setOnClickListener {
+            updateStatus("Fetching list of transactions")
+            Omni.shared()?.getTransactions({ transactions ->
+
+                // Figure out which transactions are refundable
+                val voidableTransactions = transactions.filter {
+                    it.source?.contains("CPSDK") == true
+                            || it.source?.contains("terminalservice.dejavoo") == true
                 }
 
+                chooseTransaction(voidableTransactions) { transactionToRefund ->
+                    updateStatus("Trying to void ${transactionToRefund.pretty()}")
+                    Omni.shared()?.voidMobileReaderTransaction(transactionToRefund, {
+                        updateStatus("Voided ${transactionToRefund.pretty()}")
+                    }, {
+                        updateStatus("Error voiding: ${it.message} ${it.detail}")
+                    })
+                }
             }, {
-                updateStatus(it)
+                updateStatus(it.message ?: "Could not get transactions")
             })
         }
     }

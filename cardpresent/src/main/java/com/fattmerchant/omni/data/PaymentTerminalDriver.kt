@@ -2,6 +2,7 @@ package com.fattmerchant.omni.data
 
 import com.fattmerchant.omni.data.MobileReaderDriver.InitializeMobileReaderDriverException
 import com.fattmerchant.omni.data.MobileReaderDriver.PerformTransactionException
+import com.fattmerchant.omni.data.models.Transaction
 
 interface PaymentTerminalDriver {
 
@@ -19,6 +20,24 @@ interface PaymentTerminalDriver {
      */
     @Throws(PerformTransactionException::class)
     suspend fun performTransaction(request: TransactionRequest): TransactionResult
+
+    /**
+     * Attempts to void the given [transaction]
+     *
+     * @param transaction
+     * @return the result of the operation
+     */
+    @Throws(MobileReaderDriver.VoidTransactionException::class)
+    suspend fun voidTransaction(transaction: Transaction): TransactionResult
+
+    /**
+     * Attempts to refund the given [transaction]
+     *
+     * @param transaction
+     * @return the result of the operation
+     */
+    @Throws(MobileReaderDriver.RefundTransactionException::class)
+    suspend fun refundTransaction(transaction: Transaction, refundAmount: Amount? = null): TransactionResult
 
     /**
      * Attempts to initialize the [MobileReaderDriver]

@@ -1,14 +1,17 @@
 package com.fattmerchant.android.dejavoo
 
 import android.content.Context
+import com.anywherecommerce.android.sdk.models.TransactionType
 import com.dvmms.dejapay.IRequestCallback
 import com.dvmms.dejapay.exception.DejavooThrowable
 import com.dvmms.dejapay.models.*
 import com.dvmms.dejapay.models.DejavooTransactionRequest
 import com.dvmms.dejapay.models.DejavooTransactionResponse
+import com.dvmms.dejapay.models.requests.DejavooResponseSale
 import com.dvmms.dejapay.terminals.InternalTerminal
 import com.fattmerchant.omni.data.*
 import com.fattmerchant.omni.data.MobileReaderDriver
+import com.fattmerchant.omni.data.models.Transaction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -84,6 +87,67 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                         val lastName = names.last()
                         val expiry = extData.data["ExpDate"] ?: "1299"
 
+                        val transactionResult = TransactionResult().apply {
+                            authCode = auth
+                            success =
+                                response.resultCode == DejavooTransactionResponse.ResultCode.Succeded
+                            maskedPan = pan
+                            amount = Amount(dollars = extData.amount)
+                            cardType = extData.cardTypeString.toLowerCase()
+                            message = response.message
+                            cardHolderFirstName = firstName
+                            cardHolderLastName = lastName
+                            cardExpiration = expiry
+                            source = this@DejavooDriver.source
+                            transactionSource = extData.entryTypeString
+                            gatewayResponse = response.packetRaw
+                            transactionMeta = mutableMapOf(
+                                "RegisterId" to response.registerId,
+                                "AuthCode" to response.authenticationCode,
+                                "PNRef" to response.pnReference,
+                                "RespMSG" to response.responseMessage,
+                                "SN" to response.serialNumber,
+                                "referenceId" to response.referenceId
+                            )
+                            this.request = request
+                        }
+
+                        cancellableContinuation.resume(transactionResult)
+                    }
+
+                    override fun onError(throwable: DejavooThrowable) {
+                        //TODO handle error
+                    }
+                }
+            )
+
+        }
+    }
+
+    override suspend fun voidTransaction(transaction: Transaction): TransactionResult {
+        var referenceId = (transaction.meta as? Map<*, *>)?.get("referenceId") as? String
+
+        return suspendCancellableCoroutine { cancellableContinuation ->
+            val dejavooRequest = DejavooTransactionRequest()
+            dejavooRequest.paymentType = DejavooPaymentType.Credit
+            dejavooRequest.transactionType = DejavooTransactionType.Void
+            dejavooRequest.referenceId = referenceId
+            dejavooRequest.setAmount(transaction.total?.toDoubleOrNull() ?: 0.0)
+
+            InternalTerminal().commitTransaction(
+                appContext, dejavooRequest, object : IRequestCallback<DejavooTransactionResponse> {
+                    override fun onResponse(response: DejavooTransactionResponse) {
+                        val auth = response.authenticationCode
+                        val extData = DejavooResponseExtData(appName, response.extData)
+
+                        val firstFour = extData.acntFirst4
+                        val lastFour = extData.acntLast4
+                        val pan = "$firstFour********$lastFour"
+                        val names = extData.cardHolder.split("/").reversed()
+                        val firstName = names.first()
+                        val lastName = names.last()
+                        val expiry = extData.data["ExpDate"] ?: "1299"
+
                         response.referenceId // this seems like the transaction ref id to use for voiding/refunding
 
                         val transactionResult = TransactionResult().apply {
@@ -107,6 +171,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                                 "RespMSG" to response.responseMessage,
                                 "SN" to response.serialNumber,
                             )
+                            transactionType = "refund"
                             this.request = request
                         }
 
@@ -114,7 +179,75 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                     }
 
                     override fun onError(throwable: DejavooThrowable) {
-                        //TODO handle error
+
+                    }
+                }
+            )
+
+        }
+    }
+
+
+    override suspend fun refundTransaction(
+        transaction: Transaction,
+        refundAmount: Amount?
+    ): TransactionResult {
+
+        var referenceId = (transaction.meta as? Map<*, *>)?.get("referenceId") as? String
+
+        return suspendCancellableCoroutine { cancellableContinuation ->
+            val dejavooRequest = DejavooTransactionRequest()
+            dejavooRequest.paymentType = DejavooPaymentType.Credit
+            dejavooRequest.transactionType = DejavooTransactionType.Return
+            dejavooRequest.referenceId = referenceId
+            dejavooRequest.setAmount(refundAmount?.dollars() ?: transaction.total?.toDoubleOrNull() ?: 0.0)
+
+            InternalTerminal().commitTransaction(
+                appContext, dejavooRequest, object : IRequestCallback<DejavooTransactionResponse> {
+                    override fun onResponse(response: DejavooTransactionResponse) {
+                        val auth = response.authenticationCode
+                        val extData = DejavooResponseExtData(appName, response.extData)
+
+                        val firstFour = extData.acntFirst4
+                        val lastFour = extData.acntLast4
+                        val pan = "$firstFour********$lastFour"
+                        val names = extData.cardHolder.split("/").reversed()
+                        val firstName = names.first()
+                        val lastName = names.last()
+                        val expiry = extData.data["ExpDate"] ?: "1299"
+
+                        response.referenceId // this seems like the transaction ref id to use for voiding/refunding
+
+                        val transactionResult = TransactionResult().apply {
+                            authCode = auth
+                            success =
+                                response.resultCode == DejavooTransactionResponse.ResultCode.Succeded
+                            maskedPan = pan
+                            amount = Amount(dollars = extData.amount)
+                            cardType = extData.cardTypeString.toLowerCase()
+                            message = response.message
+                            cardHolderFirstName = firstName
+                            cardHolderLastName = lastName
+                            cardExpiration = expiry
+                            source = this@DejavooDriver.source
+                            transactionSource = extData.entryTypeString
+                            gatewayResponse = response.packetRaw
+                            transactionMeta = mutableMapOf(
+                                "RegisterId" to response.registerId,
+                                "AuthCode" to response.authenticationCode,
+                                "PNRef" to response.pnReference,
+                                "RespMSG" to response.responseMessage,
+                                "SN" to response.serialNumber,
+                            )
+                            transactionType = "refund"
+                            this.request = request
+                        }
+
+                        cancellableContinuation.resume(transactionResult)
+                    }
+
+                    override fun onError(throwable: DejavooThrowable) {
+
                     }
                 }
             )
