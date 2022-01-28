@@ -1,9 +1,6 @@
 package com.fattmerchant.omni.data
 
-import com.fattmerchant.omni.data.models.BankAccount
-import com.fattmerchant.omni.data.models.CatalogItem
-import com.fattmerchant.omni.data.models.CreditCard
-import com.fattmerchant.omni.data.models.Transaction
+import com.fattmerchant.omni.data.models.*
 
 /**
  * A request for a transaction
@@ -65,6 +62,13 @@ data class TransactionRequest(
 
     /** A reference for the transaction */
     var reference: String? = null,
+
+    /**
+     * Credit or Debit
+     *
+     * Currently, this is only supported for integrated terminals
+     *  */
+    var paymentType: PaymentType? = PaymentType.CREDIT,
 
     /**
      * The option to perform a preauthorization

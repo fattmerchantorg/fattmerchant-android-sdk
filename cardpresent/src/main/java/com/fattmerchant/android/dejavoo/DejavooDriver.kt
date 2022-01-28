@@ -11,6 +11,7 @@ import com.dvmms.dejapay.models.requests.DejavooResponseSale
 import com.dvmms.dejapay.terminals.InternalTerminal
 import com.fattmerchant.omni.data.*
 import com.fattmerchant.omni.data.MobileReaderDriver
+import com.fattmerchant.omni.data.models.PaymentType
 import com.fattmerchant.omni.data.models.Transaction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -62,7 +63,10 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
             dejavooRequest.authenticationKey = authenticationKey
             dejavooRequest.tpn = tpn
             dejavooRequest.registerId = registerId
-            dejavooRequest.paymentType = DejavooPaymentType.Credit
+            dejavooRequest.paymentType = when (request.paymentType) {
+                PaymentType.DEBIT -> DejavooPaymentType.Debit
+                else -> DejavooPaymentType.Credit
+            }
             dejavooRequest.transactionType = DejavooTransactionType.Sale
             dejavooRequest.referenceId = UUID.randomUUID().toString()
             dejavooRequest.isRepeatRequest = false
