@@ -11,6 +11,7 @@ import com.dvmms.dejapay.models.requests.DejavooResponseSale
 import com.dvmms.dejapay.terminals.InternalTerminal
 import com.fattmerchant.omni.data.*
 import com.fattmerchant.omni.data.MobileReaderDriver
+import com.fattmerchant.omni.data.models.DejavooTerminalCredentials
 import com.fattmerchant.omni.data.models.PaymentType
 import com.fattmerchant.omni.data.models.Transaction
 import kotlinx.coroutines.CoroutineScope
@@ -38,17 +39,15 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
             ?: throw MobileReaderDriver.InitializeMobileReaderDriverException("appContext not found")
         this.appContext = appContext
 
-        this.authenticationKey = args["authenticationKey"] as? String
-            ?: throw MobileReaderDriver.InitializeMobileReaderDriverException("authKey not found")
+        this.appName = args["appId"] as? String
+            ?: throw MobileReaderDriver.InitializeMobileReaderDriverException("appId not found")
 
-        this.tpn = args["tpn"] as? String
-            ?: throw MobileReaderDriver.InitializeMobileReaderDriverException("tpn not found")
+        val creds = args["dejavoo"] as? DejavooTerminalCredentials
+            ?: throw MobileReaderDriver.InitializeMobileReaderDriverException("Dejavoo credentials not found")
 
-        this.registerId = args["registerId"] as? String
-            ?: throw MobileReaderDriver.InitializeMobileReaderDriverException("registerId not found")
-
-        this.appName = args["appName"] as? String
-            ?: throw MobileReaderDriver.InitializeMobileReaderDriverException("appName not found")
+        this.authenticationKey = creds.key
+        this.tpn = creds.tpn
+        this.registerId = creds.registerId
 
         return true
     }
