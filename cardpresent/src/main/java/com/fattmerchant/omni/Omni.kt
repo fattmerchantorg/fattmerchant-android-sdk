@@ -1,5 +1,6 @@
 package com.fattmerchant.omni
 
+import com.fattmerchant.android.dejavoo.DejavooDriverUtils
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.TransactionRequest
@@ -66,24 +67,28 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
 
             val merchant = omniApi.getSelf {
                 error(OmniException("Could not get reader settings", it.message))
-            }?.merchant
-
-            if (merchant == null) {
+            }?.merchant ?: run {
                 error(OmniException("Could not get reader settings", "Merchant object is null"))
+                return@launch
             }
 
             val mutatedArgs = args.toMutableMap()
 
             // AWC
             val awcDetails = MobileReaderDetails.AWCDetails()
-            merchant?.emvTerminalId()?.let { awcDetails.terminalId = it }
-            merchant?.emvTerminalSecret()?.let { awcDetails.terminalSecret = it }
+            merchant.emvTerminalId()?.let { awcDetails.terminalId = it }
+            merchant.emvTerminalSecret()?.let { awcDetails.terminalSecret = it }
             mutatedArgs["awc"] = awcDetails
 
             // NMI
             val nmiDetails = MobileReaderDetails.NMIDetails()
-            merchant?.emvPassword()?.let { nmiDetails.securityKey = it }
+            merchant.emvPassword()?.let { nmiDetails.securityKey = it }
             mutatedArgs["nmi"] = nmiDetails
+
+            // Dejavoo
+            DejavooDriverUtils().getCurrentTerminalCreds(merchant)?.let {
+                mutatedArgs["dejavoo"] = it
+            }
 
             omniApi.getMobileReaderSettings {
                 // error(OmniException("Could not get reader settings", it.message))
@@ -95,13 +100,13 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
                 mobileReaderDetails.anywhereCommerce?.let {
                     mutatedArgs["awc"] = it
                 }
-
-                InitializeDrivers(
-                        mobileReaderDriverRepository,
-                        mutatedArgs,
-                        coroutineContext
-                ).start(error)
             }
+
+            InitializeDrivers(
+                mobileReaderDriverRepository,
+                mutatedArgs,
+                coroutineContext
+            ).start(error)
 
             initialized = true
 

@@ -2,6 +2,6 @@
           package="com.fattmerchant.cpresent">
 
     <application>
-<!--        <service android:name="com.anywherecommerce.android.sdk.services.CardReaderConnectionService" android:stopWithTask="false" />-->
+       <service android:name="com.anywherecommerce.android.sdk.services.CardReaderConnectionService" android:stopWithTask="false" />
     </application>
 </manifest>
