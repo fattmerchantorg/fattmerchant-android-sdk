@@ -1,0 +1,23 @@
+name: Test Android SDK
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+      - release/**
+
+jobs:
+  test:
+    runs-on: macos-latest
+    steps:
+      - name: Unit Test
+        run: ./gradlew :cardpresent:testDebugUnitTest
+
+      - name: Upload Test Reports Folder
+        uses: actions/upload-artifact@v2
+        if: ${{ always() }} # IMPORTANT: Upload reports regardless of status
+        with:
+          name: reports
+          path: app/build/test-results
