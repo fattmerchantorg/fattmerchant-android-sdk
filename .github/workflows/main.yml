@@ -12,6 +12,9 @@ jobs:
   test:
     runs-on: macos-latest
     steps:
+      - name: Make Gradle executable
+      - run: chmod +x ./gradlew
+
       - name: Unit Test
         run: ./gradlew :cardpresent:testDebugUnitTest
 
