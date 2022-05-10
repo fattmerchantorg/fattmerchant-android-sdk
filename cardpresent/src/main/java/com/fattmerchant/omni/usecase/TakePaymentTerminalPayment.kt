@@ -76,6 +76,11 @@ internal class TakePaymentTerminalPayment(
         }
 
         // Check if transaction cancelled
+        if (result.message?.contains("busy") == true && result.authCode == null) {
+            onError(TakeMobileReaderPaymentException("Service Busy"))
+            return@coroutineScope null
+        }
+
         if (result.message == "Canceled") {
             onError(TakeMobileReaderPaymentException("User Cancelled"))
             return@coroutineScope null
