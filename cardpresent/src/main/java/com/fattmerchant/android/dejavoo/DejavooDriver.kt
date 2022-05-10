@@ -198,7 +198,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
         refundAmount: Amount?
     ): TransactionResult {
 
-        var referenceId = (transaction.meta as? Map<*, *>)?.get("referenceId") as? String
+        val referenceId = UUID.randomUUID().toString()
 
         return suspendCancellableCoroutine { cancellableContinuation ->
             val dejavooRequest = DejavooTransactionRequest()
