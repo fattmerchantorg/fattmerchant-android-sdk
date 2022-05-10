@@ -68,19 +68,19 @@ class DejavooDriverUtils {
                     "AuthCode" to response.authenticationCode,
                     "message" to response.responseMessage,
                     "PNRef" to response.pnReference,
-                    "PaymentType" to response.paymentType.toString(),
+                    "PaymentType" to response.paymentType?.toString(),
                     "RegisterId" to response.registerId,
                     "RespMSG" to response.responseMessage,
                     "SN" to response.serialNumber,
-                    "TransType" to response.transactionType.toString(),
+                    "TransType" to response.transactionType?.toString(),
                     "Voided" to response.isVoided,
-                    "paymentType" to response.paymentType.toString(),
+                    "paymentType" to response.paymentType?.toString(),
                     "refId" to response.referenceId,
                     "registerId" to response.registerId,
                     "registerSerial" to response.serialNumber,
                     "registerType" to "dejavoo",
-                    "transactionType" to response.transactionType.toString(),
-                    "type" to response.paymentType.toString()
+                    "transactionType" to response.transactionType?.toString(),
+                    "type" to response.paymentType?.toString()
             )
         }
     }
