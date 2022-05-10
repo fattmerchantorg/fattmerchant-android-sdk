@@ -104,7 +104,6 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                             cardExpiration = expiry
                             source = this@DejavooDriver.source
                             transactionSource = extData.entryTypeString
-                            gatewayResponse = response.packetRaw
                             transactionMeta = mutableMapOf(
                                 "RegisterId" to response.registerId,
                                 "AuthCode" to response.authenticationCode,
@@ -113,6 +112,8 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                                 "SN" to response.serialNumber,
                                 "referenceId" to response.referenceId
                             )
+
+                            gatewayResponse = DejavooDriverUtils.gatewayResponse(response)
                             this.request = request
                         }
 
@@ -167,7 +168,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                             cardExpiration = expiry
                             source = this@DejavooDriver.source
                             transactionSource = extData.entryTypeString
-                            gatewayResponse = response.packetRaw
+                            gatewayResponse = DejavooDriverUtils.gatewayResponse(response)
                             transactionMeta = mutableMapOf(
                                 "RegisterId" to response.registerId,
                                 "AuthCode" to response.authenticationCode,
@@ -235,7 +236,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                             cardExpiration = expiry
                             source = this@DejavooDriver.source
                             transactionSource = extData.entryTypeString
-                            gatewayResponse = response.packetRaw
+                            gatewayResponse = DejavooDriverUtils.gatewayResponse(response)
                             transactionMeta = mutableMapOf(
                                 "RegisterId" to response.registerId,
                                 "AuthCode" to response.authenticationCode,

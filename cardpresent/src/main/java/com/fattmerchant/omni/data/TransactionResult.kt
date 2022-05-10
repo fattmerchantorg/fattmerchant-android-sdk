@@ -2,6 +2,7 @@ package com.fattmerchant.omni.data
 
 import com.fattmerchant.android.anywherecommerce.AWCDriver
 import com.fattmerchant.android.chipdna.ChipDnaDriver
+import com.fattmerchant.cpresent.BuildConfig
 import com.fattmerchant.omni.data.models.Customer
 import com.fattmerchant.omni.data.models.Invoice
 import com.fattmerchant.omni.data.models.PaymentMethod
@@ -76,9 +77,9 @@ open class TransactionResult {
     var externalId: String? = null
 
     /** The gateway response in its entirety */
-    var gatewayResponse: String? = null
+    var gatewayResponse: MutableMap<String, Any?>? = null
 
-    var transactionMeta: MutableMap<String, Any>? = null
+    var transactionMeta: MutableMap<String, Any?>? = null
 
     /** The token that represents this payment method */
     internal var paymentToken: String? = null
@@ -112,8 +113,8 @@ open class TransactionResult {
         "****"
     }
 
-    internal fun transactionMeta(): Map<String, Any> {
-        val transactionMeta = this.transactionMeta ?: mutableMapOf()
+    internal fun transactionMeta(): Map<String, Any?> {
+        var transactionMeta = this.transactionMeta ?: mutableMapOf()
 
         when {
             source.contains(ChipDnaDriver().source) -> {
@@ -144,6 +145,10 @@ open class TransactionResult {
         request?.memo?.let { transactionMeta["memo"] = it }
         request?.reference?.let { transactionMeta["reference"] = it }
 
+        request?.meta?.let { passthroughMeta ->
+            transactionMeta = passthroughMeta.plus(transactionMeta).toMutableMap()
+        }
+
         return transactionMeta
     }
 
@@ -163,7 +168,7 @@ open class TransactionResult {
     internal fun generateTransaction(): Transaction {
         val transactionMeta = transactionMeta()
 
-        var gatewayResponse: Map<String, Any>? = null
+        var gatewayResponse: Map<String, Any?>? = this.gatewayResponse
 
         if (source.contains("nmi")) {
             authCode?.let {

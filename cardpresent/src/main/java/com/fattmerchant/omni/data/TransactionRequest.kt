@@ -80,6 +80,12 @@ data class TransactionRequest(
     var preauth: Boolean = false,
 
     /**
+     * Metadata that you want to pass in with the transaction. This will be put into the transaction
+     * record along with any other metadata that this SDK already adds to the transaction meta
+     */
+    var meta: Map<String, Any?>? = null,
+
+    /**
      * The id that we want the transaction to have
      *
      * We also give this to the 3rd party gateway to assign to the transaction so we know how to
