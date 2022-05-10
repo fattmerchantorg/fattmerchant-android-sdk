@@ -77,7 +77,15 @@ data class TransactionRequest(
      *  transaction will only hold funds and you will need to capture it at a later date via the
      *  Stax API or the SDK
      */
-    var preauth: Boolean = false
+    var preauth: Boolean = false,
+
+    /**
+     * The id that we want the transaction to have
+     *
+     * We also give this to the 3rd party gateway to assign to the transaction so we know how to
+     * reference it later. Not all gateways support this
+     */
+    internal var transactionId: String? = null
 ) {
 
     /**

@@ -17,6 +17,7 @@ import com.fattmerchant.omni.data.models.Transaction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
+import timber.log.Timber
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
@@ -67,7 +68,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                 else -> DejavooPaymentType.Credit
             }
             dejavooRequest.transactionType = DejavooTransactionType.Sale
-            dejavooRequest.referenceId = UUID.randomUUID().toString()
+            dejavooRequest.referenceId = request.transactionId ?: UUID.randomUUID().toString()
             dejavooRequest.isRepeatRequest = false
             dejavooRequest.setAmount(request.amount.dollars())
             dejavooRequest.isSignatureCapable = false

@@ -6,6 +6,7 @@ import com.fattmerchant.omni.data.models.*
 import com.fattmerchant.omni.data.repository.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
+import java.util.*
 import kotlin.coroutines.CoroutineContext
 
 internal class TakePaymentTerminalPayment(
@@ -31,6 +32,11 @@ internal class TakePaymentTerminalPayment(
             }
 
         var invoice = Invoice()
+
+        // Set the transactionId of the request
+        if (request.transactionId == null) {
+            request.transactionId = UUID.randomUUID().toString()
+        }
 
         // Check if we are passing an invoice id
         request.invoiceId?.let {
@@ -140,6 +146,7 @@ internal class TakePaymentTerminalPayment(
         // Create transaction
         val createdTransaction = transactionRepository.create(
             result.generateTransaction().apply {
+                id = request.transactionId
                 paymentMethodId = paymentMethod.id
                 customerId = customer.id
                 invoiceId = invoice.id
