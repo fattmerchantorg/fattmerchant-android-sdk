@@ -179,7 +179,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                                 "RespMSG" to response.responseMessage,
                                 "SN" to response.serialNumber,
                             )
-                            transactionType = "refund"
+                            transactionType = "void"
                             this.request = request
                         }
 
@@ -226,8 +226,6 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                         val firstName = names.first()
                         val lastName = names.last()
                         val expiry = extData.data["ExpDate"] ?: "1299"
-
-                        response.referenceId // this seems like the transaction ref id to use for voiding/refunding
 
                         val transactionResult = TransactionResult().apply {
                             authCode = auth
