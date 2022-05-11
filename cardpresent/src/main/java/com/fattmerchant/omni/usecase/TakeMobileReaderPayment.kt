@@ -8,6 +8,7 @@ import com.fattmerchant.omni.data.models.*
 import com.fattmerchant.omni.data.repository.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
+import java.util.*
 import kotlin.coroutines.CoroutineContext
 
 internal class TakeMobileReaderPayment(
@@ -16,7 +17,7 @@ internal class TakeMobileReaderPayment(
     val customerRepository: CustomerRepository,
     val paymentMethodRepository: PaymentMethodRepository,
     val transactionRepository: TransactionRepository,
-    val request: TransactionRequest,
+    var request: TransactionRequest,
     val signatureProvider: SignatureProviding? = null,
     val transactionUpdateListener: TransactionUpdateListener? = null,
     val userNotificationListener: UserNotificationListener? = null,

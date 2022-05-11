@@ -17,6 +17,7 @@ import com.fattmerchant.omni.data.models.Transaction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
+import timber.log.Timber
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
@@ -67,7 +68,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                 else -> DejavooPaymentType.Credit
             }
             dejavooRequest.transactionType = DejavooTransactionType.Sale
-            dejavooRequest.referenceId = UUID.randomUUID().toString()
+            dejavooRequest.referenceId = request.transactionId ?: UUID.randomUUID().toString()
             dejavooRequest.isRepeatRequest = false
             dejavooRequest.setAmount(request.amount.dollars())
             dejavooRequest.isSignatureCapable = false
@@ -103,7 +104,6 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                             cardExpiration = expiry
                             source = this@DejavooDriver.source
                             transactionSource = extData.entryTypeString
-                            gatewayResponse = response.packetRaw
                             transactionMeta = mutableMapOf(
                                 "RegisterId" to response.registerId,
                                 "AuthCode" to response.authenticationCode,
@@ -112,6 +112,8 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                                 "SN" to response.serialNumber,
                                 "referenceId" to response.referenceId
                             )
+
+                            gatewayResponse = DejavooDriverUtils.gatewayResponse(response)
                             this.request = request
                         }
 
@@ -166,7 +168,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                             cardExpiration = expiry
                             source = this@DejavooDriver.source
                             transactionSource = extData.entryTypeString
-                            gatewayResponse = response.packetRaw
+                            gatewayResponse = DejavooDriverUtils.gatewayResponse(response)
                             transactionMeta = mutableMapOf(
                                 "RegisterId" to response.registerId,
                                 "AuthCode" to response.authenticationCode,
@@ -196,7 +198,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
         refundAmount: Amount?
     ): TransactionResult {
 
-        var referenceId = (transaction.meta as? Map<*, *>)?.get("referenceId") as? String
+        val referenceId = UUID.randomUUID().toString()
 
         return suspendCancellableCoroutine { cancellableContinuation ->
             val dejavooRequest = DejavooTransactionRequest()
@@ -234,7 +236,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                             cardExpiration = expiry
                             source = this@DejavooDriver.source
                             transactionSource = extData.entryTypeString
-                            gatewayResponse = response.packetRaw
+                            gatewayResponse = DejavooDriverUtils.gatewayResponse(response)
                             transactionMeta = mutableMapOf(
                                 "RegisterId" to response.registerId,
                                 "AuthCode" to response.authenticationCode,
