@@ -134,6 +134,9 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
 
         return suspendCancellableCoroutine { cancellableContinuation ->
             val dejavooRequest = DejavooTransactionRequest()
+            dejavooRequest.authenticationKey = authenticationKey
+            dejavooRequest.tpn = tpn
+            dejavooRequest.registerId = registerId
             dejavooRequest.paymentType = DejavooPaymentType.Credit
             dejavooRequest.transactionType = DejavooTransactionType.Void
             dejavooRequest.referenceId = referenceId
@@ -202,6 +205,9 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
 
         return suspendCancellableCoroutine { cancellableContinuation ->
             val dejavooRequest = DejavooTransactionRequest()
+            dejavooRequest.authenticationKey = authenticationKey
+            dejavooRequest.tpn = tpn
+            dejavooRequest.registerId = registerId
             dejavooRequest.paymentType = DejavooPaymentType.Credit
             dejavooRequest.transactionType = DejavooTransactionType.Return
             dejavooRequest.referenceId = referenceId
