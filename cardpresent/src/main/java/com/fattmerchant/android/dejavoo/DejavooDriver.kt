@@ -87,9 +87,17 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                         val lastFour = extData.acntLast4
                         val pan = "$firstFour********$lastFour"
                         val names = extData.cardHolder.split("/").reversed()
-                        val firstName = names.first()
-                        val lastName = names.last()
+                        var firstName = names.first()
+                        var lastName = names.last()
                         val expiry = extData.data["ExpDate"] ?: "1299"
+
+                        if (firstName.isBlank()) {
+                            firstName = "Contactless"
+                        }
+
+                        if (lastName.isBlank()) {
+                            lastName = "Customer"
+                        }
 
                         val transactionResult = TransactionResult().apply {
                             authCode = auth
@@ -134,6 +142,9 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
 
         return suspendCancellableCoroutine { cancellableContinuation ->
             val dejavooRequest = DejavooTransactionRequest()
+            dejavooRequest.authenticationKey = authenticationKey
+            dejavooRequest.tpn = tpn
+            dejavooRequest.registerId = registerId
             dejavooRequest.paymentType = DejavooPaymentType.Credit
             dejavooRequest.transactionType = DejavooTransactionType.Void
             dejavooRequest.referenceId = referenceId
@@ -149,11 +160,19 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                         val lastFour = extData.acntLast4
                         val pan = "$firstFour********$lastFour"
                         val names = extData.cardHolder.split("/").reversed()
-                        val firstName = names.first()
-                        val lastName = names.last()
+                        var firstName = names.first()
+                        var lastName = names.last()
                         val expiry = extData.data["ExpDate"] ?: "1299"
 
                         response.referenceId // this seems like the transaction ref id to use for voiding/refunding
+
+                        if (firstName.isBlank()) {
+                            firstName = "Contactless"
+                        }
+
+                        if (lastName.isBlank()) {
+                            lastName = "Customer"
+                        }
 
                         val transactionResult = TransactionResult().apply {
                             authCode = auth
@@ -176,7 +195,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                                 "RespMSG" to response.responseMessage,
                                 "SN" to response.serialNumber,
                             )
-                            transactionType = "refund"
+                            transactionType = "void"
                             this.request = request
                         }
 
@@ -202,6 +221,9 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
 
         return suspendCancellableCoroutine { cancellableContinuation ->
             val dejavooRequest = DejavooTransactionRequest()
+            dejavooRequest.authenticationKey = authenticationKey
+            dejavooRequest.tpn = tpn
+            dejavooRequest.registerId = registerId
             dejavooRequest.paymentType = DejavooPaymentType.Credit
             dejavooRequest.transactionType = DejavooTransactionType.Return
             dejavooRequest.referenceId = referenceId
@@ -217,11 +239,18 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                         val lastFour = extData.acntLast4
                         val pan = "$firstFour********$lastFour"
                         val names = extData.cardHolder.split("/").reversed()
-                        val firstName = names.first()
-                        val lastName = names.last()
+                        var firstName = names.first()
+                        var lastName = names.last()
                         val expiry = extData.data["ExpDate"] ?: "1299"
 
-                        response.referenceId // this seems like the transaction ref id to use for voiding/refunding
+
+                        if (firstName.isBlank()) {
+                            firstName = "Contactless"
+                        }
+
+                        if (lastName.isBlank()) {
+                            lastName = "Customer"
+                        }
 
                         val transactionResult = TransactionResult().apply {
                             authCode = auth
