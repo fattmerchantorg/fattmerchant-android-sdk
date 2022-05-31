@@ -100,21 +100,25 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
                 mobileReaderDetails.anywhereCommerce?.let {
                     mutatedArgs["awc"] = it
                 }
-
-                // In case of Missing reader credentials
-                if (mutatedArgs["awc"] == null && mutatedArgs["nmi"] == null) {
-                    initialized = true
-                    error(OmniException("Could not get reader settings", "Your account does not have mobile reader credentials"))
-                    return@launch
-                }
             }
 
-            initialized = true
+            // In case of Missing reader credentials
+            var updatedNMIDetails: MobileReaderDetails.NMIDetails? = mutatedArgs["nmi"] as? MobileReaderDetails.NMIDetails
+            var updatedAWCDetails: MobileReaderDetails.AWCDetails? = mutatedArgs["awc"] as? MobileReaderDetails.AWCDetails
+            // If details(AWC/NMI) null OR NMISecKey & any of AWC cred is Blank, then initialize SDK and return an error to warn user
+            if ((updatedAWCDetails == null && updatedNMIDetails == null) ||
+                ( updatedNMIDetails?.securityKey == "" &&  ( updatedAWCDetails?.terminalId == "" || updatedAWCDetails?.terminalSecret == "") ) ){
+                initialized = true
+                error(OmniException("Could not get reader settings", "Your account does not have mobile reader credentials"))
+                return@launch
+            }
+
             InitializeDrivers(
                 mobileReaderDriverRepository,
                 mutatedArgs,
                 coroutineContext
             ).start(error)
+            initialized = true
             completion()
         }
     }
