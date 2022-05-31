@@ -17,6 +17,7 @@ internal class InitializeDrivers(
     class InitializeDriversException(message: String? = null) : OmniException("Could not initialize drivers", message) {
         companion object {
             val NoMobileReadersFound = InitializeDriversException("Couldn't find any mobile readers")
+            val InvalidReaderCredentials = InitializeDriversException("Your account has invalid mobile reader credentials")
         }
     }
 
@@ -33,6 +34,8 @@ internal class InitializeDrivers(
             } catch (e: Throwable) {
                 if (e is OmniException) {
                     error = e
+                } else {
+                    error = InitializeDriversException.InvalidReaderCredentials
                 }
                 false
             }
