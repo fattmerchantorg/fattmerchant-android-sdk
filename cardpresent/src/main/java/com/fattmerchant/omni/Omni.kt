@@ -107,7 +107,7 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
             var updatedAWCDetails: MobileReaderDetails.AWCDetails? = mutatedArgs["awc"] as? MobileReaderDetails.AWCDetails
             // If details(AWC/NMI) null OR NMISecKey & any of AWC cred is Blank, then initialize SDK and return an error to warn user
             if ((updatedAWCDetails == null && updatedNMIDetails == null) ||
-                ( updatedNMIDetails?.securityKey == "" &&  ( updatedAWCDetails?.terminalId == "" || updatedAWCDetails?.terminalSecret == "") ) ){
+                ( updatedNMIDetails?.securityKey.isNullOrBlank() &&  ( updatedAWCDetails?.terminalId.isNullOrBlank() || updatedAWCDetails?.terminalSecret.isNullOrBlank()) ) ){
                 initialized = true
                 error(OmniException("Could not get reader settings", "Your account does not have mobile reader credentials"))
                 return@launch
