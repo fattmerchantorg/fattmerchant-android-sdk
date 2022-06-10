@@ -4,11 +4,38 @@ import com.fattmerchant.android.dejavoo.DejavooDriverUtils
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.TransactionRequest
-import com.fattmerchant.omni.data.models.*
-import com.fattmerchant.omni.data.repository.*
 import com.fattmerchant.omni.networking.OmniApi
-import com.fattmerchant.omni.usecase.*
 import kotlinx.coroutines.*
+import com.fattmerchant.omni.data.models.MobileReaderDetails
+import com.fattmerchant.omni.data.models.MobileReaderDetails.NMIDetails
+import com.fattmerchant.omni.data.models.MobileReaderDetails.AWCDetails
+import com.fattmerchant.omni.data.models.OmniException
+import com.fattmerchant.omni.data.models.BankAccount
+import com.fattmerchant.omni.data.models.PaymentMethod
+import com.fattmerchant.omni.data.models.Transaction
+import com.fattmerchant.omni.data.models.CreditCard
+import com.fattmerchant.omni.data.models.Invoice
+import com.fattmerchant.omni.data.repository.TransactionRepository
+import com.fattmerchant.omni.data.repository.InvoiceRepository
+import com.fattmerchant.omni.data.repository.CustomerRepository
+import com.fattmerchant.omni.data.repository.MobileReaderDriverRepository
+import com.fattmerchant.omni.data.repository.PaymentMethodRepository
+import com.fattmerchant.omni.usecase.SearchForReaders
+import com.fattmerchant.omni.usecase.InitializeDrivers
+import com.fattmerchant.omni.usecase.GetConnectedMobileReader
+import com.fattmerchant.omni.usecase.ConnectMobileReader
+import com.fattmerchant.omni.usecase.DisconnectMobileReader
+import com.fattmerchant.omni.usecase.TakePayment
+import com.fattmerchant.omni.usecase.TakeMobileReaderPayment
+import com.fattmerchant.omni.usecase.TokenizePaymentMethod
+import com.fattmerchant.omni.usecase.VoidTransaction
+import com.fattmerchant.omni.usecase.VoidMobileReaderTransaction
+import com.fattmerchant.omni.usecase.CapturePreauthTransaction
+import com.fattmerchant.omni.usecase.RefundMobileReaderTransaction
+import com.fattmerchant.omni.usecase.TakePaymentTerminalPayment
+import com.fattmerchant.omni.usecase.CancelCurrentTransaction
+
+
 
 class OmniGeneralException(detail: String): OmniException("Omni General Error", detail) {
     companion object {
@@ -75,13 +102,13 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
             val mutatedArgs = args.toMutableMap()
 
             // AWC
-            val awcDetails = MobileReaderDetails.AWCDetails()
+            val awcDetails = AWCDetails()
             merchant.emvTerminalId()?.let { awcDetails.terminalId = it }
             merchant.emvTerminalSecret()?.let { awcDetails.terminalSecret = it }
             mutatedArgs["awc"] = awcDetails
 
             // NMI
-            val nmiDetails = MobileReaderDetails.NMIDetails()
+            val nmiDetails = NMIDetails()
             merchant.emvPassword()?.let { nmiDetails.securityKey = it }
             mutatedArgs["nmi"] = nmiDetails
 
@@ -103,8 +130,8 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
             }
 
             // In case of Missing reader credentials
-            var updatedNMIDetails: MobileReaderDetails.NMIDetails? = mutatedArgs["nmi"] as? MobileReaderDetails.NMIDetails
-            var updatedAWCDetails: MobileReaderDetails.AWCDetails? = mutatedArgs["awc"] as? MobileReaderDetails.AWCDetails
+            val updatedNMIDetails: NMIDetails? = mutatedArgs["nmi"] as? NMIDetails
+            val updatedAWCDetails: AWCDetails? = mutatedArgs["awc"] as? AWCDetails
             // If details(AWC/NMI) null OR NMISecKey & any of AWC cred is Blank, then initialize SDK and return an error to warn user
             if ((updatedAWCDetails == null && updatedNMIDetails == null) ||
                 ( updatedNMIDetails?.securityKey.isNullOrBlank() &&  ( updatedAWCDetails?.terminalId.isNullOrBlank() || updatedAWCDetails?.terminalSecret.isNullOrBlank()) ) ){
@@ -203,7 +230,7 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
      * Attempts to disconnect the given [MobileReader]
      *
      * @param mobileReader the [MobileReader] to disconnect
-     * @param onDisconnected a block to run once finished. It will receive true if the reader was disconencted
+     * @param onDisconnected a block to run once finished. It will receive true if the reader was disconnected
      * @param onFail a block to run if this operation fails. Receives an [OmniException]
      */
     fun disconnectReader(mobileReader: MobileReader, onDisconnected: (Boolean) -> Unit, onFail: (OmniException) -> Unit) {
@@ -396,7 +423,7 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
     /**
      * Voids the given transaction and returns a new [Transaction] that represents the void in Omni
      *
-     * @param transaction The transaction to void
+     * @param transactionId The id of transaction to void
      * @param completion A block to execute with the new, voided [Transaction]
      * @param error a block to run in case an error occurs
      */

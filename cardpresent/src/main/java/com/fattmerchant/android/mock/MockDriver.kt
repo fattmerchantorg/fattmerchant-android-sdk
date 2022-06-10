@@ -1,15 +1,18 @@
-package com.fattmerchant.android.Mock
+package com.fattmerchant.android.mock
 
-import com.fattmerchant.android.chipdna.ChipDnaDriver
 import com.fattmerchant.omni.MobileReaderConnectionStatusListener
 import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.UserNotificationListener
-import com.fattmerchant.omni.data.*
 import com.fattmerchant.omni.data.MobileReaderDriver
-import com.fattmerchant.omni.data.models.MobileReaderDetails
+import com.fattmerchant.omni.data.models.MobileReaderDetails.NMIDetails
+import com.fattmerchant.omni.data.models.MobileReaderDetails.AWCDetails
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.models.Transaction
+import com.fattmerchant.omni.data.MobileReader
+import com.fattmerchant.omni.data.TransactionResult
+import com.fattmerchant.omni.data.Amount
+import com.fattmerchant.omni.data.TransactionRequest
 
 internal fun createMockReader(forIndex: Int): MobileReader {
     return object : MobileReader {
@@ -44,8 +47,8 @@ internal final class MockDriver: MobileReaderDriver {
     }
 
     override suspend fun initialize(args: Map<String, Any>): Boolean {
-        val nmiDetails = args["nmi"] as? MobileReaderDetails.NMIDetails
-        val awcDetails = args["awc"] as? MobileReaderDetails.AWCDetails
+        val nmiDetails: NMIDetails? = args["nmi"] as? NMIDetails
+        val awcDetails: AWCDetails? = args["awc"] as? AWCDetails
         return nmiDetails?.securityKey.isNullOrBlank() || (awcDetails?.terminalId.isNullOrBlank() && awcDetails?.terminalSecret.isNullOrBlank())
     }
 
@@ -78,11 +81,7 @@ internal final class MockDriver: MobileReaderDriver {
     }
 
     override suspend fun getConnectedReader(): MobileReader? {
-        currentlyConnectedReader?.let {
-            return it
-        } ?: run {
-            return null
-        }
+        return currentlyConnectedReader ?: null
     }
 
     override suspend fun performTransaction(

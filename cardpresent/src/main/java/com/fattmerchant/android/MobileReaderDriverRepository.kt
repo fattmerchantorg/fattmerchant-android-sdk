@@ -1,7 +1,7 @@
 package com.fattmerchant.android
 
 import android.os.Build
-import com.fattmerchant.android.Mock.MockDriver
+import com.fattmerchant.android.mock.MockDriver
 import com.fattmerchant.android.anywherecommerce.AWCDriver
 import com.fattmerchant.android.chipdna.ChipDnaDriver
 import com.fattmerchant.android.dejavoo.DejavooDriver
