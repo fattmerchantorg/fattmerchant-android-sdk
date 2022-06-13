@@ -99,9 +99,11 @@ internal final class MockDriver: MobileReaderDriver {
         transactionUpdateListener: TransactionUpdateListener?,
         userNotificationListener: UserNotificationListener?
     ): TransactionResult {
+        val isInsufficient = request.bankAccount?.bankName == "fakeBank" && request.amount.dollars() == 1000.0
+        val isDeclined = request.bankAccount?.bankRouting == "fakeRoute"
         var transactionResult = TransactionResult()
         transactionResult.request = request
-        transactionResult.success = true
+        transactionResult.success = if (isDeclined) false else !isInsufficient
         transactionResult.maskedPan = "411111111234"
         transactionResult.cardHolderFirstName = "William"
         transactionResult.cardHolderLastName = "Holder"
@@ -110,6 +112,7 @@ internal final class MockDriver: MobileReaderDriver {
         transactionResult.amount = request.amount
         transactionResult.cardType = "visa"
         transactionResult.userReference = "cdm-123123"
+        (if (isDeclined) "Transaction declined" else if (isInsufficient) "Insufficient funds" else null).also { transactionResult.message = it }
         return transactionResult
     }
 

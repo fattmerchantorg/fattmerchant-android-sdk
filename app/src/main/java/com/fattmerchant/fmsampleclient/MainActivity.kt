@@ -91,12 +91,15 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
                 }
             }
 
+            val fakeBankAccount = BankAccount(personName: "fakePerson", bankType: "fakeType", bankHolderType: "personal", bankAccount: "fakeBank", bankRouting: "fakeRoute", addressZip: "fakeAddress")
+            val request = TransactionRequest(amount, fakeBankAccount)
+
             Omni.shared()?.takeMobileReaderTransaction(request, {
 
                 val msg = if (it.success == true) {
                     "Successfully executed transaction"
                 } else {
-                    "Transaction declined"
+                    it.message?.let { "Transaction declined --- $it" } ?: run { "Transaction declined" }
                 }
 
                 runOnUiThread {
