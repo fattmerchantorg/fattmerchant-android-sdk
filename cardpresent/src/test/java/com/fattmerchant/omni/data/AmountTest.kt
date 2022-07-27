@@ -7,6 +7,25 @@ import org.junit.Assert.*
 class AmountTest {
 
     @Test
+    fun testInitWithDollars() {
+        assertEquals(Amount(5.9876).cents, 598)
+        assertEquals(Amount(2.07).cents, 207)
+        assertEquals(Amount(606.30).cents, 60630)
+
+        // This code below checks every dollar amount from min to max to make sure that the Amount object
+        // performs the dollars -> cents conversion correctly
+        var min = 0.0
+        val max = 1000.0
+        val increment = 0.01
+
+        while (min < max) {
+           val expectedResult =  min.toFloat().times(100).toInt()
+              assertEquals(Amount(min).cents, expectedResult)
+            min += increment
+        }
+    }
+
+    @Test
     fun centsString() {
         assertEquals(Amount(50).centsString(), "50")
         assertEquals(Amount(50.30).centsString(), "5030")
