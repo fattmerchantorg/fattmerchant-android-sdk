@@ -217,7 +217,18 @@ internal class AWCDriver: MobileReaderDriver {
         }
     }
 
+    override suspend fun capture(transaction: Transaction): Boolean {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun voidTransaction(transaction: Transaction): TransactionResult {
+        TODO("Not yet implemented")
+    }
+
+    override fun voidTransaction(
+        transactionResult: TransactionResult,
+        completion: (Boolean) -> Unit
+    ) {
         TODO("Not yet implemented")
     }
 
