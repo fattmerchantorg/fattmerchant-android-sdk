@@ -18,7 +18,7 @@ data class Amount(
     /**
      * Creates an instance of [Amount] representing the given dollar value
      */
-    constructor(dollars: Double) : this(dollars.times(100).toInt())
+    constructor(dollars: Double) : this(dollars.toFloat().times(100).toInt())
 
     /**
      * Creates an instance of [Amount] representing the given dollar value
