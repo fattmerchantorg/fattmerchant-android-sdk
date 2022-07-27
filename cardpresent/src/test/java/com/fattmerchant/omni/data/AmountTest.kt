@@ -1,8 +1,7 @@
 package com.fattmerchant.omni.data
 
-import org.junit.Test
-
 import org.junit.Assert.*
+import org.junit.Test
 
 class AmountTest {
 
@@ -19,8 +18,8 @@ class AmountTest {
         val increment = 0.01
 
         while (min < max) {
-           val expectedResult =  min.toFloat().times(100).toInt()
-              assertEquals(Amount(min).cents, expectedResult)
+            val expectedResult = min.toFloat().times(100).toInt()
+            assertEquals(Amount(min).cents, expectedResult)
             min += increment
         }
     }
@@ -73,6 +72,5 @@ class AmountTest {
         assertEquals(Amount(50.309).cents, 5030)
         assertEquals(Amount(0.09).cents, 9)
         assertEquals(Amount(606.30).cents, 60630)
-
     }
 }

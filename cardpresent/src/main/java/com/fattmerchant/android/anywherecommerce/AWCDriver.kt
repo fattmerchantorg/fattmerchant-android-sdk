@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothDevice
 import android.os.Handler
 import com.anywherecommerce.android.sdk.*
 import com.anywherecommerce.android.sdk.devices.*
-import com.anywherecommerce.android.sdk.util.Amount as ANPAmount
 import com.anywherecommerce.android.sdk.endpoints.AnyPayTransaction
 import com.anywherecommerce.android.sdk.endpoints.worldnet.WorldnetEndpoint
 import com.anywherecommerce.android.sdk.models.Signature
@@ -17,16 +16,17 @@ import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.UserNotificationListener
 import com.fattmerchant.omni.data.*
-import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.data.MobileReaderDriver.*
 import com.fattmerchant.omni.data.models.MobileReaderDetails
 import com.fattmerchant.omni.data.models.OmniException
+import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.usecase.CancelCurrentTransactionException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import com.anywherecommerce.android.sdk.util.Amount as ANPAmount
 
-internal class AWCDriver: MobileReaderDriver {
+internal class AWCDriver : MobileReaderDriver {
 
     /** The endpoint that AnywhereCommerce will be reaching out to */
     private var endpoint: WorldnetEndpoint? = null
@@ -87,10 +87,9 @@ internal class AWCDriver: MobileReaderDriver {
         endpoint.worldnetSecret = awcArgs.terminalSecret
         endpoint.gatewayUrl = gatewayUrl
 
-
         // Authenticate
         return suspendCancellableCoroutine {
-            endpoint.authenticate(object: AuthenticationListener {
+            endpoint.authenticate(object : AuthenticationListener {
                 override fun onAuthenticationComplete() {
                     this@AWCDriver.endpoint = endpoint
                     it.resume(true)
@@ -102,7 +101,6 @@ internal class AWCDriver: MobileReaderDriver {
                 }
             })
         }
-
     }
 
     override suspend fun isInitialized(): Boolean {
@@ -114,31 +112,34 @@ internal class AWCDriver: MobileReaderDriver {
 
     override suspend fun searchForReaders(args: Map<String, Any>): List<MobileReader> {
         return suspendCancellableCoroutine {
-            CardReader.connect(CardReader.ConnectionMethod.BLUETOOTH, object : CardReaderConnectionListener<CardReader>, MultipleBluetoothDevicesFoundListener {
-                override fun onCardReaderConnectionFailed(p0: MeaningfulError?) {
-                    it.resume(listOf())
-                }
-
-                override fun onCardReaderConnected(connectedReader: CardReader?) {
-                    val list = mutableListOf<MobileReader>()
-                    connectedReader?.let { reader ->
-                        val mobileReader = reader.toMobileReader()
-
-                        // Add the serial number to the list of familiar ones. This helps
-                        // with recognizing that this reader belongs to this driver
-                        mobileReader.serialNumber()?.let { serial ->
-                            familiarSerialNumbers.add(serial)
-                        }
-
-                        list.add(mobileReader)
+            CardReader.connect(
+                CardReader.ConnectionMethod.BLUETOOTH,
+                object : CardReaderConnectionListener<CardReader>, MultipleBluetoothDevicesFoundListener {
+                    override fun onCardReaderConnectionFailed(p0: MeaningfulError?) {
+                        it.resume(listOf())
                     }
-                    it.resume(list)
-                }
 
-                override fun onMultipleBluetoothDevicesFound(p0: MutableList<BluetoothDevice>?) {
-                    it.resume(listOf())
+                    override fun onCardReaderConnected(connectedReader: CardReader?) {
+                        val list = mutableListOf<MobileReader>()
+                        connectedReader?.let { reader ->
+                            val mobileReader = reader.toMobileReader()
+
+                            // Add the serial number to the list of familiar ones. This helps
+                            // with recognizing that this reader belongs to this driver
+                            mobileReader.serialNumber()?.let { serial ->
+                                familiarSerialNumbers.add(serial)
+                            }
+
+                            list.add(mobileReader)
+                        }
+                        it.resume(list)
+                    }
+
+                    override fun onMultipleBluetoothDevicesFound(p0: MutableList<BluetoothDevice>?) {
+                        it.resume(listOf())
+                    }
                 }
-            })
+            )
         }
     }
 
@@ -147,12 +148,12 @@ internal class AWCDriver: MobileReaderDriver {
         return CardReaderController.getConnectedReader()?.toMobileReader()
     }
 
-    override suspend fun getConnectedReader(): MobileReader?
-            = CardReaderController.getConnectedReader()?.toMobileReader()
+    override suspend fun getConnectedReader(): MobileReader? =
+        CardReaderController.getConnectedReader()?.toMobileReader()
 
     override suspend fun disconnect(reader: MobileReader, error: (OmniException) -> Unit): Boolean {
 
-        if ( CardReaderController.isCardReaderConnected() && CardReaderController.getConnectedReader().connectionMethod == CardReader.ConnectionMethod.BLUETOOTH) {
+        if (CardReaderController.isCardReaderConnected() && CardReaderController.getConnectedReader().connectionMethod == CardReader.ConnectionMethod.BLUETOOTH) {
             CardReaderController.getConnectedReader()?.disconnect() ?: run {
                 error(OmniException("Unable to disconnect reader", "Card reader is null"))
             }
@@ -181,7 +182,7 @@ internal class AWCDriver: MobileReaderDriver {
                     transactionUpdateListener?.onTransactionUpdate(TransactionUpdate.PromptProvideSignature)
                     signatureProvider.signatureRequired {
                         transactionUpdateListener?.onTransactionUpdate(TransactionUpdate.SignatureProvided)
-                        transaction.signature = Signature() //TODO: Take care of the signature
+                        transaction.signature = Signature() // TODO: Take care of the signature
                         transaction.proceed()
                     }
                 }
@@ -247,12 +248,12 @@ internal class AWCDriver: MobileReaderDriver {
             refund.refTransactionId = transaction.awcExternalId()
             refund.totalAmount = ANPAmount(refundAmount?.dollarsString())
 
-            refund.execute(object: TransactionListener {
+            refund.execute(object : TransactionListener {
                 override fun onTransactionCompleted() {
                     val result = TransactionResult.from(refund)
 
                     // AWC is returning a negative approved amount so we want to use our total instead
-                    if(refund.approvedAmount.isLessThan(0.00)) {
+                    if (refund.approvedAmount.isLessThan(0.00)) {
                         result.amount = refundAmount
                     }
 
@@ -274,5 +275,4 @@ internal class AWCDriver: MobileReaderDriver {
         error?.invoke(CancelCurrentTransactionException("Could not cancel current transaction"))
         return false
     }
-
 }
