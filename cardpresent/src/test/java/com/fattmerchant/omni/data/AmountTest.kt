@@ -13,6 +13,7 @@ class AmountTest {
         assertEquals(Amount(50.30f).centsString(), "5030")
         assertEquals(Amount(50.309).centsString(), "5030")
         assertEquals(Amount(0.09).centsString(), "9")
+        assertEquals(Amount(606.30).centsString(), "60630")
     }
 
     @Test
