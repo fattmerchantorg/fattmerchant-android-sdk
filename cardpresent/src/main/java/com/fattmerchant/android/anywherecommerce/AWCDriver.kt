@@ -65,14 +65,14 @@ internal class AWCDriver: MobileReaderDriver {
     override suspend fun initialize(args: Map<String, Any>): Boolean {
         // Make sure we have all the necessary data
         val application = args["application"] as? Application
-                ?: throw InitializeMobileReaderDriverException("appContext not found")
+            ?: throw InitializeMobileReaderDriverException("appContext not found")
 
         val awcArgs = args["awc"] as? MobileReaderDetails.AWCDetails
-                ?: throw InitializeMobileReaderDriverException("merchant not found")
+            ?: throw InitializeMobileReaderDriverException("merchant not found")
 
         if (awcArgs.terminalId.isBlank() || awcArgs.terminalSecret.isBlank()) {
             missingAwcDetails = true
-            throw InitializeMobileReaderDriverException("merchant not foundq")
+            throw InitializeMobileReaderDriverException("merchant not found")
         }
 
         // Initialize the Terminal. This will allow us to interact with AnyPay later on
@@ -81,7 +81,7 @@ internal class AWCDriver: MobileReaderDriver {
 
         // Create the endpoint
         val endpoint = Terminal.instance.endpoint as? WorldnetEndpoint
-                ?: throw InitializeMobileReaderDriverException("Could not create worldnet endpoint")
+            ?: throw InitializeMobileReaderDriverException("Could not create worldnet endpoint")
 
         endpoint.worldnetTerminalID = awcArgs.terminalId
         endpoint.worldnetSecret = awcArgs.terminalSecret
@@ -151,11 +151,17 @@ internal class AWCDriver: MobileReaderDriver {
             = CardReaderController.getConnectedReader()?.toMobileReader()
 
     override suspend fun disconnect(reader: MobileReader, error: (OmniException) -> Unit): Boolean {
-        CardReaderController.getConnectedReader()?.disconnect() ?: run {
-            error(OmniException("Unable to disconnect reader", "Card reader is null"))
-        }
 
-        return true
+        if ( CardReaderController.isCardReaderConnected() && CardReaderController.getConnectedReader().connectionMethod == CardReader.ConnectionMethod.BLUETOOTH) {
+            CardReaderController.getConnectedReader()?.disconnect() ?: run {
+                error(OmniException("Unable to disconnect reader", "Card reader is null"))
+            }
+
+            return true
+        } else {
+            // In case of no connected reader
+            return false
+        }
     }
 
     var transactionUpdateDelay = 0.0
@@ -218,18 +224,18 @@ internal class AWCDriver: MobileReaderDriver {
     }
 
     override suspend fun capture(transaction: Transaction): Boolean {
-        TODO("Not yet implemented")
+        return false
     }
 
     override suspend fun voidTransaction(transaction: Transaction): TransactionResult {
-        TODO("Not yet implemented")
+        return TransactionResult()
     }
 
     override fun voidTransaction(
         transactionResult: TransactionResult,
         completion: (Boolean) -> Unit
     ) {
-        TODO("Not yet implemented")
+        completion(false)
     }
 
     override suspend fun refundTransaction(transaction: Transaction, refundAmount: Amount?): TransactionResult {
