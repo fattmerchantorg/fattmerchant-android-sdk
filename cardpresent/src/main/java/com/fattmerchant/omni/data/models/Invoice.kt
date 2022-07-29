@@ -6,11 +6,12 @@ package com.fattmerchant.omni.data.models
  */
 open class Invoice : Model {
     override var id: String? = null
-    open var url: String? = null
-    open var customerId: String? = null
     open var meta: Map<String, Any>? = null
-    open var paymentMethodId: String? = null
+    open var customerId: String? = null
+    open var url: String? = null
     open var total: String? = null
+    open var paymentMethodId: String? = null
+
 }
 
 
