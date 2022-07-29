@@ -11,6 +11,8 @@ open class Invoice : Model {
     open var meta: Map<String, Any>? = null
     open var paymentMethodId: String? = null
     open var total: String? = null
+}
+
 
 //    open var balanceDue: String? = null
 //    open var createdAt: String? = null
@@ -31,4 +33,3 @@ open class Invoice : Model {
 //    open var updatedAt: String? = null
 //    open var userId: String? = null
 //    open var viewedAt: String? = null
-}
