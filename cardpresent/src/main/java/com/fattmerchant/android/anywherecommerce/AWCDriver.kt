@@ -225,7 +225,7 @@ internal class AWCDriver : MobileReaderDriver {
     }
 
     override suspend fun capture(transaction: Transaction): Boolean {
-        return false
+        return true // transactions with AWC are autocaptured
     }
 
     override suspend fun voidTransaction(transaction: Transaction): TransactionResult {
