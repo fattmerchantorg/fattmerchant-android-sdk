@@ -17,11 +17,11 @@ import kotlinx.coroutines.coroutineScope
  * @property transaction
  */
 internal class RefundMobileReaderTransaction(
-        private val mobileReaderDriverRepository: MobileReaderDriverRepository,
-        private val transactionRepository: TransactionRepository,
-        internal val transaction: Transaction,
-        private var refundAmount: Amount?,
-        private val omniApi: OmniApi
+    private val mobileReaderDriverRepository: MobileReaderDriverRepository,
+    private val transactionRepository: TransactionRepository,
+    internal val transaction: Transaction,
+    private var refundAmount: Amount?,
+    private val omniApi: OmniApi
 ) {
 
     class RefundException(message: String? = null) : OmniException("Could not refund transaction", message)
@@ -43,7 +43,7 @@ internal class RefundMobileReaderTransaction(
             // Get the driver
             mobileReaderDriverRepository.getDriverFor(transaction).let { driver ->
                 // Check if Omni refund is supported by driver
-                if(driver?.isOmniRefundsSupported()!!) {
+                if (driver?.isOmniRefundsSupported()!!) {
                     transaction.id?.let { transactionId ->
                         val response = omniApi.postVoidOrRefund(transactionId, refundAmount?.dollarsString()) {
                             throw RefundException()
@@ -58,8 +58,8 @@ internal class RefundMobileReaderTransaction(
                 } else {
                     // Do the 3rd-party refund
                     val result = mobileReaderDriverRepository
-                            .getDriverFor(transaction)
-                            ?.refundTransaction(transaction, refundAmount)
+                        .getDriverFor(transaction)
+                        ?.refundTransaction(transaction, refundAmount)
 
                     if (result == null || result.success == false) {
                         throw RefundException()
@@ -70,7 +70,6 @@ internal class RefundMobileReaderTransaction(
                     }
                 }
             }
-
         } catch (e: RefundException) {
             onError(e)
             return@coroutineScope null
@@ -128,5 +127,4 @@ internal class RefundMobileReaderTransaction(
             return null
         }
     }
-
 }

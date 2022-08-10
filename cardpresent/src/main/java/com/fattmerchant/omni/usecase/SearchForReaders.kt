@@ -17,5 +17,4 @@ internal class SearchForReaders(
     suspend fun start(): List<MobileReader> = mobileReaderDriverRepository
         .getInitializedDrivers()
         .flatMap { it.searchForReaders(args) }
-
 }
