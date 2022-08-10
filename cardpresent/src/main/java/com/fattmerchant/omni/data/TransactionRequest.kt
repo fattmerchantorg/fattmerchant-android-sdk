@@ -111,6 +111,6 @@ data class TransactionRequest(
      * @param amount The [Amount] to be collected during the transaction
      * @param lineItems The [CatalogItem]s to be added to the transaction
      * */
-    constructor(amount: Amount, lineItems: List<CatalogItem>?)
-            : this(amount, true, lineItems = lineItems)
+    constructor(amount: Amount, lineItems: List<CatalogItem>?) :
+        this(amount, true, lineItems = lineItems)
 }
