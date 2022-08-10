@@ -11,7 +11,7 @@ import com.fattmerchant.omni.networking.OmniApi
  *
  * @param T - the kind of model this repository will serve
  */
-internal interface ModelRepository<T: Model> {
+internal interface ModelRepository<T : Model> {
 
     /** Responsible for communications with Omni */
     var omniApi: OmniApi
