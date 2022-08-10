@@ -40,9 +40,8 @@ class Merchant : Model {
         return try {
             options?.get(key) as? T
         } catch (e: Error) {
-            //TODO: Log the error
+            // TODO: Log the error
             null
         }
     }
-
 }

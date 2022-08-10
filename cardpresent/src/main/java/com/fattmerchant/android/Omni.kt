@@ -1,11 +1,10 @@
 package com.fattmerchant.android
 
-import com.fattmerchant.android.chipdna.TransactionGateway
 import com.fattmerchant.omni.data.models.OmniException
-import com.fattmerchant.omni.Omni as CommonOmni
-import com.fattmerchant.omni.data.repository.MobileReaderDriverRepository as CommonMobileReaderDriverRepo
 import com.fattmerchant.omni.networking.OmniApi
 import kotlinx.coroutines.launch
+import com.fattmerchant.omni.Omni as CommonOmni
+import com.fattmerchant.omni.data.repository.MobileReaderDriverRepository as CommonMobileReaderDriverRepo
 
 /**
  * Communicates with the Omni platform and bluetooth mobile readers
@@ -50,7 +49,7 @@ class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
          * @throws InitializationError if you don't pass an apiKey
          */
         fun initialize(params: InitParams, completion: () -> Unit, error: (OmniException) -> Unit) {
-            val paramMap = mutableMapOf (
+            val paramMap = mutableMapOf(
                 "apiKey" to params.apiKey,
                 "appContext" to params.appContext,
                 "environment" to params.environment,
@@ -94,5 +93,4 @@ class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
 
         fun shared(): Omni? = sharedInstance
     }
-
 }

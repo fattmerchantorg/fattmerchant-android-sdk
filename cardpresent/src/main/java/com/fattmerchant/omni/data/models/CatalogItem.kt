@@ -1,6 +1,6 @@
 package com.fattmerchant.omni.data.models
 
-open class CatalogItem: Model {
+open class CatalogItem : Model {
     override var id: String? = null
 
     open var item: String? = null
