@@ -4,6 +4,8 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+apply plugin: "org.jlleitschuh.gradle.ktlint"
+
 android {
     compileSdkVersion 30
     defaultConfig {
@@ -46,15 +48,7 @@ dependencies {
 }
 
 
-import org.apache.tools.ant.taskdefs.condition.Os
-
-task installGitHook(type: Copy) {
-    def suffix = "macos"
-    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-        suffix = "windows"
-    }
-    from new File(rootProject.rootDir, "scripts/pre-commit-$suffix")
-    into { new File(rootProject.rootDir, '.git/hooks') }
-    rename("pre-commit-$suffix", 'pre-commit')
-    fileMode 0775
+ktlint {
+    android.set(true)
+    outputColorName.set("RED")
 }
