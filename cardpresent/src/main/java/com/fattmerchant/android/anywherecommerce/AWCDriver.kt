@@ -3,8 +3,16 @@ package com.fattmerchant.android.anywherecommerce
 import android.app.Application
 import android.bluetooth.BluetoothDevice
 import android.os.Handler
-import com.anywherecommerce.android.sdk.*
-import com.anywherecommerce.android.sdk.devices.*
+import com.anywherecommerce.android.sdk.AuthenticationListener
+import com.anywherecommerce.android.sdk.MeaningfulError
+import com.anywherecommerce.android.sdk.MeaningfulMessage
+import com.anywherecommerce.android.sdk.SDKManager
+import com.anywherecommerce.android.sdk.Terminal
+import com.anywherecommerce.android.sdk.devices.CardReader
+import com.anywherecommerce.android.sdk.devices.CardReaderConnectionListener
+import com.anywherecommerce.android.sdk.devices.CardReaderController
+import com.anywherecommerce.android.sdk.devices.ConnectionStatus
+import com.anywherecommerce.android.sdk.devices.MultipleBluetoothDevicesFoundListener
 import com.anywherecommerce.android.sdk.endpoints.AnyPayTransaction
 import com.anywherecommerce.android.sdk.endpoints.worldnet.WorldnetEndpoint
 import com.anywherecommerce.android.sdk.models.Signature
@@ -15,8 +23,15 @@ import com.fattmerchant.omni.MobileReaderConnectionStatusListener
 import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.UserNotificationListener
-import com.fattmerchant.omni.data.*
-import com.fattmerchant.omni.data.MobileReaderDriver.*
+import com.fattmerchant.omni.data.Amount
+import com.fattmerchant.omni.data.MobileReader
+import com.fattmerchant.omni.data.MobileReaderDriver
+import com.fattmerchant.omni.data.MobileReaderDriver.InitializeMobileReaderDriverException
+import com.fattmerchant.omni.data.MobileReaderDriver.PerformTransactionException
+import com.fattmerchant.omni.data.MobileReaderDriver.RefundTransactionException
+import com.fattmerchant.omni.data.TransactionUpdate
+import com.fattmerchant.omni.data.TransactionRequest
+import com.fattmerchant.omni.data.TransactionResult
 import com.fattmerchant.omni.data.models.MobileReaderDetails
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.models.Transaction
@@ -237,6 +252,13 @@ internal class AWCDriver : MobileReaderDriver {
         completion: (Boolean) -> Unit
     ) {
         completion(false)
+    }
+
+    override fun voidTransaction(
+        transactionResult: TransactionResult,
+        completion: (Boolean) -> Unit
+    ) {
+        TODO("Not yet implemented")
     }
 
     override suspend fun refundTransaction(transaction: Transaction, refundAmount: Amount?): TransactionResult {

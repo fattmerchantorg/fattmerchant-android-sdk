@@ -1,6 +1,6 @@
 package com.fattmerchant.omni.data
 
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class AmountTest {

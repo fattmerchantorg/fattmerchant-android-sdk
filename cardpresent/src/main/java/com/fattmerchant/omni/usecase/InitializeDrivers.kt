@@ -9,9 +9,9 @@ import kotlin.coroutines.CoroutineContext
  * Initializes all the drivers provided by the mobileReaderDriverRepository
  */
 internal class InitializeDrivers(
-        private val mobileReaderDriverRepository: MobileReaderDriverRepository,
-        private val args: Map<String, Any>,
-        override val coroutineContext: CoroutineContext
+    private val mobileReaderDriverRepository: MobileReaderDriverRepository,
+    private val args: Map<String, Any>,
+    override val coroutineContext: CoroutineContext
 ) : CoroutineScope {
 
     class InitializeDriversException(message: String? = null) : OmniException("Could not initialize drivers", message) {

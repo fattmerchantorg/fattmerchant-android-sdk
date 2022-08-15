@@ -2,11 +2,11 @@ package com.fattmerchant.omni.usecase
 
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.models.Transaction
-import com.fattmerchant.omni.data.repository.*
+import com.fattmerchant.omni.data.repository.MobileReaderDriverRepository
+import com.fattmerchant.omni.data.repository.TransactionRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlin.coroutines.CoroutineContext
-
 
 /**
  * Voids the given [Transaction] and records the void in Omni
@@ -67,7 +67,6 @@ internal class VoidMobileReaderTransaction(
             transactionRepository.create(voided) {
                 error(it)
             }
-
         } catch (e: VoidTransactionException) {
             error(e)
             return@coroutineScope null
@@ -76,5 +75,4 @@ internal class VoidMobileReaderTransaction(
             return@coroutineScope null
         }
     }
-
 }

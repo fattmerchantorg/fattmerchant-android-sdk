@@ -1,19 +1,20 @@
 package com.fattmerchant.tokenization
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.runner.AndroidJUnit4
 import com.fattmerchant.tokenization.models.BankAccount
 import com.fattmerchant.tokenization.models.CreditCard
 import com.fattmerchant.tokenization.models.PaymentMethod
 import com.fattmerchant.tokenization.networking.FattmerchantClient
 import com.fattmerchant.tokenization.networking.FattmerchantConfiguration
-import junit.framework.Assert.*
+import junit.framework.Assert.assertEquals
+import junit.framework.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-@RunWith(androidx.test.ext.junit.runners.AndroidJUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class CardTokenizationTest {
 
     lateinit var client: FattmerchantClient

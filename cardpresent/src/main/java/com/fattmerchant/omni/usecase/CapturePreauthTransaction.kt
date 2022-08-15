@@ -8,7 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlin.coroutines.CoroutineContext
 
-class CapturePreauthTransactionException(detail: String): OmniException("Could not get connected mobile reader", detail)
+class CapturePreauthTransactionException(detail: String) : OmniException("Could not get connected mobile reader", detail)
 
 class CapturePreauthTransaction(
     var transactionId: String,

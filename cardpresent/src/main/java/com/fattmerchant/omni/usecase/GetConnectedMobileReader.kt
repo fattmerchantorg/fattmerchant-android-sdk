@@ -6,10 +6,9 @@ import com.fattmerchant.omni.data.MobileReaderDriver
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.repository.MobileReaderDriverRepository
 import kotlinx.coroutines.CoroutineScope
-import java.lang.Exception
 import kotlin.coroutines.CoroutineContext
 
-class GetConnectedMobileReaderException(detail: String): OmniException("Could not get connected mobile reader", detail) {
+class GetConnectedMobileReaderException(detail: String) : OmniException("Could not get connected mobile reader", detail) {
     companion object {
         val noReaderAvailable = GetConnectedMobileReaderException("No mobile reader is available")
     }
@@ -23,8 +22,8 @@ class GetConnectedMobileReaderException(detail: String): OmniException("Could no
  * @property mobileReaderDriverRepository provides the [MobileReaderDriver]
  */
 internal class GetConnectedMobileReader(
-        override val coroutineContext: CoroutineContext,
-        private val mobileReaderDriverRepository: MobileReaderDriverRepository
+    override val coroutineContext: CoroutineContext,
+    private val mobileReaderDriverRepository: MobileReaderDriverRepository
 ) : CoroutineScope {
 
     /**
@@ -50,5 +49,4 @@ internal class GetConnectedMobileReader(
 
         return null
     }
-
 }

@@ -41,5 +41,4 @@ internal class MobileReaderDriverRepository : MobileReaderDriverRepository {
             }
         } ?: return null
     }
-
 }
