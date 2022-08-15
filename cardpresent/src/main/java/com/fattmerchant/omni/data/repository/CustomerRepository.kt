@@ -1,7 +1,6 @@
 package com.fattmerchant.omni.data.repository
 
 import com.fattmerchant.omni.data.models.Customer
-import com.fattmerchant.omni.data.models.Invoice
 import com.fattmerchant.omni.data.models.OmniException
 
 internal interface CustomerRepository : ModelRepository<Customer> {
@@ -20,5 +19,4 @@ internal interface CustomerRepository : ModelRepository<Customer> {
             error(GetCustomerException(it.message))
         }
     }
-
 }

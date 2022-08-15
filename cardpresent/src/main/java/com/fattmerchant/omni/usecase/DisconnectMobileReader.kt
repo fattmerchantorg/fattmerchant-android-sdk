@@ -6,7 +6,7 @@ import com.fattmerchant.omni.data.repository.MobileReaderDriverRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
 
-class DisconnectMobileReaderException(detail: String): OmniException("Could not disconnect mobile reader", detail) {
+class DisconnectMobileReaderException(detail: String) : OmniException("Could not disconnect mobile reader", detail) {
     companion object {
         val driverNotFound = DisconnectMobileReaderException("Driver not found")
     }
@@ -21,9 +21,9 @@ class DisconnectMobileReaderException(detail: String): OmniException("Could not 
  * one will be disconnected
  */
 internal class DisconnectMobileReader(
-        override val coroutineContext: CoroutineContext,
-        private var mobileReaderDriverRepository: MobileReaderDriverRepository,
-        private var mobileReader: MobileReader
+    override val coroutineContext: CoroutineContext,
+    private var mobileReaderDriverRepository: MobileReaderDriverRepository,
+    private var mobileReader: MobileReader
 ) : CoroutineScope {
 
     /**

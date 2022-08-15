@@ -14,5 +14,4 @@ interface SignatureProviding {
      * signature as a Base64 encoded string
      */
     fun signatureRequired(completion: (String) -> Unit)
-
 }

@@ -34,5 +34,4 @@ internal interface InvoiceRepository : ModelRepository<Invoice> {
             error(GetInvoiceException(it.message))
         }
     }
-
 }

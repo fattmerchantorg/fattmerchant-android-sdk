@@ -4,7 +4,7 @@ package com.fattmerchant.omni.data.models
  * An Omni invoice
  *
  */
-open class Invoice: Model {
+open class Invoice : Model {
     override var id: String? = null
     open var balanceDue: String? = null
     open var createdAt: String? = null

@@ -4,9 +4,6 @@ import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.TransactionRequest
 import com.fattmerchant.omni.data.TransactionResult
 import com.fattmerchant.omni.data.models.CatalogItem
-import kotlinx.serialization.ImplicitReflectionSerializer
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.stringify
 import org.junit.Test
 
 class TakeMobileReaderPaymentTest {

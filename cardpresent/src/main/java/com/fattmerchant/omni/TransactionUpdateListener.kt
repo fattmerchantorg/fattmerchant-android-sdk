@@ -16,5 +16,4 @@ interface TransactionUpdateListener {
      * @see TransactionUpdate
      */
     fun onTransactionUpdate(transactionUpdate: TransactionUpdate)
-
 }

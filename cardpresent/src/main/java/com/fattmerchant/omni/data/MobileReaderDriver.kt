@@ -106,9 +106,12 @@ internal interface MobileReaderDriver {
      * @return the result of the operation
      */
     @Throws(PerformTransactionException::class)
-    suspend fun performTransaction(request: TransactionRequest, signatureProvider: SignatureProviding?,
-                                   transactionUpdateListener: TransactionUpdateListener?,
-                                   userNotificationListener: UserNotificationListener?): TransactionResult
+    suspend fun performTransaction(
+        request: TransactionRequest,
+        signatureProvider: SignatureProviding?,
+        transactionUpdateListener: TransactionUpdateListener?,
+        userNotificationListener: UserNotificationListener?
+    ): TransactionResult
 
     /**
      * Captures an auth transaction
