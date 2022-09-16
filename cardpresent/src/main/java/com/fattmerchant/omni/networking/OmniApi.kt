@@ -1,6 +1,9 @@
 package com.fattmerchant.omni.networking
 
 import com.fattmerchant.omni.Environment
+import com.fattmerchant.omni.Environment.DEV
+import com.fattmerchant.omni.Environment.LIVE
+import com.fattmerchant.omni.Environment.QA
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.models.ChargeRequest
 import com.fattmerchant.omni.data.models.Customer
@@ -28,9 +31,9 @@ import org.json.JSONObject
 class OmniApi {
 
     private fun baseUrl(): String = when (environment) {
-        Environment.LIVE -> "https://apiprod.fattlabs.com/"
-        Environment.DEV -> "https://apidev.fattlabs.com/"
-        is Environment.QA -> "https://api-qa-${(environment as Environment.QA).qaBuildHash}.qabuilds.fattpay.com/"
+        LIVE -> "https://apiprod.fattlabs.com/"
+        DEV -> "https://apidev.fattlabs.com/"
+        is QA -> "https://api-qa-${(environment as QA).qaBuildHash}.qabuilds.fattpay.com/"
     }
 
     private val httpClient = HttpClient {
@@ -43,7 +46,7 @@ class OmniApi {
     }
 
     internal var token = ""
-    internal var environment: Environment = Environment.LIVE
+    internal var environment: Environment = LIVE
 
     /**
      * Uses the [token] field and returns the [Self] object associated with that token
