@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
+import com.fattmerchant.omni.Environment
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.UserNotificationListener
 import com.fattmerchant.omni.data.Amount
@@ -23,7 +24,6 @@ import com.fattmerchant.omni.data.models.CreditCard
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.models.PaymentMethod
 import com.fattmerchant.omni.data.models.Transaction
-import com.fattmerchant.omni.networking.OmniApi
 import kotlinx.android.synthetic.main.activity_main.buttonCancelTransaction
 import kotlinx.android.synthetic.main.activity_main.buttonCaptureLastAuth
 import kotlinx.android.synthetic.main.activity_main.buttonConnectReader
@@ -357,6 +357,25 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
             }.show()
     }
 
+    private fun showQABaseUrlDialog(apiKey: String) {
+        val editText = EditText(this).apply { maxLines = 1 }
+        updateStatus("Attempting to take QA url")
+        AlertDialog.Builder(this)
+            .setTitle("Please provide a Stax QA Build Hash")
+            .setView(editText)
+            .setCancelable(false)
+            .setPositiveButton("Done") { dialog, _ ->
+                val qaBuildHash: String = editText.text.toString()
+                if(qaBuildHash.isEmpty()){
+                    editText.error = "QA Build Hash is not valid"
+                }else{
+                    dialog.dismiss()
+                    initializeOmniWithEnvironment(apiKey = apiKey,environment = Environment.QA(qaBuildHash = qaBuildHash) )
+                }
+
+            }.show()
+    }
+
     private fun setupButtons() {
         setupInitializeButton()
         setupPerformSaleWithReaderButton()
@@ -467,19 +486,32 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
         return "${dateFormat.format(Date())} | $msg"
     }
 
-    private fun initializeOmni(apiKey: String) {
+    private fun initializeOmni(apiKey: String, environment: Environment = Environment.QA()) {
+
+        if (environment == Environment.QA()) {
+            showQABaseUrlDialog(apiKey = apiKey)
+            return
+        } else {
+            initializeOmniWithEnvironment(apiKey = apiKey,environment = environment )
+        }
+
+
+    }
+
+    private fun initializeOmniWithEnvironment(apiKey: String, environment: Environment) {
         updateStatus("Trying to initialize")
         Omni.initialize(
-            InitParams(applicationContext, application, apiKey, OmniApi.Environment.DEV), {
-            runOnUiThread {
-                updateStatus("Initialized")
-                buttonRefundPreviousTransaction.isEnabled = true
-                buttonInitialize.visibility = View.GONE
+            InitParams(applicationContext, application, apiKey, environment), {
+                runOnUiThread {
+                    updateStatus("Initialized")
+                    buttonRefundPreviousTransaction.isEnabled = true
+                    buttonInitialize.visibility = View.GONE
+                }
+                Omni.shared()?.signatureProvider = SignatureProvider()
             }
-            Omni.shared()?.signatureProvider = SignatureProvider()
-        }
         ) {
             updateStatus("${it.message}. ${it.detail}")
         }
     }
+
 }
