@@ -357,9 +357,9 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
             }.show()
     }
 
-    private fun showQABaseUrlDialog(apiKey: String) {
+    private fun showQABuildHashDialog(apiKey: String) {
         val editText = EditText(this).apply { maxLines = 1 }
-        updateStatus("Attempting to take QA url")
+        updateStatus("Attempting to take QA build hash")
         AlertDialog.Builder(this)
             .setTitle("Please provide a Stax QA Build Hash")
             .setView(editText)
@@ -488,7 +488,7 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
     private fun initializeOmni(apiKey: String, environment: Environment = Environment.QA()) {
 
         if (environment == Environment.QA()) {
-            showQABaseUrlDialog(apiKey = apiKey)
+            showQABuildHashDialog(apiKey = apiKey)
             return
         } else {
             initializeOmniWithEnvironment(apiKey = apiKey, environment = environment)
