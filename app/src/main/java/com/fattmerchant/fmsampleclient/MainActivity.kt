@@ -485,7 +485,7 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
         return "${dateFormat.format(Date())} | $msg"
     }
 
-    private fun initializeOmni(apiKey: String, environment: Environment = Environment.QA()) {
+    private fun initializeOmni(apiKey: String, environment: Environment = Environment.DEV) {
 
         if (environment == Environment.QA()) {
             showQABuildHashDialog(apiKey = apiKey)
