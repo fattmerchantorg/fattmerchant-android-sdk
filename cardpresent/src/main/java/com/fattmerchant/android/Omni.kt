@@ -1,7 +1,5 @@
 package com.fattmerchant.android
 
-import android.app.AlertDialog
-import android.widget.EditText
 import com.fattmerchant.omni.Environment
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.networking.OmniApi
@@ -94,8 +92,6 @@ class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
                 }
             }
         }
-
-
 
         fun shared(): Omni? = sharedInstance
     }

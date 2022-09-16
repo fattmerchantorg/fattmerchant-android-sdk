@@ -366,13 +366,12 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
             .setCancelable(false)
             .setPositiveButton("Done") { dialog, _ ->
                 val qaBuildHash: String = editText.text.toString()
-                if(qaBuildHash.isEmpty()){
+                if (qaBuildHash.isEmpty()) {
                     editText.error = "QA Build Hash is not valid"
-                }else{
+                } else {
                     dialog.dismiss()
-                    initializeOmniWithEnvironment(apiKey = apiKey,environment = Environment.QA(qaBuildHash = qaBuildHash) )
+                    initializeOmniWithEnvironment(apiKey = apiKey, environment = Environment.QA(qaBuildHash = qaBuildHash))
                 }
-
             }.show()
     }
 
@@ -492,26 +491,23 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
             showQABaseUrlDialog(apiKey = apiKey)
             return
         } else {
-            initializeOmniWithEnvironment(apiKey = apiKey,environment = environment )
+            initializeOmniWithEnvironment(apiKey = apiKey, environment = environment)
         }
-
-
     }
 
     private fun initializeOmniWithEnvironment(apiKey: String, environment: Environment) {
         updateStatus("Trying to initialize")
         Omni.initialize(
             InitParams(applicationContext, application, apiKey, environment), {
-                runOnUiThread {
-                    updateStatus("Initialized")
-                    buttonRefundPreviousTransaction.isEnabled = true
-                    buttonInitialize.visibility = View.GONE
-                }
-                Omni.shared()?.signatureProvider = SignatureProvider()
+            runOnUiThread {
+                updateStatus("Initialized")
+                buttonRefundPreviousTransaction.isEnabled = true
+                buttonInitialize.visibility = View.GONE
             }
+            Omni.shared()?.signatureProvider = SignatureProvider()
+        }
         ) {
             updateStatus("${it.message}. ${it.detail}")
         }
     }
-
 }
