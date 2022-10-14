@@ -37,6 +37,60 @@ internal class TakeMobileReaderPayment(
     class TakeMobileReaderPaymentException(message: String? = null) :
         OmniException("Could not take mobile reader payment", message)
 
+    companion object {
+        internal fun transactionMetaFrom(result: TransactionResult): Map<String, Any> {
+            val transactionMeta = mutableMapOf<String, Any>()
+
+            when {
+                result.source.contains(ChipDnaDriver().source) -> {
+                    result.userReference?.let {
+                        transactionMeta["nmiUserRef"] = it
+                    }
+
+                    result.localId?.let {
+                        transactionMeta["cardEaseReference"] = it
+                    }
+
+                    result.externalId?.let {
+                        transactionMeta["nmiTransactionId"] = it
+                    }
+                }
+
+                result.source.contains(AWCDriver().source) -> {
+                    result.externalId?.let {
+                        transactionMeta["awcTransactionId"] = it
+                    }
+                }
+            }
+
+            result.request?.lineItems?.let { transactionMeta["lineItems"] = it }
+            result.request?.subtotal?.let { transactionMeta["subtotal"] = it }
+            result.request?.tax?.let { transactionMeta["tax"] = it }
+            result.request?.tip?.let { transactionMeta["tip"] = it }
+            result.request?.memo?.let { transactionMeta["memo"] = it }
+            result.request?.reference?.let { transactionMeta["reference"] = it }
+            result.request?.shippingAmount?.let { transactionMeta["shippingAmount"] = it }
+            result.request?.poNumber?.let { transactionMeta["poNumber"] = it }
+
+            return transactionMeta
+        }
+
+        internal fun invoiceMetaFrom(result: TransactionResult): Map<String, Any> {
+            val invoiceMeta = mutableMapOf<String, Any>()
+
+            result.request?.lineItems?.let { invoiceMeta["lineItems"] = it }
+            result.request?.subtotal?.let { invoiceMeta["subtotal"] = it }
+            result.request?.tax?.let { invoiceMeta["tax"] = it }
+            result.request?.tip?.let { invoiceMeta["tip"] = it }
+            result.request?.memo?.let { invoiceMeta["memo"] = it }
+            result.request?.reference?.let { invoiceMeta["reference"] = it }
+            result.request?.shippingAmount?.let { invoiceMeta["shippingAmount"] = it }
+            result.request?.poNumber?.let { invoiceMeta["poNumber"] = it }
+
+            return invoiceMeta
+        }
+    }
+
     suspend fun start(onError: (OmniException) -> Unit): Transaction? = coroutineScope {
 
         // Get the reader responsible for taking the payment
