@@ -1,9 +1,6 @@
 package com.fattmerchant.omni.data
 
-import com.fattmerchant.omni.data.models.BankAccount
-import com.fattmerchant.omni.data.models.CatalogItem
-import com.fattmerchant.omni.data.models.CreditCard
-import com.fattmerchant.omni.data.models.Transaction
+import com.fattmerchant.omni.data.models.*
 
 /**
  * A request for a transaction
@@ -19,6 +16,12 @@ data class TransactionRequest(
 
     /** The id of the invoice we want to apply the transaction to */
     var invoiceId: String? = null,
+
+    /** The id of the [Customer] we want to apply the [Transaction] to
+     *
+     * Note that if there is a payment method created
+     * */
+    var customerId: String? = null,
 
     /** The [CreditCard] to charge */
     var card: CreditCard? = null,
@@ -48,11 +51,24 @@ data class TransactionRequest(
     /** The tip amount applied to the transaction */
     var tip: Double? = null,
 
+    /** The shipping amount applied to the transaction */
+    var shippingAmount: Double? = null,
+
+    /** The purchase order number for the transaction */
+    var poNumber: String? = null,
+
     /** A memo for the transaction */
     var memo: String? = null,
 
     /** A reference for the transaction */
     var reference: String? = null,
+
+    /**
+     * Credit or Debit
+     *
+     * Currently, this is only supported for integrated terminals
+     *  */
+    var paymentType: PaymentType? = PaymentType.CREDIT,
 
     /**
      * The option to perform a preauthorization
@@ -61,7 +77,21 @@ data class TransactionRequest(
      *  transaction will only hold funds and you will need to capture it at a later date via the
      *  Stax API or the SDK
      */
-    var preauth: Boolean = false
+    var preauth: Boolean = false,
+
+    /**
+     * Metadata that you want to pass in with the transaction. This will be put into the transaction
+     * record along with any other metadata that this SDK already adds to the transaction meta
+     */
+    var meta: Map<String, Any?>? = null,
+
+    /**
+     * The id that we want the transaction to have
+     *
+     * We also give this to the 3rd party gateway to assign to the transaction so we know how to
+     * reference it later. Not all gateways support this
+     */
+    internal var transactionId: String? = null
 ) {
 
     /**
@@ -81,7 +111,7 @@ data class TransactionRequest(
      * @param amount The [Amount] to be collected during the transaction
      * @param creditCard The [CreditCard] used for the transaction
      * */
-    constructor(amount: Amount, creditCard: CreditCard) : this(amount, true, null, creditCard)
+    constructor(amount: Amount, creditCard: CreditCard) : this(amount, true, null, null, creditCard)
 
     /**
      * Initializes a Transaction with the given [Amount] and [BankAccount]

@@ -18,7 +18,7 @@ class TakeMobileReaderPaymentTest {
             source = "NMI"
         }
 
-        val meta = TakeMobileReaderPayment.transactionMetaFrom(transactionResult)
+        val meta = transactionResult.transactionMeta()
 
         assert(meta["nmiUserRef"] == "userRef")
         assert(meta["cardEaseReference"] == "localId")
@@ -57,7 +57,7 @@ class TakeMobileReaderPaymentTest {
             request = transactionRequest
         }
 
-        val meta = TakeMobileReaderPayment.transactionMetaFrom(transactionResult)
+        val meta = transactionResult.transactionMeta()
 
         assert(meta["lineItems"] == expectedMeta["lineItems"])
     }
@@ -78,7 +78,7 @@ class TakeMobileReaderPaymentTest {
             }
         }
 
-        val meta = TakeMobileReaderPayment.transactionMetaFrom(transactionResult)
+        val meta = transactionResult.transactionMeta()
 
         assert(meta["subtotal"] == 40.0)
         assert(meta["tax"] == 6.0)

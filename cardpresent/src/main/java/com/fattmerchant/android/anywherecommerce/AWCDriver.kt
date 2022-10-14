@@ -254,13 +254,6 @@ internal class AWCDriver : MobileReaderDriver {
         completion(false)
     }
 
-    override fun voidTransaction(
-        transactionResult: TransactionResult,
-        completion: (Boolean) -> Unit
-    ) {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun refundTransaction(transaction: Transaction, refundAmount: Amount?): TransactionResult {
         return suspendCancellableCoroutine { continuation ->
             val refund = AnyPayTransaction()

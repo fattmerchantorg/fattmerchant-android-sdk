@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
+import com.fattmerchant.omni.Environment
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.UserNotificationListener
 import com.fattmerchant.omni.data.Amount
@@ -23,22 +24,7 @@ import com.fattmerchant.omni.data.models.CreditCard
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.models.PaymentMethod
 import com.fattmerchant.omni.data.models.Transaction
-import com.fattmerchant.omni.networking.OmniApi
-import kotlinx.android.synthetic.main.activity_main.buttonCancelTransaction
-import kotlinx.android.synthetic.main.activity_main.buttonCaptureLastAuth
-import kotlinx.android.synthetic.main.activity_main.buttonConnectReader
-import kotlinx.android.synthetic.main.activity_main.buttonConnectedReaderDetails
-import kotlinx.android.synthetic.main.activity_main.buttonDisconnectReader
-import kotlinx.android.synthetic.main.activity_main.buttonInitialize
-import kotlinx.android.synthetic.main.activity_main.buttonPerformAuth
-import kotlinx.android.synthetic.main.activity_main.buttonPerformSale
-import kotlinx.android.synthetic.main.activity_main.buttonPerformSaleWithReader
-import kotlinx.android.synthetic.main.activity_main.buttonRefundPreviousTransaction
-import kotlinx.android.synthetic.main.activity_main.buttonTokenizeBank
-import kotlinx.android.synthetic.main.activity_main.buttonTokenizeCard
-import kotlinx.android.synthetic.main.activity_main.buttonVoidLastAuth
-import kotlinx.android.synthetic.main.activity_main.textInput_amount
-import kotlinx.android.synthetic.main.activity_main.textView
+import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -46,7 +32,7 @@ import java.util.logging.Logger
 
 class MainActivity : AppCompatActivity(), PermissionsManager {
 
-    val staxKey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6ImViNDhlZjk5LWFhNzgtNDk2ZS05YjAxLTQyMWY4ZGFmNzMyMyIsImdvZFVzZXIiOnRydWUsImJyYW5kIjoiZmF0dG1lcmNoYW50Iiwic3ViIjoiMzBjNmVlYjYtNjRiNi00N2Y2LWJjZjYtNzg3YTljNTg3OThiIiwiaXNzIjoiaHR0cDovL2FwaWRldjAxLmZhdHRsYWJzLmNvbS9hdXRoZW50aWNhdGUiLCJpYXQiOjE2MjIxMjgyMzQsImV4cCI6MTYyMjIxNDYzNCwibmJmIjoxNjIyMTI4MjM0LCJqdGkiOiJUYU9RSnV0cElEeWx6MzNoIn0.FosF0OCb4wm3O3Uj98V23xiJ8PN9HDNAqx-k8nhlptA"
+    val staxKey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6ImViNDhlZjk5LWFhNzgtNDk2ZS05YjAxLTQyMWY4ZGFmNzMyMyIsImdvZFVzZXIiOnRydWUsImJyYW5kIjoiZmF0dG1lcmNoYW50Iiwic3ViIjoiMzBjNmVlYjYtNjRiNi00N2Y2LWJjZjYtNzg3YTljNTg3OThiIiwiaXNzIjoiaHR0cDovL2FwaWRldjAxLmZhdHRsYWJzLmNvbS9hdXRoZW50aWNhdGUiLCJpYXQiOjE2NDA1NzA4MDAsImV4cCI6MTY0MDY1NzIwMCwibmJmIjoxNjQwNTcwODAwLCJqdGkiOiJ3SjlDa0tqRGNlRHRzMzBhIn0.WcFvqSf0wDungNBPOX4nWfiGAv4uX8sXRVfMMCNx6LU"
 
     val log = Logger.getLogger("MainActivity")
 
@@ -90,8 +76,7 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
             val amount = Amount(getAmount())
             updateStatus("Attempting to charge ${amount.dollarsString()}")
             val request = TransactionRequest(amount)
-
-            request.invoiceId = ""
+//            request.customerId = "bbe13c96-8bf6-4cb5-8d5c-24896cf0e0db"
 
             // Listen to transaction updates delivered by the Omni SDK
             Omni.shared()?.transactionUpdateListener = object : TransactionUpdateListener {
@@ -112,6 +97,32 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
 
             Omni.shared()?.takeMobileReaderTransaction(request, {
 
+                val msg = if (it.success == true) {
+                    "Successfully executed transaction"
+                } else {
+                    "Transaction declined"
+                }
+
+                runOnUiThread {
+                    updateStatus(msg)
+                }
+
+                transaction = it
+            }, {
+                updateStatus("Couldn't perform sale: ${it.message}. ${it.detail}")
+            })
+        }
+
+        buttonPerformSaleWithReader.isEnabled = true
+    }
+
+    private fun setupPerformSaleWithTerminalButton() {
+        buttonPerformSaleWithTerminal.setOnClickListener {
+            val amount = Amount(getAmount())
+            updateStatus("Attempting to charge ${amount.dollarsString()}")
+            val request = TransactionRequest(amount)
+
+            Omni.shared()?.takePaymentTerminalTransaction(request, {
                 val msg = if (it.success == true) {
                     "Successfully executed transaction"
                 } else {
@@ -271,6 +282,7 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
                 // Figure out which transactions are refundable
                 val refundableTransactions = transactions.filter {
                     it.source?.contains("CPSDK") == true
+                            || it.source?.contains("terminalservice.dejavoo") == true
                 }
 
                 chooseTransaction(refundableTransactions) { transactionToRefund ->
@@ -288,15 +300,26 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
     }
 
     private fun setupVoidButton() {
-        buttonCancelTransaction.setOnClickListener {
-            Omni.shared()?.cancelMobileReaderTransaction({
-                if (it) {
-                    updateStatus("Transaction cancelled")
-                } else {
-                    updateStatus("Transaction not cancelled")
+        buttonVoidTransaction.setOnClickListener {
+            updateStatus("Fetching list of transactions")
+            Omni.shared()?.getTransactions({ transactions ->
+
+                // Figure out which transactions are refundable
+                val voidableTransactions = transactions.filter {
+                    it.source?.contains("CPSDK") == true
+                            || it.source?.contains("terminalservice.dejavoo") == true
+                }
+
+                chooseTransaction(voidableTransactions) { transactionToRefund ->
+                    updateStatus("Trying to void ${transactionToRefund.pretty()}")
+                    Omni.shared()?.voidMobileReaderTransaction(transactionToRefund, {
+                        updateStatus("Voided ${transactionToRefund.pretty()}")
+                    }, {
+                        updateStatus("Error voiding: ${it.message} ${it.detail}")
+                    })
                 }
             }, {
-                updateStatus(it)
+                updateStatus(it.message ?: "Could not get transactions")
             })
         }
     }
@@ -357,9 +380,28 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
             }.show()
     }
 
+    private fun showQABuildHashDialog(apiKey: String) {
+        val editText = EditText(this).apply { maxLines = 1 }
+        updateStatus("Attempting to take QA build hash")
+        AlertDialog.Builder(this)
+            .setTitle("Please provide a Stax QA Build Hash")
+            .setView(editText)
+            .setCancelable(false)
+            .setPositiveButton("Done") { dialog, _ ->
+                val qaBuildHash: String = editText.text.toString()
+                if (qaBuildHash.isEmpty()) {
+                    editText.error = "QA Build Hash is not valid"
+                } else {
+                    dialog.dismiss()
+                    initializeOmniWithEnvironment(apiKey = apiKey, environment = Environment.QA(qaBuildHash = qaBuildHash))
+                }
+            }.show()
+    }
+
     private fun setupButtons() {
         setupInitializeButton()
         setupPerformSaleWithReaderButton()
+        setupPerformSaleWithTerminalButton()
         setupPerformSaleButton()
         setupRefundButton()
         setupConnectReaderButton()
@@ -467,10 +509,20 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
         return "${dateFormat.format(Date())} | $msg"
     }
 
-    private fun initializeOmni(apiKey: String) {
+    private fun initializeOmni(apiKey: String, environment: Environment = Environment.DEV) {
+
+        if (environment == Environment.QA()) {
+            showQABuildHashDialog(apiKey = apiKey)
+            return
+        } else {
+            initializeOmniWithEnvironment(apiKey = apiKey, environment = environment)
+        }
+    }
+
+    private fun initializeOmniWithEnvironment(apiKey: String, environment: Environment) {
         updateStatus("Trying to initialize")
         Omni.initialize(
-            InitParams(applicationContext, application, apiKey, OmniApi.Environment.DEV), {
+            InitParams(applicationContext, application, apiKey, environment), {
             runOnUiThread {
                 updateStatus("Initialized")
                 buttonRefundPreviousTransaction.isEnabled = true
@@ -481,5 +533,18 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
         ) {
             updateStatus("${it.message}. ${it.detail}")
         }
+
+//        Omni.initialize(
+//            InitParams(applicationContext, application, apiKey, OmniApi.Environment.DEV), {
+//                runOnUiThread {
+//                    updateStatus("Initialized")
+//                    buttonRefundPreviousTransaction.isEnabled = true
+//                    buttonInitialize.visibility = View.GONE
+//                }
+//                Omni.shared()?.signatureProvider = SignatureProvider()
+//            }
+//        ) {
+//            updateStatus("${it.message}. ${it.detail}")
+//        }
     }
 }
