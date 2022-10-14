@@ -1,25 +1,51 @@
 package com.fattmerchant.android.chipdna
 
 import android.content.Context
-import com.creditcall.chipdnamobile.*
-import com.fattmerchant.omni.*
-import com.fattmerchant.omni.data.*
-import com.fattmerchant.omni.data.models.Transaction
-import com.fattmerchant.omni.data.MobileReaderDriver.*
+import com.creditcall.chipdnamobile.ChipDnaMobile
+import com.creditcall.chipdnamobile.ChipDnaMobileSerializer
+import com.creditcall.chipdnamobile.DeviceStatus
+import com.creditcall.chipdnamobile.IAvailablePinPadsListener
+import com.creditcall.chipdnamobile.IConfigurationUpdateListener
+import com.creditcall.chipdnamobile.IConnectAndConfigureFinishedListener
+import com.creditcall.chipdnamobile.IDeviceUpdateListener
+import com.creditcall.chipdnamobile.ParameterKeys
+import com.creditcall.chipdnamobile.ParameterValues
+import com.creditcall.chipdnamobile.Parameters
+import com.creditcall.chipdnamobile.ReceiptFieldKey
+import com.fattmerchant.omni.MobileReaderConnectionStatusListener
+import com.fattmerchant.omni.OmniGeneralException
+import com.fattmerchant.omni.SignatureProviding
+import com.fattmerchant.omni.TransactionUpdateListener
+import com.fattmerchant.omni.UserNotificationListener
+import com.fattmerchant.omni.data.Amount
+import com.fattmerchant.omni.data.MobileReader
+import com.fattmerchant.omni.data.MobileReaderDriver
+import com.fattmerchant.omni.data.MobileReaderDriver.InitializeMobileReaderDriverException
+import com.fattmerchant.omni.data.MobileReaderDriver.PerformTransactionException
+import com.fattmerchant.omni.data.MobileReaderDriver.RefundTransactionException
+import com.fattmerchant.omni.data.TransactionRequest
+import com.fattmerchant.omni.data.TransactionResult
 import com.fattmerchant.omni.data.models.MobileReaderConnectionStatus
-import com.fattmerchant.omni.data.models.OmniException
-import com.fattmerchant.omni.usecase.CancelCurrentTransactionException
 import com.fattmerchant.omni.data.models.MobileReaderDetails
-import kotlinx.coroutines.*
+import com.fattmerchant.omni.data.models.OmniException
+import com.fattmerchant.omni.data.models.Transaction
+import com.fattmerchant.omni.usecase.CancelCurrentTransactionException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
-import java.util.*
+import java.util.Locale
 import java.util.logging.Logger
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-internal class ChipDnaDriver : CoroutineScope, MobileReaderDriver, IConfigurationUpdateListener, IDeviceUpdateListener {
+internal class ChipDnaDriver :
+    CoroutineScope,
+    MobileReaderDriver,
+    IConfigurationUpdateListener,
+    IDeviceUpdateListener {
 
     class ConnectReaderException(message: String? = null) :
         MobileReaderDriver.ConnectReaderException(mapDetailMessage(message)) {

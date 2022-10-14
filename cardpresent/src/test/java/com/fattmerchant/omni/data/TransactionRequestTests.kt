@@ -25,12 +25,12 @@ class TransactionRequestTests {
         assert(true)
 
         val request = TransactionRequest(
-                amount = Amount(10),
-                memo = "1",
-                subtotal = 2.0,
-                tip = 3.0,
-                tax = 4.0,
-                reference = "5"
+            amount = Amount(10),
+            memo = "1",
+            subtotal = 2.0,
+            tip = 3.0,
+            tax = 4.0,
+            reference = "5"
         )
 
         assert(request.memo == "1")
@@ -45,5 +45,4 @@ class TransactionRequestTests {
         request.customerId = "1234"
         assert(true)
     }
-
 }

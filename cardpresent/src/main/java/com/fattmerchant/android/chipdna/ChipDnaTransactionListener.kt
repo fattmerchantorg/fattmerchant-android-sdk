@@ -1,14 +1,34 @@
 package com.fattmerchant.android.chipdna
-
-import com.creditcall.chipdnamobile.*
+import com.creditcall.chipdnamobile.ChipDnaMobile
+import com.creditcall.chipdnamobile.IApplicationSelectionListener
+import com.creditcall.chipdnamobile.IDeferredAuthorizationListener
+import com.creditcall.chipdnamobile.IForceAcceptanceListener
+import com.creditcall.chipdnamobile.IPartialApprovalListener
+import com.creditcall.chipdnamobile.ISignatureVerificationListener
+import com.creditcall.chipdnamobile.ITransactionFinishedListener
+import com.creditcall.chipdnamobile.ITransactionUpdateListener
+import com.creditcall.chipdnamobile.IUserNotificationListener
+import com.creditcall.chipdnamobile.IVerifyIdListener
+import com.creditcall.chipdnamobile.IVoiceReferralListener
+import com.creditcall.chipdnamobile.ParameterKeys
+import com.creditcall.chipdnamobile.ParameterValues
+import com.creditcall.chipdnamobile.Parameters
 import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.UserNotificationListener
 import com.fattmerchant.omni.data.TransactionUpdate
 
-internal class ChipDnaTransactionListener : ITransactionUpdateListener, ITransactionFinishedListener,
-    IDeferredAuthorizationListener, ISignatureVerificationListener, IVoiceReferralListener,
-    IPartialApprovalListener, IForceAcceptanceListener, IVerifyIdListener, IApplicationSelectionListener, IUserNotificationListener {
+internal class ChipDnaTransactionListener :
+    ITransactionUpdateListener,
+    ITransactionFinishedListener,
+    IDeferredAuthorizationListener,
+    ISignatureVerificationListener,
+    IVoiceReferralListener,
+    IPartialApprovalListener,
+    IForceAcceptanceListener,
+    IVerifyIdListener,
+    IApplicationSelectionListener,
+    IUserNotificationListener {
 
     /** Called when the Transaction is complete */
     var onFinish: ((Parameters) -> Unit)? = null

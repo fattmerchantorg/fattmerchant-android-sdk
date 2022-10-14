@@ -3,12 +3,27 @@ package com.fattmerchant.fmsampleclient
 import android.content.Context
 import android.os.AsyncTask
 import android.util.Log
-import com.creditcall.chipdnamobile.*
+import com.creditcall.chipdnamobile.ChipDnaMobile
+import com.creditcall.chipdnamobile.ChipDnaMobileSerializer
+import com.creditcall.chipdnamobile.IAvailablePinPadsListener
+import com.creditcall.chipdnamobile.IConnectAndConfigureFinishedListener
+import com.creditcall.chipdnamobile.IDeferredAuthorizationListener
+import com.creditcall.chipdnamobile.IForceAcceptanceListener
+import com.creditcall.chipdnamobile.IPartialApprovalListener
+import com.creditcall.chipdnamobile.IProcessReceiptFinishedListener
+import com.creditcall.chipdnamobile.ISignatureVerificationListener
+import com.creditcall.chipdnamobile.ITransactionFinishedListener
+import com.creditcall.chipdnamobile.ITransactionUpdateListener
+import com.creditcall.chipdnamobile.IVerifyIdListener
+import com.creditcall.chipdnamobile.IVoiceReferralListener
+import com.creditcall.chipdnamobile.ParameterKeys
+import com.creditcall.chipdnamobile.ParameterValues
+import com.creditcall.chipdnamobile.Parameters
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
 import java.lang.ref.WeakReference
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
 
 class ChipDnaHelper(
     var apiKey: String? = "v8EknC7d3rhgyvDWrSrU6QM2PBT573K2",
@@ -95,9 +110,7 @@ class ChipDnaHelper(
                 Log.d("connectpintask", result.toString())
                 delegate?.get()?.processFinish(result)
             }
-
         }
-
     }
 
     fun submitTransaction() {
@@ -121,7 +134,6 @@ class ChipDnaHelper(
 
         val response = ChipDnaMobile.getInstance().startTransaction(params)
         if (response.containsKey(ParameterKeys.Result) && response.getValue(ParameterKeys.Result).equals(ParameterValues.FALSE)) {
-
         }
     }
 
@@ -213,7 +225,7 @@ class ChipDnaHelper(
             override fun processFinish(availableReaders: List<SelectablePinPad>?) {
                 availableReaders?.first()?.let {
                     val task = ConnectPinPadTask()
-                    task.delegate = WeakReference(object: ConnectPinPadTask.ConnectPinPadTaskResponse {
+                    task.delegate = WeakReference(object : ConnectPinPadTask.ConnectPinPadTaskResponse {
                         override fun processFinish(parameters: Parameters) {
                             connectForReal()
                         }
@@ -231,9 +243,15 @@ class ChipDnaHelper(
         }
     }
 
-    private inner class TransactionListener : ITransactionUpdateListener, ITransactionFinishedListener,
-        IDeferredAuthorizationListener, ISignatureVerificationListener, IVoiceReferralListener,
-        IPartialApprovalListener, IForceAcceptanceListener, IVerifyIdListener {
+    private inner class TransactionListener :
+        ITransactionUpdateListener,
+        ITransactionFinishedListener,
+        IDeferredAuthorizationListener,
+        ISignatureVerificationListener,
+        IVoiceReferralListener,
+        IPartialApprovalListener,
+        IForceAcceptanceListener,
+        IVerifyIdListener {
         override fun onTransactionUpdateListener(parameters: Parameters) {
             Log.d("transaction", (parameters.getValue(ParameterKeys.TransactionUpdate)))
         }
@@ -243,7 +261,7 @@ class ChipDnaHelper(
         }
 
         override fun onSignatureVerification(parameters: Parameters) {
-            Log.d("transaction","Signature Check Required")
+            Log.d("transaction", "Signature Check Required")
 
             if (parameters.getValue(ParameterKeys.ResponseRequired) != ParameterValues.TRUE) {
                 // Signature handled on PINpad. No call to ChipDna Mobile required.

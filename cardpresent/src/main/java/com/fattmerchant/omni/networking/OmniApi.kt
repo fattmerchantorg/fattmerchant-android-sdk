@@ -1,8 +1,18 @@
 package com.fattmerchant.omni.networking
 
+import com.fattmerchant.omni.Environment
+import com.fattmerchant.omni.Environment.DEV
+import com.fattmerchant.omni.Environment.LIVE
+import com.fattmerchant.omni.Environment.QA
 import com.fattmerchant.omni.data.Amount
-import com.fattmerchant.omni.data.TransactionResult
-import com.fattmerchant.omni.data.models.*
+import com.fattmerchant.omni.data.models.ChargeRequest
+import com.fattmerchant.omni.data.models.Customer
+import com.fattmerchant.omni.data.models.Invoice
+import com.fattmerchant.omni.data.models.Merchant
+import com.fattmerchant.omni.data.models.MobileReaderDetails
+import com.fattmerchant.omni.data.models.PaymentMethod
+import com.fattmerchant.omni.data.models.Self
+import com.fattmerchant.omni.data.models.Transaction
 import com.google.gson.FieldNamingPolicy
 import io.ktor.client.HttpClient
 import io.ktor.client.call.NoTransformationFoundException
@@ -20,13 +30,10 @@ import org.json.JSONObject
 
 class OmniApi {
 
-    enum class Environment {
-        LIVE, DEV;
-
-        fun baseUrl(): String = when (this) {
-            LIVE -> "https://apiprod.fattlabs.com/"
-            DEV -> "https://apidev.fattlabs.com/"
-        }
+    private fun baseUrl(): String = when (environment) {
+        LIVE -> "https://apiprod.fattlabs.com/"
+        DEV -> "https://apidev.fattlabs.com/"
+        is QA -> "https://api-qa-${(environment as QA).qaBuildHash}.qabuilds.fattpay.com/"
     }
 
     private val httpClient = HttpClient {
@@ -39,7 +46,7 @@ class OmniApi {
     }
 
     internal var token = ""
-    internal var environment: Environment = Environment.LIVE
+    internal var environment: Environment = LIVE
 
     /**
      * Uses the [token] field and returns the [Self] object associated with that token
@@ -71,7 +78,7 @@ class OmniApi {
      * @param error
      * @return the found invoice
      */
-    internal suspend fun getInvoice(id: String, error: (Error) -> Unit): Invoice? = get("invoice/${id}", error)
+    internal suspend fun getInvoice(id: String, error: (Error) -> Unit): Invoice? = get("invoice/$id", error)
 
     /**
      * Creates a new invoice in Omni
@@ -97,7 +104,7 @@ class OmniApi {
      * @param error
      * @return the found customer
      */
-    internal suspend fun getCustomer(id: String, error: (Error) -> Unit): Customer? = get("customer/${id}", error)
+    internal suspend fun getCustomer(id: String, error: (Error) -> Unit): Customer? = get("customer/$id", error)
 
     /**
      * Creates a new customer in Omni
@@ -129,7 +136,7 @@ class OmniApi {
         total?.let {
             body["total"] = it
         }
-        return post("transaction/${transactionId}/void-or-refund", JSONObject(body).toString(), error)
+        return post("transaction/$transactionId/void-or-refund", JSONObject(body).toString(), error)
     }
 
     internal suspend fun captureTransaction(transactionId: String, total: Amount?, error: (Error) -> Unit): Transaction? {
@@ -137,7 +144,7 @@ class OmniApi {
     }
 
     internal suspend fun voidTransaction(transactionId: String, error: (Error) -> Unit): Transaction? {
-        return post("/transaction/${transactionId}/void", "", error)
+        return post("/transaction/$transactionId/void", "", error)
     }
 
     /**
@@ -147,7 +154,7 @@ class OmniApi {
      * @return the updated transaction
      */
     internal suspend fun updateTransaction(transaction: Transaction): Transaction? =
-            put("transaction/${transaction.id}", JsonParser.toJson(transaction))
+        put("transaction/${transaction.id}", JsonParser.toJson(transaction))
 
     /**
      * Gets a list of transactions from Omni
@@ -211,11 +218,11 @@ class OmniApi {
         request(method, urlString, body) {}
 
     private suspend inline fun captureAuthedTransaction(
-            transactionId: String,
-            captureAmount: Amount?,
-            error: ((Error) -> Unit)
+        transactionId: String,
+        captureAmount: Amount?,
+        error: ((Error) -> Unit)
     ): Transaction? {
-        val url = environment.baseUrl() + "/transaction/${transactionId}/capture"
+        val url = baseUrl() + "/transaction/$transactionId/capture"
 
         var body: String? = null
 
@@ -288,7 +295,6 @@ class OmniApi {
                 }
             }
             return null
-
         } catch (e: NoTransformationFoundException) {
             // We were expecting an object of type T, but couldn't transform the response body to T
             print(e)
@@ -307,7 +313,7 @@ class OmniApi {
         body: String? = null,
         error: ((Error) -> Unit)
     ): T? {
-        val url = environment.baseUrl() + urlString
+        val url = baseUrl() + urlString
 
         try {
 
@@ -362,7 +368,6 @@ class OmniApi {
                 }
             }
             return null
-
         } catch (e: NoTransformationFoundException) {
             // We were expecting an object of type T, but couldn't transform the response body to T
             print(e)

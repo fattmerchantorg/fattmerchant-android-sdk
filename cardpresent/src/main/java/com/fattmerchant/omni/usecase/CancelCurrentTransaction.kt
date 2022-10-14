@@ -16,8 +16,8 @@ class CancelCurrentTransactionException(message: String? = null) : OmniException
  * Cancels a current mobile reader [transaction]
  */
 internal class CancelCurrentTransaction(
-        override val coroutineContext: CoroutineContext,
-        var mobileReaderDriverRepository: MobileReaderDriverRepository
+    override val coroutineContext: CoroutineContext,
+    var mobileReaderDriverRepository: MobileReaderDriverRepository
 ) : CoroutineScope {
 
     /**
@@ -26,7 +26,7 @@ internal class CancelCurrentTransaction(
      * @return result of cancelling [transaction] attempt
      */
     suspend fun start(error: (OmniException) -> Unit): Boolean {
-       val drivers = mobileReaderDriverRepository.getInitializedDrivers()
+        val drivers = mobileReaderDriverRepository.getInitializedDrivers()
         var success = true
         drivers.forEach { driver ->
             success = success && driver.cancelCurrentTransaction(error)

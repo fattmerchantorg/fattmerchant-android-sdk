@@ -4,27 +4,31 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
-import android.text.Spannable
-import android.text.SpannableString
 import android.text.method.ScrollingMovementMethod
-import android.text.style.ForegroundColorSpan
 import android.view.View
 import android.widget.EditText
-import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
+import com.fattmerchant.omni.Environment
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.UserNotificationListener
-import com.fattmerchant.omni.data.*
-import com.fattmerchant.omni.data.models.*
-import com.fattmerchant.omni.networking.OmniApi
+import com.fattmerchant.omni.data.Amount
+import com.fattmerchant.omni.data.MobileReader
+import com.fattmerchant.omni.data.TransactionRequest
+import com.fattmerchant.omni.data.TransactionUpdate
+import com.fattmerchant.omni.data.UserNotification
+import com.fattmerchant.omni.data.models.BankAccount
+import com.fattmerchant.omni.data.models.CreditCard
+import com.fattmerchant.omni.data.models.OmniException
+import com.fattmerchant.omni.data.models.PaymentMethod
+import com.fattmerchant.omni.data.models.Transaction
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 import java.util.logging.Logger
-
 
 class MainActivity : AppCompatActivity(), PermissionsManager {
 
@@ -62,10 +66,10 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
         return this
     }
 
-    override var permissionRequestLauncher
-            = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-        permissionRequestLauncherCallback?.invoke(isGranted)
-    }
+    override var permissionRequestLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            permissionRequestLauncherCallback?.invoke(isGranted)
+        }
 
     private fun setupPerformSaleWithReaderButton() {
         buttonPerformSaleWithReader.setOnClickListener {
@@ -75,13 +79,13 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
 //            request.customerId = "bbe13c96-8bf6-4cb5-8d5c-24896cf0e0db"
 
             // Listen to transaction updates delivered by the Omni SDK
-            Omni.shared()?.transactionUpdateListener = object: TransactionUpdateListener {
+            Omni.shared()?.transactionUpdateListener = object : TransactionUpdateListener {
                 override fun onTransactionUpdate(transactionUpdate: TransactionUpdate) {
                     updateStatus("${transactionUpdate.value} | ${transactionUpdate.userFriendlyMessage}")
                 }
             }
 
-            Omni.shared()?.userNotificationListener = object: UserNotificationListener {
+            Omni.shared()?.userNotificationListener = object : UserNotificationListener {
                 override fun onUserNotification(userNotification: UserNotification) {
                     updateStatus("${userNotification.value} | ${userNotification.userFriendlyMessage}")
                 }
@@ -235,7 +239,6 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
         }
     }
 
-
     private fun setupTokenizeCardButton() {
         buttonTokenizeCard.setOnClickListener {
             Omni.shared()?.tokenize(CreditCard.testCreditCard(), {
@@ -377,6 +380,24 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
             }.show()
     }
 
+    private fun showQABuildHashDialog(apiKey: String) {
+        val editText = EditText(this).apply { maxLines = 1 }
+        updateStatus("Attempting to take QA build hash")
+        AlertDialog.Builder(this)
+            .setTitle("Please provide a Stax QA Build Hash")
+            .setView(editText)
+            .setCancelable(false)
+            .setPositiveButton("Done") { dialog, _ ->
+                val qaBuildHash: String = editText.text.toString()
+                if (qaBuildHash.isEmpty()) {
+                    editText.error = "QA Build Hash is not valid"
+                } else {
+                    dialog.dismiss()
+                    initializeOmniWithEnvironment(apiKey = apiKey, environment = Environment.QA(qaBuildHash = qaBuildHash))
+                }
+            }.show()
+    }
+
     private fun setupButtons() {
         setupInitializeButton()
         setupPerformSaleWithReaderButton()
@@ -421,11 +442,12 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
 
     private fun searchAndConnectReader() {
         runIfPermissionGranted(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                R.string.permission_rationale_title,
-                R.string.permission_rationale_message_fine_location,
-                R.string.permission_denied_title,
-                R.string.permission_rationale_message_fine_location) {
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            R.string.permission_rationale_title,
+            R.string.permission_rationale_message_fine_location,
+            R.string.permission_denied_title,
+            R.string.permission_rationale_message_fine_location
+        ) {
             updateStatus("Searching for readers...")
             Omni.shared()?.getAvailableReaders {
                 val readers = it.map { it.getName() }.toTypedArray()
@@ -433,24 +455,23 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
 
                 runOnUiThread {
                     AlertDialog.Builder(this@MainActivity)
-                            .setItems(readers) { dialog, which ->
-                                val selected = it[which]
+                        .setItems(readers) { dialog, which ->
+                            val selected = it[which]
 
-                                updateStatus("Trying to connect to [${selected.getName()}]")
+                            updateStatus("Trying to connect to [${selected.getName()}]")
 
-                                Omni.shared()?.connectReader(selected, { reader ->
-                                    this.connectedReader = reader
-                                    buttonDisconnectReader.isEnabled = true
-                                    updateStatus("Connected to [${reader.getName()}]")
+                            Omni.shared()?.connectReader(selected, { reader ->
+                                this.connectedReader = reader
+                                buttonDisconnectReader.isEnabled = true
+                                updateStatus("Connected to [${reader.getName()}]")
 
-                                    runOnUiThread {
-                                        buttonPerformSaleWithReader.isEnabled = true
-                                    }
-                                }, { error ->
-                                    updateStatus("Error connecting: $error")
-                                })
-
-                            }.create().show()
+                                runOnUiThread {
+                                    buttonPerformSaleWithReader.isEnabled = true
+                                }
+                            }, { error ->
+                                updateStatus("Error connecting: $error")
+                            })
+                        }.create().show()
                 }
             }
         }
@@ -488,24 +509,27 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
         return "${dateFormat.format(Date())} | $msg"
     }
 
-    private fun initializeOmni(apiKey: String) {
+    private fun initializeOmni(apiKey: String, environment: Environment = Environment.DEV) {
+
+        if (environment == Environment.QA()) {
+            showQABuildHashDialog(apiKey = apiKey)
+            return
+        } else {
+            initializeOmniWithEnvironment(apiKey = apiKey, environment = environment)
+        }
+    }
+
+    private fun initializeOmniWithEnvironment(apiKey: String, environment: Environment) {
         updateStatus("Trying to initialize")
-        Omni.initialize(mapOf(
-            "appContext" to applicationContext,
-            "environment" to OmniApi.Environment.DEV,
-            "authenticationKey" to "",
-            "tpn" to "",
-            "registerId" to "",
-            "apiKey" to apiKey,
-            "appName" to "stax_sdk_sample"
-        ), {
-                runOnUiThread {
-                    updateStatus("Initialized")
-                    buttonRefundPreviousTransaction.isEnabled = true
-                    buttonInitialize.visibility = View.GONE
-                }
-                Omni.shared()?.signatureProvider = SignatureProvider()
+        Omni.initialize(
+            InitParams(applicationContext, application, apiKey, environment), {
+            runOnUiThread {
+                updateStatus("Initialized")
+                buttonRefundPreviousTransaction.isEnabled = true
+                buttonInitialize.visibility = View.GONE
             }
+            Omni.shared()?.signatureProvider = SignatureProvider()
+        }
         ) {
             updateStatus("${it.message}. ${it.detail}")
         }
@@ -523,5 +547,4 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
 //            updateStatus("${it.message}. ${it.detail}")
 //        }
     }
-
 }

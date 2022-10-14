@@ -2,8 +2,6 @@ package com.fattmerchant.android.chipdna
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
-import io.ktor.client.request.post
-import io.ktor.http.content.MultiPartData
 
 /**
  * Communicates with Transaction Gateway via the Direct Post API

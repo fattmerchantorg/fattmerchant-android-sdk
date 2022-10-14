@@ -5,15 +5,15 @@ import com.anywherecommerce.android.sdk.devices.CardReader
 import com.anywherecommerce.android.sdk.endpoints.AnyPayTransaction
 import com.anywherecommerce.android.sdk.models.TransactionStatus
 import com.anywherecommerce.android.sdk.models.TransactionType
-import com.anywherecommerce.android.sdk.util.Amount as ANPAmount
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.TransactionResult
 import com.fattmerchant.omni.data.TransactionUpdate
 import com.fattmerchant.omni.data.models.Transaction
+import com.anywherecommerce.android.sdk.util.Amount as ANPAmount
 
 internal fun CardReader.toMobileReader(): MobileReader {
-    return object: MobileReader {
+    return object : MobileReader {
         override fun getName(): String = serialNumber
         override fun getFirmwareVersion(): String? = firmwareVersion
         override fun getMake(): String? = null
@@ -26,7 +26,7 @@ internal fun TransactionUpdate.Companion.from(anpMeaningfulMessage: MeaningfulMe
 
     return anpMeaningfulMessage.toString().let { message ->
         when (message) {
-            "SWIPE OR INSERT OR TAP", "Insert, Swipe, or Tap Card"-> PromptInsertSwipeTap
+            "SWIPE OR INSERT OR TAP", "Insert, Swipe, or Tap Card" -> PromptInsertSwipeTap
             "SWIPE OR INSERT" -> PromptInsertSwipeCard
             "PROCESSING" -> Authorizing
             "REMOVE_CARD" -> PromptRemoveCard

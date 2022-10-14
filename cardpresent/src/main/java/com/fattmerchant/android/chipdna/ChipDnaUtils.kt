@@ -11,7 +11,8 @@ import com.fattmerchant.omni.data.UserNotification
 import com.fattmerchant.omni.data.models.MobileReaderConnectionStatus
 import com.fattmerchant.omni.data.models.Transaction
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 import com.creditcall.chipdnamobile.TransactionUpdate as ChipDnaTransactionUpdate
 import com.creditcall.chipdnamobile.UserNotification as ChipDnaUserNotification
 
@@ -86,7 +87,6 @@ fun mapUserNotification(userNotification: String): UserNotification? {
     }
 }
 
-
 /**
  * Tries to get the parameter by key.
  *
@@ -108,7 +108,7 @@ val ParameterValuesAddCustomer = "add-customer"
  * @return a string containing the user reference or null if not found
  */
 internal fun extractUserReference(transaction: Transaction): String? =
-        (transaction.meta as? Map<*, *>)?.get("nmiUserRef") as? String
+    (transaction.meta as? Map<*, *>)?.get("nmiUserRef") as? String
 
 /**
  * Gets the Card Ease Reference from the given [Transaction]
@@ -117,8 +117,7 @@ internal fun extractUserReference(transaction: Transaction): String? =
  * @return a string containing the user reference or null if not found
  */
 internal fun extractCardEaseReference(transaction: Transaction): String? =
-        (transaction.meta as? Map<*, *>)?.get("cardEaseReference") as? String
-
+    (transaction.meta as? Map<*, *>)?.get("cardEaseReference") as? String
 
 /**
  * Generates a user reference for chipDNA transactions
@@ -126,7 +125,7 @@ internal fun extractCardEaseReference(transaction: Transaction): String? =
  * @return String containing the generated user reference
  */
 internal fun generateUserReference(): String =
-        String.format("CDM-%s", SimpleDateFormat("yy-MM-dd-HH.mm.ss", Locale.US).format(Date()))
+    String.format("CDM-%s", SimpleDateFormat("yy-MM-dd-HH.mm.ss", Locale.US).format(Date()))
 
 internal fun withTransactionRequest(request: TransactionRequest) = Parameters().apply {
     add(ParameterKeys.Amount, request.amount.centsString())
@@ -135,6 +134,11 @@ internal fun withTransactionRequest(request: TransactionRequest) = Parameters().
     add(ParameterKeys.UserReference, generateUserReference())
     add(ParameterKeys.PaymentMethod, ParameterValues.Card)
     add(ParameterKeys.TransactionType, ParameterValues.Sale)
+
+    // Only autoconfirm if this is a preauth transaction
+    if (!request.preauth) {
+        add(ParameterKeys.AutoConfirm, ParameterValues.TRUE)
+    }
 
     if (request.tokenize) {
         add(ParameterKeys.CustomerVaultCommand, ParameterValuesAddCustomer)
@@ -154,7 +158,7 @@ internal fun withTransactionRequest(request: TransactionRequest) = Parameters().
  *
  * @param chipDnaConfigurationUpdate
  */
-fun MobileReaderConnectionStatus.Companion.from(chipDnaConfigurationUpdate: String): MobileReaderConnectionStatus? = when(chipDnaConfigurationUpdate) {
+fun MobileReaderConnectionStatus.Companion.from(chipDnaConfigurationUpdate: String): MobileReaderConnectionStatus? = when (chipDnaConfigurationUpdate) {
     ParameterValues.Registering,
     ParameterValues.Connecting -> MobileReaderConnectionStatus.CONNECTING
     ParameterValues.PerformingTmsUpdate -> MobileReaderConnectionStatus.UPDATING_CONFIGURATION
@@ -164,7 +168,7 @@ fun MobileReaderConnectionStatus.Companion.from(chipDnaConfigurationUpdate: Stri
     else -> null
 }
 
-fun MobileReaderConnectionStatus.Companion.from(chipDnaDeviceStatus: DeviceStatus.DeviceStatusEnum) = when(chipDnaDeviceStatus) {
+fun MobileReaderConnectionStatus.Companion.from(chipDnaDeviceStatus: DeviceStatus.DeviceStatusEnum) = when (chipDnaDeviceStatus) {
     DeviceStatus.DeviceStatusEnum.DeviceStatusDisconnected -> MobileReaderConnectionStatus.DISCONNECTED
     DeviceStatus.DeviceStatusEnum.DeviceStatusConnected -> MobileReaderConnectionStatus.CONNECTED
     else -> null
