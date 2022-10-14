@@ -70,6 +70,8 @@ internal class TakeMobileReaderPayment(
             result.request?.tip?.let { transactionMeta["tip"] = it }
             result.request?.memo?.let { transactionMeta["memo"] = it }
             result.request?.reference?.let { transactionMeta["reference"] = it }
+            result.request?.shippingAmount?.let { transactionMeta["shippingAmount"] = it }
+            result.request?.poNumber?.let { transactionMeta["poNumber"] = it }
 
             return transactionMeta
         }
@@ -83,6 +85,8 @@ internal class TakeMobileReaderPayment(
             result.request?.tip?.let { invoiceMeta["tip"] = it }
             result.request?.memo?.let { invoiceMeta["memo"] = it }
             result.request?.reference?.let { invoiceMeta["reference"] = it }
+            result.request?.shippingAmount?.let { invoiceMeta["shippingAmount"] = it }
+            result.request?.poNumber?.let { invoiceMeta["poNumber"] = it }
 
             return invoiceMeta
         }
