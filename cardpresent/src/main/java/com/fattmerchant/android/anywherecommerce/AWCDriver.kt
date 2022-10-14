@@ -168,7 +168,7 @@ internal class AWCDriver : MobileReaderDriver {
 
     override suspend fun disconnect(reader: MobileReader, error: (OmniException) -> Unit): Boolean {
 
-        if ( CardReaderController.isCardReaderConnected() && CardReaderController.getConnectedReader().connectionMethod == CardReader.ConnectionMethod.BLUETOOTH) {
+        if (CardReaderController.isCardReaderConnected() && CardReaderController.getConnectedReader().connectionMethod == CardReader.ConnectionMethod.BLUETOOTH) {
             CardReaderController.getConnectedReader()?.disconnect() ?: run {
                 error(OmniException("Unable to disconnect reader", "Card reader is null"))
             }
@@ -240,7 +240,7 @@ internal class AWCDriver : MobileReaderDriver {
     }
 
     override suspend fun capture(transaction: Transaction): Boolean {
-        return false
+        return true // transactions with AWC are autocaptured
     }
 
     override suspend fun voidTransaction(transaction: Transaction): TransactionResult {
