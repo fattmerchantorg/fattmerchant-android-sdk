@@ -7,6 +7,7 @@ package com.fattmerchant.omni.data.models
 class Merchant : Model {
     override var id: String? = null
     var options: Map<String, Any>? = null
+    internal var registration: Map<String, Any>? = null
 
     /**
      * Gets the 'emvTerminalPassword' option from the Merchant
