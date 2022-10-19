@@ -2,6 +2,7 @@ package com.fattmerchant.omni.data.repository
 
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.MobileReaderDriver
+import com.fattmerchant.omni.data.PaymentTerminalDriver
 import com.fattmerchant.omni.data.models.Transaction
 
 internal interface MobileReaderDriverRepository {
@@ -32,4 +33,9 @@ internal interface MobileReaderDriverRepository {
      * @return
      */
     suspend fun getDriverFor(mobileReader: MobileReader): MobileReaderDriver?
+
+    /**
+     * Returns the terminal driver that knows how to handle the given transaction
+     */
+    fun getTerminal(): PaymentTerminalDriver?
 }

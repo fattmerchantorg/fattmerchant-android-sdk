@@ -1,7 +1,5 @@
 package com.fattmerchant.omni.usecase
 
-import com.fattmerchant.android.anywherecommerce.AWCDriver
-import com.fattmerchant.android.chipdna.ChipDnaDriver
 import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.UserNotificationListener
@@ -20,6 +18,7 @@ import com.fattmerchant.omni.data.repository.PaymentMethodRepository
 import com.fattmerchant.omni.data.repository.TransactionRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
+import java.util.*
 import kotlin.coroutines.CoroutineContext
 
 internal class TakeMobileReaderPayment(
@@ -28,7 +27,7 @@ internal class TakeMobileReaderPayment(
     val customerRepository: CustomerRepository,
     val paymentMethodRepository: PaymentMethodRepository,
     val transactionRepository: TransactionRepository,
-    val request: TransactionRequest,
+    var request: TransactionRequest,
     val signatureProvider: SignatureProviding? = null,
     val transactionUpdateListener: TransactionUpdateListener? = null,
     val userNotificationListener: UserNotificationListener? = null,
@@ -70,6 +69,8 @@ internal class TakeMobileReaderPayment(
             result.request?.tip?.let { transactionMeta["tip"] = it }
             result.request?.memo?.let { transactionMeta["memo"] = it }
             result.request?.reference?.let { transactionMeta["reference"] = it }
+            result.request?.shippingAmount?.let { transactionMeta["shippingAmount"] = it }
+            result.request?.poNumber?.let { transactionMeta["poNumber"] = it }
 
             return transactionMeta
         }
@@ -83,6 +84,8 @@ internal class TakeMobileReaderPayment(
             result.request?.tip?.let { invoiceMeta["tip"] = it }
             result.request?.memo?.let { invoiceMeta["memo"] = it }
             result.request?.reference?.let { invoiceMeta["reference"] = it }
+            result.request?.shippingAmount?.let { invoiceMeta["shippingAmount"] = it }
+            result.request?.poNumber?.let { invoiceMeta["poNumber"] = it }
 
             return invoiceMeta
         }
@@ -136,48 +139,44 @@ internal class TakeMobileReaderPayment(
             return@coroutineScope null
         }
 
-        val cardLastFour = try {
-            result.maskedPan?.substring(result.maskedPan!!.lastIndex - 3) ?: "****"
-        } catch (e: Error) {
-            "****"
-        }
-
         val voidAndFail = { exception: OmniException ->
             reader.voidTransaction(result) {
                 onError(exception)
             }
         }
 
-        // Check if the invoice already has a customer associated with it
-        val customer = invoice.customerId?.let {
-            // Check if the invoice exists
-            customerRepository.getById(it) {
-                voidAndFail(TakeMobileReaderPaymentException("Customer with given id not found"))
-            } ?: return@coroutineScope null
-        } ?: run {
-            // If not create the invoice
-            customerRepository.create(
+        val customer = when {
+            invoice.customerId != null -> {
+                // Check if the invoice exists
+                customerRepository.getById(invoice.customerId!!) {
+                    voidAndFail(TakeMobileReaderPaymentException("Customer with given id not found"))
+                } ?: return@coroutineScope null
+            }
+
+            request.customerId != null -> {
+                customerRepository.getById(request.customerId!!) {
+                    voidAndFail(TakeMobileReaderPaymentException("Customer with given id not found"))
+                } ?: return@coroutineScope null
+            }
+
+            else -> {
+                customerRepository.create(
                     Customer().apply {
                         firstname = if(result.transactionSource.equals("contactless", true)) "Mobile Device" else result.cardHolderFirstName ?: "SWIPE"
                         lastname = if(result.transactionSource.equals("contactless", true)) "Customer" else result.cardHolderLastName ?: "CUSTOMER"
                     }
-            ) {
-                voidAndFail(it)
-            } ?: return@coroutineScope null
+                ) {
+                    voidAndFail(it)
+                } ?: return@coroutineScope null
+            }
+
         }
 
         // Create a PaymentMethod
         val paymentMethod = paymentMethodRepository.create(
-            PaymentMethod().apply {
+            result.generatePaymentMethod().apply {
                 merchantId = customer.merchantId
                 customerId = customer.id
-                method = "card"
-                cardType = result.cardType
-                cardExp = result.cardExpiration
-                this.cardLastFour = cardLastFour
-                personName = (customer.firstname ?: "") + " " + (customer.lastname ?: "")
-                tokenize = false
-                paymentToken = result.paymentToken
             }
         ) {
             voidAndFail(it)
@@ -186,7 +185,14 @@ internal class TakeMobileReaderPayment(
         // Associate payment method and invoice with customer
         invoice.paymentMethodId = paymentMethod.id
         invoice.customerId = customer.id
-        invoice.meta = invoiceMetaFrom(result)
+
+        // If the invoice already has meta, then we don't want to replace it but rather merge in
+        // the new fields we have
+        invoice.meta = invoice.meta?.let {
+            val newMeta = it.toMutableMap()
+            newMeta.putAll(result.invoiceMeta())
+            newMeta
+        } ?: result.invoiceMeta()
 
         // Update invoice
         invoiceRepository.update(invoice) {
@@ -194,53 +200,27 @@ internal class TakeMobileReaderPayment(
         } ?: return@coroutineScope null
 
         // Create transaction
-        val transactionMeta = transactionMetaFrom(result)
-
-        var gatewayResponse: Map<String, Any>? = null
-
-        result.authCode?.let {
-            val responseMap = mapOf(
-                "gateway_specific_response_fields" to mapOf(
-                    "nmi" to mapOf(
-                        "authcode" to it
-                    )
-                )
-            )
-
-            gatewayResponse = responseMap
-        }
-
         val createdTransaction = transactionRepository.create(
-            Transaction().apply {
+            result.generateTransaction().apply {
                 paymentMethodId = paymentMethod.id
-                total = request.amount.dollarsString()
-                success = result.success
-                lastFour = cardLastFour
-                meta = transactionMeta
-                type = "charge"
-                method = "card"
-                source = "Android|CPSDK|${result.source}"
-                if(result.source == "AWC") {
-                    isRefundable = false
-                    isVoidable = false
-                }
                 customerId = customer.id
                 invoiceId = invoice.id
-                response = gatewayResponse
-                token = result.externalId
-
-                if (request.preauth) {
-                    preAuth = true
-                    isCaptured = 0
-                    isVoidable = true
-                    type = "pre_auth"
-                }
             }
         ) {
             voidAndFail(it)
+        } ?: return@coroutineScope null
+
+        // If we the transaction is preauth, we don't need to capture it
+        if (request.preauth) {
+            return@coroutineScope createdTransaction
         }
 
-        val successfullyCaptured = reader.capture(createdTransaction!!)
+        // If the transaction is not an NMI one, then we don't need to do the auth capture step
+        if (!result.source.contains("NMI")) {
+            return@coroutineScope createdTransaction
+        }
+
+        val successfullyCaptured = reader.capture(createdTransaction)
 
         if (successfullyCaptured) {
             return@coroutineScope createdTransaction

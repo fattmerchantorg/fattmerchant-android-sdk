@@ -1,5 +1,13 @@
 package com.fattmerchant.omni.data
 
+import com.fattmerchant.android.anywherecommerce.AWCDriver
+import com.fattmerchant.android.chipdna.ChipDnaDriver
+import com.fattmerchant.cpresent.BuildConfig
+import com.fattmerchant.omni.data.models.Customer
+import com.fattmerchant.omni.data.models.Invoice
+import com.fattmerchant.omni.data.models.PaymentMethod
+import com.fattmerchant.omni.data.models.Transaction
+
 /**
  * Represents a request for a mobile reader payment
  *
@@ -69,7 +77,9 @@ open class TransactionResult {
     var externalId: String? = null
 
     /** The gateway response in its entirety */
-    var gatewayResponse: String? = null
+    var gatewayResponse: MutableMap<String, Any?>? = null
+
+    var transactionMeta: MutableMap<String, Any?>? = null
 
     /** The token that represents this payment method */
     internal var paymentToken: String? = null
@@ -80,4 +90,153 @@ open class TransactionResult {
      *  transaction. For example, "Insufficient Funds"
      */
     internal var message: String? = null
+
+    internal fun customerFirstName(): String =
+        if (transactionSource.equals(
+                "contactless",
+                true
+            )
+        ) "Mobile Device" else cardHolderFirstName ?: "SWIPE"
+
+    internal fun customerLastName(): String =
+        if (transactionSource.equals(
+                "contactless",
+                true
+            )
+        ) "Customer" else cardHolderLastName ?: "CUSTOMER"
+
+    internal fun customerName(): String = "${customerFirstName()} ${customerLastName()}"
+
+    internal fun cardLastFour() = try {
+        maskedPan?.substring(maskedPan!!.lastIndex - 3) ?: "****"
+    } catch (e: Error) {
+        "****"
+    }
+
+    internal fun transactionMeta(): Map<String, Any?> {
+        var transactionMeta = this.transactionMeta ?: mutableMapOf()
+
+        when {
+            source.contains(ChipDnaDriver().source) -> {
+                userReference?.let {
+                    transactionMeta["nmiUserRef"] = it
+                }
+
+                localId?.let {
+                    transactionMeta["cardEaseReference"] = it
+                }
+
+                externalId?.let {
+                    transactionMeta["nmiTransactionId"] = it
+                }
+            }
+
+            source.contains(AWCDriver().source) -> {
+                externalId?.let {
+                    transactionMeta["awcTransactionId"] = it
+                }
+            }
+        }
+
+        request?.lineItems?.let { transactionMeta["lineItems"] = it }
+        request?.subtotal?.let { transactionMeta["subtotal"] = it }
+        request?.tax?.let { transactionMeta["tax"] = it }
+        request?.tip?.let { transactionMeta["tip"] = it }
+        request?.memo?.let { transactionMeta["memo"] = it }
+        request?.reference?.let { transactionMeta["reference"] = it }
+
+        request?.meta?.let { passthroughMeta ->
+            transactionMeta = passthroughMeta.plus(transactionMeta).toMutableMap()
+        }
+
+        return transactionMeta
+    }
+
+    internal fun invoiceMeta(): Map<String, Any> {
+        val invoiceMeta = mutableMapOf<String, Any>()
+
+        request?.lineItems?.let { invoiceMeta["lineItems"] = it }
+        request?.subtotal?.let { invoiceMeta["subtotal"] = it }
+        request?.tax?.let { invoiceMeta["tax"] = it }
+        request?.tip?.let { invoiceMeta["tip"] = it }
+        request?.memo?.let { invoiceMeta["memo"] = it }
+        request?.reference?.let { invoiceMeta["reference"] = it }
+
+        return invoiceMeta
+    }
+
+    internal fun generateTransaction(): Transaction {
+        val transactionMeta = transactionMeta()
+
+        var gatewayResponse: Map<String, Any?>? = this.gatewayResponse
+
+        if (source.contains("nmi")) {
+            authCode?.let {
+                val responseMap = mapOf(
+                    "gateway_specific_response_fields" to mapOf(
+                        "nmi" to mapOf(
+                            "authcode" to it
+                        )
+                    )
+                )
+
+                gatewayResponse = responseMap
+            }
+        }
+
+        return Transaction().apply {
+            total = amount?.dollarsString()
+            success = this@TransactionResult.success
+            lastFour = cardLastFour()
+            meta = transactionMeta
+            type = "charge"
+            method = "card"
+            source = "Android|CPSDK|${this@TransactionResult.source}"
+
+            if (source?.contains("terminalservice.dejavoo") == true) {
+                source = "terminalservice.dejavoo"
+            }
+
+            if(source == "AWC") {
+                isRefundable = false
+                isVoidable = false
+            }
+            response = gatewayResponse
+            token = externalId
+
+            if (request?.preauth == true) {
+                preAuth = true
+                isCaptured = 0
+                isVoidable = true
+                type = "pre_auth"
+            }
+        }
+    }
+
+    internal fun generateCustomer(): Customer {
+        return Customer().apply {
+            firstname = customerFirstName()
+            lastname = customerLastName()
+        }
+    }
+
+    internal fun generatePaymentMethod(): PaymentMethod {
+        return PaymentMethod().apply {
+            method = "card"
+            cardType = this@TransactionResult.cardType
+            cardExp = this@TransactionResult.cardExpiration
+            this.cardLastFour = cardLastFour()
+            personName = customerName()
+            tokenize = false
+            paymentToken = this@TransactionResult.paymentToken
+        }
+    }
+
+    internal fun generateInvoice(): Invoice {
+        return Invoice().apply {
+            total = request?.amount?.dollarsString()
+            url = "https://fattpay.com/#/bill/"
+            meta = mapOf("subtotal" to (request?.amount?.dollarsString() ?: "0.0"))
+        }
+    }
 }

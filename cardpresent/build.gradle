@@ -1,7 +1,5 @@
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
-apply plugin: 'com.github.dcendents.android-maven'
 
 group='com.github.fattmerchantorg'
 
@@ -11,8 +9,8 @@ android {
     defaultConfig {
         minSdkVersion 23
         targetSdkVersion 30
-        versionCode 11
-        versionName "2.1.2"
+        versionCode 15
+        versionName "2.3.0-alpha"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         testOptions {
@@ -32,6 +30,11 @@ android {
 
     packagingOptions {
         exclude 'META-INF/*.kotlin_module'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     buildTypes {
@@ -65,7 +68,7 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    androidTestCompile 'net.zetetic:android-database-sqlcipher:3.5.1'
+    androidTestImplementation 'net.zetetic:android-database-sqlcipher:3.5.1'
 
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.2'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.2.2'
@@ -82,8 +85,9 @@ dependencies {
     implementation 'net.zetetic:android-database-sqlcipher:4.0.1@aar'
 
     // AnywhereCommerce
-    compileOnly files('libs/com.anywherecommerce.android.sdk-release.aar')
+    implementation files('libs/com.anywherecommerce.android.sdk-release.aar')
 //    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "com.dvmms:dejapay:2.0.20"
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.8.0'
     implementation 'com.github.smart-fun:XmlToJson:1.4.4'
