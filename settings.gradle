@@ -1,2 +1,2 @@
-include ':tokenization', ':cardpresent', ':app', ':awc'
+include ':tokenization', ':cardpresent', ':app'
 
