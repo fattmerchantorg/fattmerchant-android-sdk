@@ -1,5 +1,7 @@
 package com.fattmerchant.omni.usecase
 
+import com.fattmerchant.android.anywherecommerce.AWCDriver
+import com.fattmerchant.android.chipdna.ChipDnaDriver
 import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.UserNotificationListener
@@ -8,7 +10,6 @@ import com.fattmerchant.omni.data.TransactionRequest
 import com.fattmerchant.omni.data.TransactionResult
 import com.fattmerchant.omni.data.models.Customer
 import com.fattmerchant.omni.data.models.Invoice
-import com.fattmerchant.omni.data.models.PaymentMethod
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.data.repository.CustomerRepository
