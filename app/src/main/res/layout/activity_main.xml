@@ -99,6 +99,12 @@
                         android:text="Connect reader" />
 
                     <Button
+                        android:id="@+id/buttonPerformSaleWithTerminal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pay on Terminal" />
+
+                    <Button
                         android:id="@+id/buttonPerformSaleWithReader"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -159,10 +165,10 @@
                         android:text="Refund A Transaction" />
 
                     <Button
-                        android:id="@+id/buttonCancelTransaction"
+                        android:id="@+id/buttonVoidTransaction"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Cancel Transaction" />
+                        android:text="Void Transaction" />
                 </LinearLayout>
             </ScrollView>
 

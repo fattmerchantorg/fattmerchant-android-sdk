@@ -86,8 +86,7 @@ internal fun TransactionResult.Companion.from(transaction: AnyPayTransaction): T
 
     transaction.maskedPAN?.let { maskedPan = it }
     transaction.cardType?.let { cardType = mapCardType(it) }
-    transaction.approvalCode?.let { authCode = it }
-    transaction.gatewayResponse?.responseText?.let { gatewayResponse = it }
+    transaction.approvalCode?.let { authCode = it}
     transaction.cardholderName?.let {
         val name = it.split(" ").toMutableList()
         cardHolderFirstName = name.removeAt(0)
