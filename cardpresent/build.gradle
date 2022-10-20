@@ -79,7 +79,7 @@ dependencies {
     api files('libs/ChipDnaMobile.jar')
 
     // AnywhereCommerce
-    implementation 'com.github.fattmerchantorg:awc-selfhosted:1.0.1'
+    compileOnly 'com.github.fattmerchantorg:awc-selfhosted:1.0.1'
 
     implementation 'com.squareup.retrofit2:retrofit:2.6.0'
     implementation 'com.squareup.retrofit2:converter-moshi:2.0.0'
