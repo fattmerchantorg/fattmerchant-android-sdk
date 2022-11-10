@@ -167,6 +167,7 @@ internal class ChipDnaDriver :
     override suspend fun searchForReaders(args: Map<String, Any>): List<MobileReader> {
         val parameters = Parameters().apply {
             add(ParameterKeys.SearchConnectionTypeBluetooth, ParameterValues.TRUE)
+            add(ParameterKeys.SearchConnectionTypeUsb, ParameterValues.TRUE)
         }
         ChipDnaMobile.getInstance().clearAllAvailablePinPadsListeners()
 
