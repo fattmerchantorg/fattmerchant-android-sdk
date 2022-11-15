@@ -45,7 +45,6 @@ To accept a payment, you'll need to collect information from the customer, token
 You'll first need to setup the `FattmerchantClient` for usage.  All you have to do here is set the `webPaymentsToken` field on the shared `FattmerchantConfiguration`. `FattmerchantClient` will then use that configuration by default.
 
 ##### Kotlin
-
 ```kotlin
 
 class MyApplication: Application() {
@@ -59,7 +58,6 @@ class MyApplication: Application() {
 ```
 
 ##### Java
-
 ```Java
 
 public class MyApplication extends Application {
@@ -76,23 +74,30 @@ public class MyApplication extends Application {
 Alternatively, you may create a configuration object and pass it to the new `FattmerchantApi` instance as you need it.
 
 ##### Kotlin
-
 ```kotlin
+
 val config = FattmerchantConfiguration("https://apidev01.fattlabs.com", "fattwars")
 val client = FattmerchantClient(config)
+
 ```
 
 ##### Java
-
 ```Java
-FattmerchantConfiguration config = new FattmerchantConfiguration("https://apidev01.fattlabs.com", "fattwars")
-FattmerchantClient client = new FattmerchantClient(config)
+
+public class SampleClass {
+    
+    FattmerchantConfiguration config = new FattmerchantConfiguration("https://apidev01.fattlabs.com", "fattwars");
+    FattmerchantClient client = new FattmerchantClient(config);
+}
+
 ```
 
 #### Collect payment information
 You first want to collect credit card information and populate a `CreditCard` or a `BankAccount` object.
 
+##### Kotlin
 ```kotlin
+
 val creditCard = CreditCard(personName = "Joan Parsnip",
 	cardNumber = "4111111111111111",
 	cardExp = "1230",
@@ -104,6 +109,20 @@ val bankAccount = BankAccount(personName = "Jim Parsnip",
 	bankAccount = "9876543210",
 	bankRouting = "021000021",
 	addressZip = "32822")
+
+```
+
+##### Java
+```Java
+
+public class SampleClass {
+
+    CreditCard creditCard = CreditCard("Joan Parsnip", "4111111111111111", "1230", "32822");
+
+    // Or for a bank account...
+    BankAccount bankAccount = BankAccount("Jim Parsnip", "savings", "9876543210", "021000021", "32822");
+}
+
 ```
 
 #### Get a payment method token
