@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/FattMerchant-Android-SDK.iml" filepath="$PROJECT_DIR$/.idea/FattMerchant-Android-SDK.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/FattMerchant-Android-SDK.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/FattMerchant-Android-SDK.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/FattMerchant-Android-SDK.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/FattMerchant-Android-SDK.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/FattMerchant-Android-SDK.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/FattMerchant-Android-SDK.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/FattMerchant-Android-SDK.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/FattMerchant-Android-SDK.app.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cardpresent/FattMerchant-Android-SDK.cardpresent.iml" filepath="$PROJECT_DIR$/.idea/modules/cardpresent/FattMerchant-Android-SDK.cardpresent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cardpresent/FattMerchant-Android-SDK.cardpresent.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/cardpresent/FattMerchant-Android-SDK.cardpresent.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cardpresent/FattMerchant-Android-SDK.cardpresent.main.iml" filepath="$PROJECT_DIR$/.idea/modules/cardpresent/FattMerchant-Android-SDK.cardpresent.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cardpresent/FattMerchant-Android-SDK.cardpresent.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/cardpresent/FattMerchant-Android-SDK.cardpresent.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tokenization/FattMerchant-Android-SDK.tokenization.iml" filepath="$PROJECT_DIR$/.idea/modules/tokenization/FattMerchant-Android-SDK.tokenization.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tokenization/FattMerchant-Android-SDK.tokenization.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/tokenization/FattMerchant-Android-SDK.tokenization.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tokenization/FattMerchant-Android-SDK.tokenization.main.iml" filepath="$PROJECT_DIR$/.idea/modules/tokenization/FattMerchant-Android-SDK.tokenization.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tokenization/FattMerchant-Android-SDK.tokenization.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/tokenization/FattMerchant-Android-SDK.tokenization.unitTest.iml" />
+    </modules>
+  </component>
+</project>

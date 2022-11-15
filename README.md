@@ -56,6 +56,19 @@ class MyApplication: Application() {
 
 ```
 
+```Java
+
+public class MyApplication extends Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+		FattmerchantConfiguration.shared.webPaymentsToken = "mywebpaymentstoken";
+    }
+}
+
+```
+
 Alternatively, you may create a configuration object and pass it to the new `FattmerchantApi` instance as you need it.
 
 ```kotlin
