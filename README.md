@@ -75,9 +75,18 @@ public class MyApplication extends Application {
 
 Alternatively, you may create a configuration object and pass it to the new `FattmerchantApi` instance as you need it.
 
+##### Kotlin
+
 ```kotlin
 val config = FattmerchantConfiguration("https://apidev01.fattlabs.com", "fattwars")
 val client = FattmerchantClient(config)
+```
+
+##### Java
+
+```Java
+FattmerchantConfiguration config = new FattmerchantConfiguration("https://apidev01.fattlabs.com", "fattwars")
+FattmerchantClient client = new FattmerchantClient(config)
 ```
 
 #### Collect payment information
