@@ -85,7 +85,6 @@ val client = FattmerchantClient(config)
 ```Java
 
 public class SampleClass {
-    
     FattmerchantConfiguration config = new FattmerchantConfiguration("https://apidev01.fattlabs.com", "fattwars");
     FattmerchantClient client = new FattmerchantClient(config);
 }
@@ -116,7 +115,6 @@ val bankAccount = BankAccount(personName = "Jim Parsnip",
 ```Java
 
 public class SampleClass {
-
     String personName = "Jim Parsnip";
     String cardNumber = "4111111111111111";
     String cardExp = "1230";
@@ -139,6 +137,7 @@ public class SampleClass {
 #### Get a payment method token
 Once you have a `CreditCard` object, call the `tokenize(:)` method on  `FattmerchantClient` object and pass a listener to be notified once tokenization is complete.
 
+##### Kotlin
 ```kotlin
 var fattClient = FattmerchantClient(config)
 fattClient.tokenize(card) { (response) in
@@ -151,6 +150,26 @@ fattClient.tokenize(card) { (response) in
                 System.out.print(errors)
             }
         })
+}
+```
+
+##### Java
+```Java
+public class SampleClass {
+    public void performCharge(CreditCard creditCard) {
+        FattmerchantClient fattClient = new FattmerchantClient(config);
+        fattClient.tokenize(creditCard, new FattmerchantClient.TokenizationListener() {
+            @Override
+            public void onPaymentMethodCreated(PaymentMethod paymentMethod) {
+                // Success! You can now run a transaction with Fattmerchant using paymentToken as the PaymentMethod
+            }
+
+            @Override
+            public void beforeValidate(String errors) {
+                System.out.print(errors);
+            }
+        });   
+    }
 }
 ```
 
