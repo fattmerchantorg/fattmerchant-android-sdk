@@ -44,17 +44,21 @@ To accept a payment, you'll need to collect information from the customer, token
 
 You'll first need to setup the `FattmerchantClient` for usage.  All you have to do here is set the `webPaymentsToken` field on the shared `FattmerchantConfiguration`. `FattmerchantClient` will then use that configuration by default.
 
+##### Kotlin
+
 ```kotlin
 
 class MyApplication: Application() {
 
-    override fun onCreate() {
-       super.onCreate()
-		FattmerchantConfiguration.shared.webPaymentsToken = "mywebpaymentstoken"
+    override fun onCreate() { 
+        super.onCreate()
+        FattmerchantConfiguration.shared.webPaymentsToken = "mywebpaymentstoken"
     }
 }
 
 ```
+
+##### Java
 
 ```Java
 
@@ -63,7 +67,7 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-		FattmerchantConfiguration.shared.webPaymentsToken = "mywebpaymentstoken";
+        FattmerchantConfiguration.shared.webPaymentsToken = "mywebpaymentstoken";
     }
 }
 
