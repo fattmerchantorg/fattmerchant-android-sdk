@@ -117,10 +117,21 @@ val bankAccount = BankAccount(personName = "Jim Parsnip",
 
 public class SampleClass {
 
-    CreditCard creditCard = CreditCard("Joan Parsnip", "4111111111111111", "1230", "32822");
+    String personName = "Jim Parsnip";
+    String cardNumber = "4111111111111111";
+    String cardExp = "1230";
+    String addressZip = "32822"; 
+    
+    CreditCard creditCard = CreditCard(personName, cardNumber, cardExp, addressZip);
 
     // Or for a bank account...
-    BankAccount bankAccount = BankAccount("Jim Parsnip", "savings", "9876543210", "021000021", "32822");
+    String personName = "Jim Parsnip";
+    String bankType = "savings";
+    String bankAccount = "9876543210";
+    String bankRouting = "021000021";
+    String addressZip = "32822";
+
+    BankAccount bankAccount = BankAccount(personName, bankType, bankAccount, bankRouting, addressZip);
 }
 
 ```
