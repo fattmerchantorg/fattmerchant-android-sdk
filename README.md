@@ -97,17 +97,21 @@ You first want to collect credit card information and populate a `CreditCard` or
 ##### Kotlin
 ```kotlin
 
-val creditCard = CreditCard(personName = "Joan Parsnip",
+val creditCard = CreditCard(
+    personName = "Joan Parsnip",
 	cardNumber = "4111111111111111",
 	cardExp = "1230",
-	addressZip = "32822")
+	addressZip = "32822"
+)
 
 // Or for a bank account...
-val bankAccount = BankAccount(personName = "Jim Parsnip",
+val bankAccount = BankAccount(
+    personName = "Jim Parsnip",
 	bankType = "savings",
 	bankAccount = "9876543210",
 	bankRouting = "021000021",
-	addressZip = "32822")
+	addressZip = "32822"
+)
 
 ```
 
@@ -156,7 +160,7 @@ fattClient.tokenize(card) { (response) in
 ##### Java
 ```Java
 public class SampleClass {
-    public void performCharge(CreditCard creditCard) {
+    public void performTokenization(CreditCard creditCard) {
         FattmerchantClient fattClient = new FattmerchantClient(config);
         fattClient.tokenize(creditCard, new FattmerchantClient.TokenizationListener() {
             @Override
@@ -179,18 +183,38 @@ Now that you have the token representing the payment method, you can send it to 
 ## <a name="testing">Testing</a>
 If you'd like to try tokenization without real payment information, you can use the `CreditCard.testCreditCard()` or `BankAccount.testBankAccount()` methods to get a test credit card or bank account.
 
+##### Kotlin
 ```kotlin
 val creditCard = CreditCard.testCreditCard()
 
 val bankAccount = BankAccount.testBankAccount()
 ```
 
+##### Java
+```Java
+public class SampleClass {
+    CreditCard creditCard = CreditCard.testCreditCard();
+
+    BankAccount bankAccount = BankAccount.testBankAccount();   
+}
+```
+
 If you want to test failures, you can use the following methods
 
+##### Kotlin
 ```kotlin
 val failingCreditCard = CreditCard.failingTestCreditCard()
 
 val failingBankAccount = BankAccount.failingTestBankAccount()
+```
+
+##### Java
+```Java
+public class SampleClass {
+    CreditCard failingCreditCard = CreditCard.failingTestCreditCard();
+
+    BankAccount failingBankAccount = BankAccount.failingTestBankAccount();   
+}
 ```
 
 Or you can create the `CreditCard` or `BankAccount` object with the following testing payment information:
