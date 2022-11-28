@@ -37,8 +37,13 @@ captures/
 .idea/workspace.xml
 .idea/tasks.xml
 .idea/gradle.xml
+.idea/misc.xml
+.idea/modules.xml
 .idea/dictionaries
 .idea/libraries
+.idea/caches
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
 
 # Keystore files
 *.jks
@@ -53,3 +58,6 @@ google-services.json
 freeline.py
 freeline/
 freeline_project_description.json
+
+# MacOS
+.DS_Store
