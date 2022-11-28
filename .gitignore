@@ -42,6 +42,9 @@ captures/
 .idea/dictionaries
 .idea/libraries
 .idea/caches
+.idea/compiler.xml
+.idea/jarRepositories.xml
+.idea/vcs.xml
 .idea/navEditor.xml
 .idea/assetWizardSettings.xml
 
