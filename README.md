@@ -44,45 +44,90 @@ To accept a payment, you'll need to collect information from the customer, token
 
 You'll first need to setup the `FattmerchantClient` for usage.  All you have to do here is set the `webPaymentsToken` field on the shared `FattmerchantConfiguration`. `FattmerchantClient` will then use that configuration by default.
 
+##### Kotlin
 ```kotlin
-
 class MyApplication: Application() {
-
-    override fun onCreate() {
-       super.onCreate()
-		FattmerchantConfiguration.shared.webPaymentsToken = "mywebpaymentstoken"
+   
+    override fun onCreate() { 
+        super.onCreate()
+        FattmerchantConfiguration.shared.webPaymentsToken = "mywebpaymentstoken"
     }
 }
+```
 
+##### Java
+```Java
+public class MyApplication extends Application {
+    
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        FattmerchantConfiguration.shared.webPaymentsToken = "mywebpaymentstoken";
+    }
+}
 ```
 
 Alternatively, you may create a configuration object and pass it to the new `FattmerchantApi` instance as you need it.
 
+##### Kotlin
 ```kotlin
 val config = FattmerchantConfiguration("https://apidev01.fattlabs.com", "fattwars")
 val client = FattmerchantClient(config)
 ```
 
+##### Java
+```Java
+public class SampleClass {
+    FattmerchantConfiguration config = new FattmerchantConfiguration("https://apidev01.fattlabs.com", "fattwars");
+    FattmerchantClient client = new FattmerchantClient(config);
+}
+```
+
 #### Collect payment information
 You first want to collect credit card information and populate a `CreditCard` or a `BankAccount` object.
 
+##### Kotlin
 ```kotlin
-val creditCard = CreditCard(personName = "Joan Parsnip",
+val creditCard = CreditCard(
+    personName = "Joan Parsnip",
 	cardNumber = "4111111111111111",
 	cardExp = "1230",
-	addressZip = "32822")
+	addressZip = "32822"
+)
 
 // Or for a bank account...
-val bankAccount = BankAccount(personName = "Jim Parsnip",
+val bankAccount = BankAccount(
+    personName = "Jim Parsnip",
 	bankType = "savings",
 	bankAccount = "9876543210",
 	bankRouting = "021000021",
-	addressZip = "32822")
+	addressZip = "32822"
+)
+```
+
+##### Java
+```Java
+public class SampleClass {
+    String personName = "Jim Parsnip";
+    String cardNumber = "4111111111111111";
+    String cardExp = "1230";
+    String addressZip = "32822"; 
+    
+    CreditCard creditCard = CreditCard(personName, cardNumber, cardExp, addressZip);
+    // Or for a bank account...
+    String personName = "Jim Parsnip";
+    String bankType = "savings";
+    String bankAccount = "9876543210";
+    String bankRouting = "021000021";
+    String addressZip = "32822";
+    BankAccount bankAccount = BankAccount(personName, bankType, bankAccount, bankRouting, addressZip);
+}
 ```
 
 #### Get a payment method token
 Once you have a `CreditCard` object, call the `tokenize(:)` method on  `FattmerchantClient` object and pass a listener to be notified once tokenization is complete.
 
+##### Kotlin
 ```kotlin
 var fattClient = FattmerchantClient(config)
 fattClient.tokenize(card) { (response) in
@@ -98,24 +143,63 @@ fattClient.tokenize(card) { (response) in
 }
 ```
 
+##### Java
+```Java
+public class SampleClass {
+    public void performTokenization(CreditCard creditCard) {
+        FattmerchantClient fattClient = new FattmerchantClient(config);
+        fattClient.tokenize(creditCard, new FattmerchantClient.TokenizationListener() {
+            @Override
+            public void onPaymentMethodCreated(PaymentMethod paymentMethod) {
+                // Success! You can now run a transaction with Fattmerchant using paymentToken as the PaymentMethod
+            }
+            @Override
+            public void beforeValidate(String errors) {
+                System.out.print(errors);
+            }
+        });   
+    }
+}
+```
+
 #### Using the token
 Now that you have the token representing the payment method, you can send it to your server to run a payment with it. You have to setup a way for your backend to accept the token and create a transaction with it.
 
 ## <a name="testing">Testing</a>
 If you'd like to try tokenization without real payment information, you can use the `CreditCard.testCreditCard()` or `BankAccount.testBankAccount()` methods to get a test credit card or bank account.
 
+##### Kotlin
 ```kotlin
 val creditCard = CreditCard.testCreditCard()
 
 val bankAccount = BankAccount.testBankAccount()
 ```
 
+##### Java
+```Java
+public class SampleClass {
+    CreditCard creditCard = CreditCard.testCreditCard();
+    
+    BankAccount bankAccount = BankAccount.testBankAccount();   
+}
+```
+
 If you want to test failures, you can use the following methods
 
+##### Kotlin
 ```kotlin
 val failingCreditCard = CreditCard.failingTestCreditCard()
 
 val failingBankAccount = BankAccount.failingTestBankAccount()
+```
+
+##### Java
+```Java
+public class SampleClass {
+    CreditCard failingCreditCard = CreditCard.failingTestCreditCard();
+    
+    BankAccount failingBankAccount = BankAccount.failingTestBankAccount();   
+}
 ```
 
 Or you can create the `CreditCard` or `BankAccount` object with the following testing payment information:
