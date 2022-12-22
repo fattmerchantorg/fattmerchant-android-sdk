@@ -1,6 +1,5 @@
 package com.fattmerchant.android
 
-import com.fattmerchant.android.anywherecommerce.AWCDriver
 import com.fattmerchant.android.chipdna.ChipDnaDriver
 import com.fattmerchant.android.dejavoo.DejavooDriver
 import com.fattmerchant.omni.data.MobileReader
@@ -12,11 +11,10 @@ import com.fattmerchant.omni.data.repository.MobileReaderDriverRepository
 internal class MobileReaderDriverRepository : MobileReaderDriverRepository {
 
     private var chipDna = ChipDnaDriver()
-    private var awc = AWCDriver()
     private var dejavooTerminal = DejavooDriver()
 
     override suspend fun getDrivers(): List<MobileReaderDriver> {
-        return listOf(awc, chipDna)
+        return listOf(chipDna)
     }
 
     override suspend fun getInitializedDrivers(): List<MobileReaderDriver> {

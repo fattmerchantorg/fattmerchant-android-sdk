@@ -1,13 +1,11 @@
 package com.fattmerchant.android.dejavoo
 
 import android.content.Context
-import com.anywherecommerce.android.sdk.models.TransactionType
 import com.dvmms.dejapay.IRequestCallback
 import com.dvmms.dejapay.exception.DejavooThrowable
 import com.dvmms.dejapay.models.*
 import com.dvmms.dejapay.models.DejavooTransactionRequest
 import com.dvmms.dejapay.models.DejavooTransactionResponse
-import com.dvmms.dejapay.models.requests.DejavooResponseSale
 import com.dvmms.dejapay.terminals.InternalTerminal
 import com.fattmerchant.omni.data.*
 import com.fattmerchant.omni.data.MobileReaderDriver
@@ -17,7 +15,6 @@ import com.fattmerchant.omni.data.models.Transaction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
-import timber.log.Timber
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume

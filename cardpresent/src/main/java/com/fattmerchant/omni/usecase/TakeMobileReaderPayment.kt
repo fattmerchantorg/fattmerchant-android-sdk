@@ -1,6 +1,5 @@
 package com.fattmerchant.omni.usecase
 
-import com.fattmerchant.android.anywherecommerce.AWCDriver
 import com.fattmerchant.android.chipdna.ChipDnaDriver
 import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
@@ -54,12 +53,6 @@ internal class TakeMobileReaderPayment(
 
                     result.externalId?.let {
                         transactionMeta["nmiTransactionId"] = it
-                    }
-                }
-
-                result.source.contains(AWCDriver().source) -> {
-                    result.externalId?.let {
-                        transactionMeta["awcTransactionId"] = it
                     }
                 }
             }

@@ -1,6 +1,5 @@
 package com.fattmerchant.omni.data
 
-import com.fattmerchant.android.anywherecommerce.AWCDriver
 import com.fattmerchant.android.chipdna.ChipDnaDriver
 import com.fattmerchant.cpresent.BuildConfig
 import com.fattmerchant.omni.data.models.Customer
@@ -128,12 +127,6 @@ open class TransactionResult {
 
                 externalId?.let {
                     transactionMeta["nmiTransactionId"] = it
-                }
-            }
-
-            source.contains(AWCDriver().source) -> {
-                externalId?.let {
-                    transactionMeta["awcTransactionId"] = it
                 }
             }
         }

@@ -4,8 +4,8 @@ import androidx.test.runner.AndroidJUnit4
 import com.fattmerchant.tokenization.models.BankAccount
 import com.fattmerchant.tokenization.models.CreditCard
 import com.fattmerchant.tokenization.models.PaymentMethod
-import com.fattmerchant.tokenization.networking.FattmerchantClient
-import com.fattmerchant.tokenization.networking.FattmerchantConfiguration
+// import com.fattmerchant.tokenization.networking.FattmerchantClient
+// import com.fattmerchant.tokenization.networking.FattmerchantConfiguration
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertNotNull
 import org.junit.Before
@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class CardTokenizationTest {
+    /*
 
     lateinit var client: FattmerchantClient
 
@@ -116,4 +117,5 @@ class CardTokenizationTest {
 
         signal.await(5, TimeUnit.SECONDS)
     }
+    */
 }
