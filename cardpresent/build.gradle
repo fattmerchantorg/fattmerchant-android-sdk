@@ -35,8 +35,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_8
+        targetCompatibility JavaVersion.VERSION_7
     }
 
     buildTypes {
@@ -89,7 +89,7 @@ dependencies {
     api 'com.github.tony19:logback-android:2.0.0'
     api 'com.googlecode.libphonenumber:libphonenumber:8.5.0'
     implementation 'com.squareup.retrofit2:converter-scalars:2.3.0'
-    compile('org.simpleframework:simple-xml:2.7.1') {
+    implementation('org.simpleframework:simple-xml:2.7.1') {
         exclude group: 'stax', module: 'stax-api'
         exclude group: 'xpp3', module: 'xpp3'
     }
