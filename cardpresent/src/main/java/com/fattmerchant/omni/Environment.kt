@@ -5,3 +5,4 @@ sealed class Environment {
     object DEV : Environment()
     data class QA(val qaBuildHash: String = "") : Environment()
 }
+

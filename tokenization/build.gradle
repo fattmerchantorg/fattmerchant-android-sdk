@@ -1,15 +1,15 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-android'
+plugins {
+    id("com.android.library")
+    id("org.jetbrains.kotlin.android")
+}
 
-group='com.github.fattmerchantorg'
+group = 'com.github.fattmerchantorg'
 
 android {
-    compileSdkVersion 30
-
+    compileSdkVersion 33
     defaultConfig {
         minSdkVersion 23
-        targetSdkVersion 30
+        targetSdkVersion 33
         versionCode 7
         versionName "1.2.0"
 
@@ -18,8 +18,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     buildTypes {
@@ -28,23 +28,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    testImplementation 'junit:junit:4.12'
-//    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
-    androidTestImplementation 'androidx.test:rules:1.1.1'
-    implementation 'com.squareup.retrofit2:retrofit:2.0.0'
-    implementation 'com.squareup.retrofit2:converter-moshi:2.0.0'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.squareup.moshi:moshi-kotlin:1.12.0'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
+    androidTestImplementation 'androidx.test:rules:1.5.0'
 }
 repositories {
     mavenCentral()
