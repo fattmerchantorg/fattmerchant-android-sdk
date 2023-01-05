@@ -7,6 +7,7 @@ import com.dvmms.dejapay.models.*
 import com.dvmms.dejapay.models.DejavooTransactionRequest
 import com.dvmms.dejapay.models.DejavooTransactionResponse
 import com.dvmms.dejapay.terminals.InternalTerminal
+import com.fattmerchant.cpresent.BuildConfig
 import com.fattmerchant.omni.data.*
 import com.fattmerchant.omni.data.MobileReaderDriver
 import com.fattmerchant.omni.data.models.DejavooTerminalCredentials
@@ -74,7 +75,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
             dejavooRequest.printReceipt = DejavooTransactionRequest.ReceiptType.Both;
             dejavooRequest.clerkId = 0
 
-            InternalTerminal().commitTransaction(
+            InternalTerminal(BuildConfig.LIBRARY_PACKAGE_NAME).commitTransaction(
                 appContext, dejavooRequest, object : IRequestCallback<DejavooTransactionResponse> {
                     override fun onResponse(response: DejavooTransactionResponse) {
                         val auth = response.authenticationCode
@@ -147,7 +148,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
             dejavooRequest.referenceId = referenceId
             dejavooRequest.setAmount(transaction.total?.toDoubleOrNull() ?: 0.0)
 
-            InternalTerminal().commitTransaction(
+            InternalTerminal(BuildConfig.LIBRARY_PACKAGE_NAME).commitTransaction(
                 appContext, dejavooRequest, object : IRequestCallback<DejavooTransactionResponse> {
                     override fun onResponse(response: DejavooTransactionResponse) {
                         val auth = response.authenticationCode
@@ -226,7 +227,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
             dejavooRequest.referenceId = referenceId
             dejavooRequest.setAmount(refundAmount?.dollars() ?: transaction.total?.toDoubleOrNull() ?: 0.0)
 
-            InternalTerminal().commitTransaction(
+            InternalTerminal(BuildConfig.LIBRARY_PACKAGE_NAME).commitTransaction(
                 appContext, dejavooRequest, object : IRequestCallback<DejavooTransactionResponse> {
                     override fun onResponse(response: DejavooTransactionResponse) {
                         val auth = response.authenticationCode
