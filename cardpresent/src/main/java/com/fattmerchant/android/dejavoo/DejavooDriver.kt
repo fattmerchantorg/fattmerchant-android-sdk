@@ -102,7 +102,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                                 response.resultCode == DejavooTransactionResponse.ResultCode.Succeded
                             maskedPan = pan
                             amount = Amount(dollars = extData.amount)
-                            cardType = extData.cardTypeString.toLowerCase()
+                            cardType = extData.cardTypeString.lowercase()
                             message = response.message
                             cardHolderFirstName = firstName
                             cardHolderLastName = lastName
@@ -177,7 +177,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                                 response.resultCode == DejavooTransactionResponse.ResultCode.Succeded
                             maskedPan = pan
                             amount = Amount(dollars = extData.amount)
-                            cardType = extData.cardTypeString.toLowerCase()
+                            cardType = extData.cardTypeString.lowercase()
                             message = response.message
                             cardHolderFirstName = firstName
                             cardHolderLastName = lastName
@@ -255,7 +255,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                                 response.resultCode == DejavooTransactionResponse.ResultCode.Succeded
                             maskedPan = pan
                             amount = Amount(dollars = extData.amount)
-                            cardType = extData.cardTypeString.toLowerCase()
+                            cardType = extData.cardTypeString.lowercase()
                             message = response.message
                             cardHolderFirstName = firstName
                             cardHolderLastName = lastName

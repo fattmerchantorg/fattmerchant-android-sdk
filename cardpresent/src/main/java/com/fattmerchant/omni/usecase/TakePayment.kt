@@ -40,7 +40,7 @@ internal class TakePayment(
 
         tokenizedPaymentMethod.id?.let {
             val chargeRequest = createChargeRequest(request.amount, it)
-            omniApi.charge(chargeRequest) { error ->
+            omniApi.charge(chargeRequest) {
                 failure(OmniException("Charging the payment method was unsuccessful."))
             }
         } ?: return@coroutineScope null

@@ -356,7 +356,7 @@ internal class ChipDnaDriver :
             externalId = result[ParameterKeys.TransactionId]
             cardHolderFirstName = firstName
             cardHolderLastName = lastName
-            cardType = result[ParameterKeys.CardSchemeId]?.toLowerCase(Locale.ROOT)
+            cardType = result[ParameterKeys.CardSchemeId]?.lowercase(Locale.ROOT)
             cardExpiration = ccExpiration
             amount = Amount(cents = result[ParameterKeys.Amount]?.toInt() ?: request.amount.cents)
 
