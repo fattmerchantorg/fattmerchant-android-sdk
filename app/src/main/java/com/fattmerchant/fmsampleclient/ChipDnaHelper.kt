@@ -197,7 +197,7 @@ class ChipDnaHelper(
 
         requestParameters.add(ParameterKeys.ApiKey, apiKey)
         requestParameters.add(ParameterKeys.Environment, environment)
-        requestParameters.add(ParameterKeys.ApplicationIdentifier, appId?.toUpperCase())
+        requestParameters.add(ParameterKeys.ApplicationIdentifier, appId?.uppercase())
 
         // Once all changes have been made a call to .setProperties() is required in order for the changes to take effect.
         // Parameters are passed within this method and added to the ChipDna Mobile status object.
