@@ -1,4 +1,4 @@
-package com.staxpayments.api
+package com.staxpayments.api.models
 
 import org.junit.Test
 import org.junit.Assert.*
