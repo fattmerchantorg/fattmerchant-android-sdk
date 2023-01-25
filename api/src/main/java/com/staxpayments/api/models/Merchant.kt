@@ -2,6 +2,7 @@ package com.staxpayments.api.models
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 @Serializable
 data class Merchant(
@@ -10,7 +11,7 @@ data class Merchant(
     val status: String?,
     val subdomain: String?,
     val plan: Plan?,
-    val options: Options?,
+    val options: JsonElement?,
     val processor: String?,
     val branding: Branding?,
     val currency: List<String>?,
