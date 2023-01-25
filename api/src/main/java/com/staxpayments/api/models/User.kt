@@ -2,6 +2,7 @@ package com.staxpayments.api.models
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 @Serializable
 data class User(
@@ -23,6 +24,6 @@ data class User(
     @SerialName("merchant_options") val merchantOptions: List<String>?,
     val gravatar: String?,
     val acknowledgments: String?,
-    val options: String?,
+    val options: JsonElement?,
     val brand: String?
 )
