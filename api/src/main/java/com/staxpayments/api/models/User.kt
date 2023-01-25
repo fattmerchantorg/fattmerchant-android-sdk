@@ -23,7 +23,7 @@ data class User(
     @SerialName("mfa_enabled") val mfaEnabled: Boolean?,
     @SerialName("merchant_options") val merchantOptions: List<String>?,
     val gravatar: String?,
-    val acknowledgments: String?,
+    val acknowledgments: JsonElement?,
     val options: JsonElement?,
     val brand: String?
 )
