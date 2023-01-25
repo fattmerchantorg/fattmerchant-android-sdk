@@ -10,10 +10,10 @@ data class Merchant(
     val mid: String?,
     val status: String?,
     val subdomain: String?,
-    val plan: Plan?,
+    val plan: JsonElement?,
     val options: JsonElement?,
     val processor: String?,
-    val branding: Branding?,
+    val branding: JsonElement?,
     val currency: List<String>?,
     @SerialName("company_name") val companyName: String?,
     @SerialName("contact_name") val contactName: String?,
@@ -32,5 +32,5 @@ data class Merchant(
     @SerialName("updated_at") val updatedAt: String,
     @SerialName("deleted_at") val deletedAt: String?,
     @SerialName("gateway_name") val gatewayName: String?,
-    @SerialName("allow_ach") val allowAch: Boolean?
+    @SerialName("allow_ach") val doesAllowAch: Boolean?
 )
