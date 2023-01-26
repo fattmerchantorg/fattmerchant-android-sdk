@@ -1,4 +1,4 @@
-package com.staxpayments.api
+package com.staxpayments.api.models
 
 import com.staxpayments.api.models.Customer
 import kotlinx.serialization.ExperimentalSerializationApi
