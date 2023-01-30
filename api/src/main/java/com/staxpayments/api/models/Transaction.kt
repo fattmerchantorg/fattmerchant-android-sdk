@@ -33,7 +33,7 @@ data class Transaction(
     val success: Boolean?,
     val total: Int?,
     val message: JsonElement?,
-    val meta: Meta?,
+    val meta: JsonElement?,
     val method: String?,
     val files: JsonElement?,
     val id: String,
