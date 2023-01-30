@@ -32,7 +32,14 @@ class PaymentMethodTest {
                 "fingerprint" to JsonPrimitive("888999888777888999988")
             )
         ),
-        customer = null,
+        message = null,
+        paymentMethod = null,
+        paymentMethodId = null,
+        receiptEmailAt = null,
+        receiptSmsAt = null,
+        recurringTransactionId = null,
+        referenceId = null,
+        scheduleId = null,
         customerId = "d45ee88c-8b27-4be8-8d81-77dda1b81826",
         merchantId = "dd36b936-1eb7-4ece-bebc-b514c6a36ebd",
         userId = "b58d7eee-e68d-4d12-a1f8-62f5e71382ae",
@@ -42,6 +49,13 @@ class PaymentMethodTest {
         cardType = "visa",
         cardLastFour = "1111",
         cardExpiry = "042019",
+        user = null,
+        type = null,
+        transactions = null,
+        totalRefunded = null,
+        total = null,
+        success = null,
+        source = null,
         bankName = null,
         bankType = null,
         bankHolderType = null,
@@ -55,11 +69,22 @@ class PaymentMethodTest {
         deletedAt = "2017-05-10 19:54:09",
         createdAt = "2017-05-10 19:54:04",
         updatedAt = "2017-05-10 19:54:09",
-        cardExpiryDateTime = "2019-04-30 23:59:59"
+        cardExpiryDateTime = "2019-04-30 23:59:59",
+        currency = null,
+        files = null,
+        invoiceId = null,
+        isManual = null,
+        isPreAuth = null,
+        isRefundable = null,
+        isVoidable = null,
+        customer = null,
+        isVoided = false,
+        lastFour = null
+
     )
 
     private val originalString =
-        """{"id":"6ba7babe-9906-4e7e-b1a5-f628c7badb61","nickname":"VISA: Steven Smith Jr. (ending in: 1111)","method":"card","meta":{"cardDisplay":"484718","routingDisplay":null,"accountDisplay":null,"eligibleForCardUpdater":true,"storageState":"cached","fingerprint":"888999888777888999988"},"customer":null,"customer_id":"d45ee88c-8b27-4be8-8d81-77dda1b81826","merchant_id":"dd36b936-1eb7-4ece-bebc-b514c6a36ebd","user_id":"b58d7eee-e68d-4d12-a1f8-62f5e71382ae","is_default":1,"bin_type":"DEBIT","person_name":"Steven Smith Jr.","card_type":"visa","card_last_four":"1111","card_exp":"042019","bank_name":null,"bank_type":null,"bank_holder_type":null,"address_1":null,"address_2":null,"address_city":null,"address_state":null,"address_zip":"32944","address_country":"USA","purged_at":null,"deleted_at":"2017-05-10 19:54:09","created_at":"2017-05-10 19:54:04","updated_at":"2017-05-10 19:54:09","card_exp_datetime":"2019-04-30 23:59:59"}"""
+        """{"child_transactions":null,"customer_id":"d45ee88c-8b27-4be8-8d81-77dda1b81826","invoice_id":null,"is_manual":null,"is_refundable":null,"is_voidable":null,"is_voided":false,"last_four":null,"merchant_id":"dd36b936-1eb7-4ece-bebc-b514c6a36ebd","payment_method":null,"payment_method_id":null,"pre_auth":null,"receipt_email_at":null,"receipt_sms_at":null,"recurring_transaction_id":null,"reference_id":null,"schedule_id":null,"total_refunded":null,"user_id":"b58d7eee-e68d-4d12-a1f8-62f5e71382ae","is_default":1,"bin_type":"DEBIT","person_name":"Steven Smith Jr.","card_type":"visa","card_last_four":"1111","card_exp":"042019","bank_name":null,"bank_type":null,"bank_holder_type":null,"address_1":null,"address_2":null,"address_city":null,"address_state":null,"address_zip":"32944","address_country":"USA","purged_at":null,"deleted_at":"2017-05-10 19:54:09","created_at":"2017-05-10 19:54:04","updated_at":"2017-05-10 19:54:09","card_exp_datetime":"2019-04-30 23:59:59","user":null,"type":null,"source":null,"success":null,"total":null,"message":null,"files":null,"currency":null,"customer":null,"id":"6ba7babe-9906-4e7e-b1a5-f628c7badb61","nickname":"VISA: Steven Smith Jr. (ending in: 1111)","method":"card","meta":{"cardDisplay":"484718","routingDisplay":null,"accountDisplay":null,"eligibleForCardUpdater":true,"storageState":"cached","fingerprint":"888999888777888999988"}}"""
 
     // id is Missing in this JSON String
     private val badString =
