@@ -16,7 +16,7 @@ data class Invoice(
     val customer: Customer?,
     val user: User?,
     val files: JsonElement?,
-    @SerialName("child_transactions") val childTransactions: List<JsonElement>?,
+    @SerialName("child_transactions") val childTransactions: List<Transaction>?,
     @SerialName("customer_id") val customerId: String?,
     @SerialName("merchant_id") val merchantId: String?,
     @SerialName("user_id") val userId: String?,
