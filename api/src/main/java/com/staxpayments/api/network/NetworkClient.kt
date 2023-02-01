@@ -3,7 +3,6 @@ package com.staxpayments.api.network
 import android.util.Log
 import com.google.gson.Gson
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpSend
 import io.ktor.client.plugins.HttpTimeout
@@ -24,11 +23,21 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import io.ktor.http.content.TextContent
 import io.ktor.http.contentType
 
-class NetworkClient {
-    private val client = HttpClient(Android) {
+class NetworkClient(private val baseUrl: String) {
+
+    companion object {
+        private var instance: NetworkClient? = null
+        fun initialize(baseUrl: String): NetworkClient {
+            if (instance == null) {
+                instance = NetworkClient(baseUrl)
+            }
+            return instance!!
+        }
+    }
+
+    private val client = HttpClient {
         install(Logging) {
             logger = object : Logger {
                 override fun log(message: String) {
@@ -62,40 +71,37 @@ class NetworkClient {
         install(HttpSend)
     }
 
-    suspend fun <T> get(url: String, params: Map<String, Any>? = null, responseType: Class<T>): T {
-        val response = client.get(url) {
+    private val gson = Gson()
+
+    suspend fun <T> get(path: String, params: Map<String, Any>? = null, responseType: Class<T>): T {
+        val response = client.get("$baseUrl$path") {
             params?.forEach { (key, value) ->
                 parameter(key, value.toString())
             }
         }
-
-        val text = response.bodyAsText()
-        return Gson().fromJson(text, responseType)
+        return gson.fromJson(response.bodyAsText(), responseType)
     }
 
-    suspend fun <T, R> post(url: String, request: R, responseType: Class<T>): T {
-        val response = client.post(url) {
+    suspend fun <T, R> post(path: String, request: R, responseType: Class<T>): T {
+        val response = client.post("$baseUrl$path") {
             contentType(ContentType.Application.Json)
-            setBody(TextContent(Gson().toJson(request), ContentType.Application.Json))
+            setBody(Gson().toJson(request))
         }
-        val text = response.bodyAsText()
-        return Gson().fromJson(text, responseType)
+        return gson.fromJson(response.bodyAsText(), responseType)
     }
 
-    suspend fun <T, R> put(url: String, request: R?, responseType: Class<T>): T {
-        val response = client.put(url) {
+    suspend fun <T, R> put(path: String, request: R?, responseType: Class<T>): T {
+        val response = client.put("$baseUrl$path") {
             request?.let {
                 contentType(ContentType.Application.Json)
-                setBody(TextContent(Gson().toJson(request), ContentType.Application.Json))
+                setBody(Gson().toJson(request))
             }
         }
-        val text = response.bodyAsText()
-        return Gson().fromJson(text, responseType)
+        return gson.fromJson(response.bodyAsText(), responseType)
     }
 
-    suspend fun <T> delete(url: String, responseType: Class<T>): T {
-        val response = client.delete(url)
-        val text = response.bodyAsText()
-        return Gson().fromJson(text, responseType)
+    suspend fun <T> delete(path: String, responseType: Class<T>): T {
+        val response = client.delete("$baseUrl$path")
+        return gson.fromJson(response.bodyAsText(), responseType)
     }
 }
