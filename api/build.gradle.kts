@@ -40,6 +40,7 @@ dependencies {
     implementation("io.ktor:ktor-client-android:1.6.7")
     implementation("io.ktor:ktor-client-serialization:1.6.7")
     implementation("io.ktor:ktor-client-logging:2.2.2")
+    implementation ("io.ktor:ktor-client-gson:1.4.1")
 
     // Test Dependencies
     testImplementation("junit:junit:4.13.2")
