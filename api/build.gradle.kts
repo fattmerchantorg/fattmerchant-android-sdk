@@ -25,6 +25,9 @@ android {
 }
 
 dependencies {
+    //kotlin reflection
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.2")
+
     // Kotlin Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
 
@@ -33,7 +36,10 @@ dependencies {
     implementation("io.ktor:ktor-client-okhttp:2.2.2")
     implementation("io.ktor:ktor-client-content-negotiation:2.2.2")
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.2.2")
-    implementation("io.ktor:ktor-client-auth:2.2.2")
+    implementation("io.ktor:ktor-client-auth:2.2.2" )
+    implementation("io.ktor:ktor-client-android:1.6.7")
+    implementation("io.ktor:ktor-client-serialization:1.6.7")
+    implementation("io.ktor:ktor-client-logging:2.2.2")
 
     // Test Dependencies
     testImplementation("junit:junit:4.13.2")
