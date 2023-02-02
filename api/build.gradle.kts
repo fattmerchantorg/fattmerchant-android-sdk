@@ -25,8 +25,10 @@ android {
 }
 
 dependencies {
+
     // Kotlin Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+
 
     // Ktor
     implementation("io.ktor:ktor-client-core:2.2.2")
@@ -34,7 +36,6 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:2.2.2")
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.2.2")
     implementation("io.ktor:ktor-client-logging:2.2.2")
-    implementation ("io.ktor:ktor-client-gson:1.4.1")
 
     // Test Dependencies
     testImplementation("junit:junit:4.13.2")

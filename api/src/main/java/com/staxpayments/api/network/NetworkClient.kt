@@ -1,7 +1,6 @@
 package com.staxpayments.api.network
 
 import android.util.Log
-import com.google.gson.Gson
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpSend
@@ -12,18 +11,20 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.observer.ResponseObserver
+import io.ktor.client.request.accept
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.headers
-import io.ktor.client.request.parameter
 import io.ktor.client.request.post
-import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class NetworkClient(private val baseUrl: String) {
 
@@ -71,37 +72,59 @@ class NetworkClient(private val baseUrl: String) {
         install(HttpSend)
     }
 
-    private val gson = Gson()
-
-    suspend fun <T> get(path: String, params: Map<String, Any>? = null, responseType: Class<T>): T {
-        val response = client.get("$baseUrl$path") {
-            params?.forEach { (key, value) ->
-                parameter(key, value.toString())
+    suspend fun <R> get(path: String, request: Any? = null, responseType: DeserializationStrategy<R>): R {
+        val requestJson = when (request) {
+            is String -> request
+            is Map<*, *> -> Json.encodeToString(request)
+            else -> {
+                Json.encodeToString(request)
             }
         }
-        return gson.fromJson(response.bodyAsText(), responseType)
+
+        val response = client.get("$baseUrl$path") {
+            contentType(ContentType.Application.Json)
+            accept(ContentType.Application.Json)
+            setBody(requestJson)
+        }
+        return Json.decodeFromString(responseType, response.bodyAsText())
     }
 
-    suspend fun <T, R> post(path: String, request: R, responseType: Class<T>): T {
+    suspend fun <R> post(path: String, request: Any? = null, responseType: DeserializationStrategy<R>): R {
+        val requestJson = when (request) {
+            is String -> request
+            is Map<*, *> -> Json.encodeToString(request)
+            else -> {
+                Json.encodeToString(request)
+            }
+        }
+
         val response = client.post("$baseUrl$path") {
             contentType(ContentType.Application.Json)
-            setBody(Gson().toJson(request))
+            accept(ContentType.Application.Json)
+            setBody(requestJson)
         }
-        return gson.fromJson(response.bodyAsText(), responseType)
+        return Json.decodeFromString(responseType, response.bodyAsText())
     }
 
-    suspend fun <T, R> put(path: String, request: R?, responseType: Class<T>): T {
-        val response = client.put("$baseUrl$path") {
-            request?.let {
-                contentType(ContentType.Application.Json)
-                setBody(Gson().toJson(request))
+    suspend fun <R> put(path: String, request: Any? = null, responseType: DeserializationStrategy<R>): R {
+        val requestJson = when (request) {
+            is String -> request
+            is Map<*, *> -> Json.encodeToString(request)
+            else -> {
+                Json.encodeToString(request)
             }
         }
-        return gson.fromJson(response.bodyAsText(), responseType)
+
+        val response = client.post("$baseUrl$path") {
+            contentType(ContentType.Application.Json)
+            accept(ContentType.Application.Json)
+            setBody(requestJson)
+        }
+        return Json.decodeFromString(responseType, response.bodyAsText())
     }
 
-    suspend fun <T> delete(path: String, responseType: Class<T>): T {
+    suspend fun <R> delete(path: String, responseType: DeserializationStrategy<R>): R {
         val response = client.delete("$baseUrl$path")
-        return gson.fromJson(response.bodyAsText(), responseType)
+        return Json.decodeFromString(responseType, response.bodyAsText())
     }
 }
