@@ -20,7 +20,7 @@ class InvoiceRepositoryTest {
     private lateinit var fakeRepository: InvoiceFakeRepository
 
     private val fakeBody = CreateInvoiceBody(
-        total = 0.09,
+        total = 2.09,
         url = "https://app.staxpayments.com/#/bill/",
         meta = null,
         files = null,
@@ -65,7 +65,7 @@ class InvoiceRepositoryTest {
         val response = fakeRepository.getInvoice(invoiceId)
 
         Assert.assertNotNull(response)
-        Assert.assertEquals(0.09, response?.total)
+        Assert.assertEquals(2.09, response?.total)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
