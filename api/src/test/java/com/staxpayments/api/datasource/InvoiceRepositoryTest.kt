@@ -14,11 +14,6 @@ import org.mockito.BDDMockito.given
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
 @RunWith(MockitoJUnitRunner::class)
 class InvoiceRepositoryTest {
 
@@ -101,7 +96,7 @@ class InvoiceRepositoryTest {
 
             // Then
             assertEquals(expectedResult, actualCommand)
-    }
+        }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test

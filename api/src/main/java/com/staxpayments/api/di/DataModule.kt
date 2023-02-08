@@ -11,7 +11,7 @@ sealed class Environment {
 }
 
 class DataModule {
-    private var environment: Environment = Environment.LIVE
+    internal var environment: Environment = Environment.LIVE
 
     private fun baseUrl(): String = when (environment) {
         Environment.LIVE -> "https://apiprod.fattlabs.com/"
