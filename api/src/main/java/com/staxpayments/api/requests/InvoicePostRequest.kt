@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 
 @Serializable
-data class CreateInvoiceBody(
+data class InvoicePostRequest(
     val total: Double,
     val url: String?,
     val meta: JsonElement?,
