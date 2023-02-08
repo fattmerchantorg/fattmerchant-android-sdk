@@ -42,7 +42,7 @@ class CustomerLiveRepositoryTest {
         missingAddressComponents = emptyList()
     )
 
-    val customerRequest = CustomerRequest (
+    val customerRequest = CustomerRequest(
         firstName = "Ade",
         lastName = "GIFTFORYOU",
         company = "",
@@ -70,7 +70,6 @@ class CustomerLiveRepositoryTest {
         )
     }
 
-
     @Test
     fun `given userId  When getCustomerById Then return expected customer`() =
         runBlocking {
@@ -78,7 +77,7 @@ class CustomerLiveRepositoryTest {
             val expectedResult = customer
             val id = "123"
 
-            //given
+            // given
             given(
                 networkClients.get("customer/$id", responseType = Customer.serializer())
             ).willReturn(expectedResult)
@@ -90,7 +89,6 @@ class CustomerLiveRepositoryTest {
             assertEquals(expectedResult, actualCommand)
         }
 
-
     @Test
     fun `given customerRequest  When createCustomer Then return expected customer`() =
         runBlocking {
@@ -98,7 +96,7 @@ class CustomerLiveRepositoryTest {
             val request = customerRequest
             val expectedResult = customer
 
-            //given
+            // given
             given(
                 networkClients.post("customer", request = request, responseType = Customer.serializer())
             ).willReturn(expectedResult)
@@ -118,13 +116,13 @@ class CustomerLiveRepositoryTest {
             val expectedResult = customer
             val id = "123"
 
-            //given
+            // given
             given(
                 networkClients.put("customer/$id", request = request, responseType = Customer.serializer())
             ).willReturn(expectedResult)
 
             // When
-            val actualCommand = classUnderTest.updateCustomer(customerRequest,id)
+            val actualCommand = classUnderTest.updateCustomer(customerRequest, id)
 
             // Then
             assertEquals(expectedResult, actualCommand)
