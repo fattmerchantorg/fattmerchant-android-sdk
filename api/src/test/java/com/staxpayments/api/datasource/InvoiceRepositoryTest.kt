@@ -2,9 +2,8 @@ package com.staxpayments.api.datasource
 
 import com.staxpayments.api.models.Invoice
 import com.staxpayments.api.network.NetworkClient
-import com.staxpayments.api.requests.InvoicePostRequest
+import com.staxpayments.api.requests.InvoiceRequest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -14,6 +13,7 @@ import org.mockito.BDDMockito.given
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class InvoiceRepositoryTest {
 
@@ -58,7 +58,7 @@ class InvoiceRepositoryTest {
         paymentMeta = null
     )
 
-    private val invoicePostRequest = InvoicePostRequest(
+    private val invoiceRequest = InvoiceRequest(
         total = 2.09,
         url = "https://app.staxpayments.com/#/bill/",
         meta = null,
@@ -75,11 +75,10 @@ class InvoiceRepositoryTest {
         )
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `given invoicePostRequest When createInvoice Then return expected invoice`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val request = invoicePostRequest
+        runTest {
+            val request = invoiceRequest
             val expectedResult = invoice
 
             //given
@@ -98,10 +97,9 @@ class InvoiceRepositoryTest {
             assertEquals(expectedResult, actualCommand)
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `given invoiceId  When getInvoice Then return expected invoice`() =
-        runTest(UnconfinedTestDispatcher()) {
+        runTest {
             val expectedResult = invoice
             val invoiceId = "8858e03e-6017-41a4-9d0e-b618b7880e3f"
 
@@ -117,11 +115,10 @@ class InvoiceRepositoryTest {
             assertEquals(expectedResult, actualCommand)
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `given invoicePostRequest When updateInvoice Then return expected invoice`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val request = invoicePostRequest
+        runTest {
+            val request = invoiceRequest
             val expectedResult = invoice
             val invoiceId = "8858e03e-6017-41a4-9d0e-b618b7880e3f"
 
