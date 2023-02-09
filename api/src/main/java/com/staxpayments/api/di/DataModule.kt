@@ -1,6 +1,7 @@
 package com.staxpayments.api.di
 
 import com.staxpayments.api.datasource.CustomerLiveRepository
+import com.staxpayments.api.datasource.UserLiveRepository
 import com.staxpayments.api.network.NetworkClient
 
 sealed class Environment {
@@ -18,9 +19,10 @@ class DataModule {
         is Environment.QA -> "https://api-qa-${(environment as Environment.QA).qaBuildHash}.qabuilds.fattpay.com/"
     }
 
-    val networkClients = NetworkClient.initialize(baseUrl())
+    private val networkClients = NetworkClient.initialize(baseUrl())
 
     init {
+        UserLiveRepository(networkClients)
         CustomerLiveRepository(networkClients)
     }
 }
