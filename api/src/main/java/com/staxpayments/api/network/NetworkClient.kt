@@ -40,7 +40,7 @@ class NetworkClient(private val baseUrl: String) {
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    val format = Json { explicitNulls = false }
+    private val format = Json { explicitNulls = false }
 
     private val client = HttpClient {
         install(Logging) {
