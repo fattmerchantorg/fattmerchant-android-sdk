@@ -1,7 +1,6 @@
 package com.staxpayments.api.datasource
 import com.staxpayments.api.models.Item
 import com.staxpayments.api.network.NetworkClient
-import com.staxpayments.api.requests.ItemRequest
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -36,21 +35,6 @@ class ItemLiveRepositoryTest {
         price = 32.0,
         meta = null,
         isService = true
-    )
-
-    private val itemRequest = ItemRequest(
-        item = "meeseeks",
-        details = null,
-        isActive = true,
-        isDiscount = true,
-        isTaxable = true,
-        code = "",
-        inStock = 1,
-        price = 32.0,
-        meta = null,
-        isService = true,
-        lowStockAlert = "",
-        category = ""
     )
 
     private lateinit var classUnderTest: ItemLiveRepository
@@ -88,7 +72,7 @@ class ItemLiveRepositoryTest {
     fun `given itemRequest  When createItem Then return expected Item`() =
         runBlocking {
 
-            val request = itemRequest
+            val request = item
             val expectedResult = item
 
             // given
@@ -97,7 +81,7 @@ class ItemLiveRepositoryTest {
             ).willReturn(expectedResult)
 
             // When
-            val actualCommand = classUnderTest.createItem(itemRequest)
+            val actualCommand = classUnderTest.createItem(item)
 
             // Then
             assertEquals(expectedResult, actualCommand)
@@ -107,7 +91,7 @@ class ItemLiveRepositoryTest {
     fun `given itemRequest and itemId  When updateItem Then return expected Item`() =
         runBlocking {
 
-            val request = itemRequest
+            val request = item
             val expectedResult = item
             val id = "123"
 
@@ -117,7 +101,7 @@ class ItemLiveRepositoryTest {
             ).willReturn(expectedResult)
 
             // When
-            val actualCommand = classUnderTest.updateItem(itemRequest, id)
+            val actualCommand = classUnderTest.updateItem(item, id)
 
             // Then
             assertEquals(expectedResult, actualCommand)
