@@ -1,7 +1,6 @@
 package com.staxpayments.api.datasource
 
 import com.staxpayments.api.models.Customer
-import com.staxpayments.api.models.request.CustomerRequest
 import com.staxpayments.api.network.NetworkClient
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -15,7 +14,7 @@ import org.mockito.junit.MockitoJUnitRunner
 @RunWith(MockitoJUnitRunner::class)
 class CustomerLiveRepositoryTest {
 
-    val customer = Customer(
+    private val customer = Customer(
         id = "680afd1b-713f-46c1-af46-1a56b8b5f8a6",
         firstName = "Ade",
         lastName = "GIFTFORYOU",
@@ -42,21 +41,7 @@ class CustomerLiveRepositoryTest {
         missingAddressComponents = emptyList()
     )
 
-    val customerRequest = CustomerRequest(
-        firstName = "Ade",
-        lastName = "GIFTFORYOU",
-        company = "",
-        email = "ted88@gmail.com",
-        phone = "",
-        address1 = "",
-        address2 = "",
-        addressCity = "",
-        addressState = "",
-        addressZip = "",
-        addressCountry = "",
-        reference = "",
-        CCEmails = emptyList()
-    )
+
 
     private lateinit var classUnderTest: CustomerLiveRepository
 
@@ -93,7 +78,7 @@ class CustomerLiveRepositoryTest {
     fun `given customerRequest  When createCustomer Then return expected customer`() =
         runBlocking {
 
-            val request = customerRequest
+            val request = customer
             val expectedResult = customer
 
             // given
@@ -102,7 +87,7 @@ class CustomerLiveRepositoryTest {
             ).willReturn(expectedResult)
 
             // When
-            val actualCommand = classUnderTest.createCustomer(customerRequest)
+            val actualCommand = classUnderTest.createCustomer(customer)
 
             // Then
             assertEquals(expectedResult, actualCommand)
@@ -112,7 +97,7 @@ class CustomerLiveRepositoryTest {
     fun `given customerRequest and userid  When updateCustomer Then return expected customer`() =
         runBlocking {
 
-            val request = customerRequest
+            val request = customer
             val expectedResult = customer
             val id = "123"
 
@@ -122,7 +107,7 @@ class CustomerLiveRepositoryTest {
             ).willReturn(expectedResult)
 
             // When
-            val actualCommand = classUnderTest.updateCustomer(customerRequest, id)
+            val actualCommand = classUnderTest.updateCustomer(customer, id)
 
             // Then
             assertEquals(expectedResult, actualCommand)
