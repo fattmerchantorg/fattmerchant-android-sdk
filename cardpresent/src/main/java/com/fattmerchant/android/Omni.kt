@@ -85,11 +85,16 @@ class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
 
             // Init com.fattmerchant.omni
             omni.coroutineScope.launch {
-                omni.initialize(params, {
-                    completion()
-                }) {
-                    error(it)
+                try {
+                    omni.initialize(params, {
+                        completion()
+                    }) {
+                        error(it)
+                    }
+                }catch (e: Exception){
+                    error(e)
                 }
+
             }
         }
 

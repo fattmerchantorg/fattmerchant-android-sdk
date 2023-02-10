@@ -174,7 +174,7 @@ internal class ChipDnaDriver :
             val availablePinPadsListener: IAvailablePinPadsListener? = null
             ChipDnaMobile.getInstance().addAvailablePinPadsListener { params ->
                 val availablePinPadsXml = params?.getValue(ParameterKeys.AvailablePinPads)
-                val pinPads = deserializePinPads(availablePinPadsXml!!)
+                val pinPads = deserializePinPads(availablePinPadsXml)
                 availablePinPadsListener?.let { ChipDnaMobile.getInstance().removeAvailablePinPadsListener(it) }
 
                 cont.resume(pinPads)
