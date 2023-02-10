@@ -167,8 +167,8 @@ internal class ChipDnaDriver :
     override suspend fun searchForReaders(args: Map<String, Any>): List<MobileReader> {
         val parameters = Parameters().apply {
             add(ParameterKeys.SearchConnectionTypeBluetooth, ParameterValues.TRUE)
-            add(ParameterKeys.SearchConnectionTypeBluetoothLe, ParameterValues.TRUE)
-            add(ParameterKeys.SearchConnectionTypeUsb, ParameterValues.TRUE)
+            // add(ParameterKeys.SearchConnectionTypeBluetoothLe, ParameterValues.TRUE)
+            // add(ParameterKeys.SearchConnectionTypeUsb, ParameterValues.TRUE)
         }
         ChipDnaMobile.getInstance().clearAllAvailablePinPadsListeners()
 
@@ -191,10 +191,12 @@ internal class ChipDnaDriver :
     }
 
     override suspend fun connectReader(reader: MobileReader): MobileReader? {
-
-        val requestParams = Parameters()
-        requestParams.add(ParameterKeys.PinPadName, reader.getName())
-        requestParams.add(ParameterKeys.PinPadConnectionType, ParameterValues.BluetoothConnectionType)
+        val requestParams = Parameters().apply {
+            add(ParameterKeys.PinPadName, reader.getName())
+            add(ParameterKeys.PinPadConnectionType, ParameterValues.BluetoothConnectionType)
+            // add(ParameterKeys.PinPadConnectionType, ParameterValues.BluetoothLeConnectionType)
+            // add(ParameterKeys.PinPadConnectionType, ParameterValues.UsbConnectionType)
+        }
 
         ChipDnaMobile.getInstance().setProperties(requestParams)
 
