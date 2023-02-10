@@ -99,7 +99,7 @@ internal class AWCDriver : MobileReaderDriver {
             ?: throw InitializeMobileReaderDriverException("Could not create worldnet endpoint")
 
         endpoint.worldnetTerminalID = awcArgs.terminalId
-        endpoint.worldnetSecret = awcArgs.terminalSecret
+        // endpoint.worldnetSecret = awcArgs.terminalSecret
         endpoint.gatewayUrl = gatewayUrl
 
         // Authenticate
