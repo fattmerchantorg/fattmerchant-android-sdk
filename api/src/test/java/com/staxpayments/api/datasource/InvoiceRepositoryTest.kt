@@ -2,7 +2,6 @@ package com.staxpayments.api.datasource
 
 import com.staxpayments.api.models.Invoice
 import com.staxpayments.api.network.NetworkClient
-import com.staxpayments.api.requests.InvoiceRequest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -22,7 +21,7 @@ class InvoiceRepositoryTest {
     @Mock
     private lateinit var networkClients: NetworkClient
 
-    private val invoice = Invoice(
+    private val invoiceResponse = Invoice(
         id = "8858e03e-6017-41a4-9d0e-b618b7880e3f",
         total = 0.09,
         meta = null,
@@ -55,16 +54,15 @@ class InvoiceRepositoryTest {
         paymentAttemptMessage = "",
         balanceDue = 0.0,
         totalPaid = 0.09,
-        paymentMeta = null
+        paymentMeta = null,
+        sendNow = null
     )
 
-    private val invoiceRequest = InvoiceRequest(
+    private val invoiceRequest = Invoice(
         total = 2.09,
         url = "https://app.staxpayments.com/#/bill/",
-        meta = null,
-        files = null,
-        customerId = "ac097e4f-2a99-4689-8f90-29ecc2ff8455",
         sendNow = true,
+        customerId = "ac097e4f-2a99-4689-8f90-29ecc2ff8455",
         isPartialPaymentEnabled = true
     )
 
@@ -76,10 +74,10 @@ class InvoiceRepositoryTest {
     }
 
     @Test
-    fun `given invoicePostRequest When createInvoice Then return expected invoice`() =
+    fun `given invoiceRequest When createInvoice Then return expected invoice`() =
         runTest {
             val request = invoiceRequest
-            val expectedResult = invoice
+            val expectedResult = invoiceResponse
 
             //given
             given(
@@ -98,9 +96,9 @@ class InvoiceRepositoryTest {
         }
 
     @Test
-    fun `given invoiceId  When getInvoice Then return expected invoice`() =
+    fun `given invoiceId When getInvoice Then return expected invoice`() =
         runTest {
-            val expectedResult = invoice
+            val expectedResult = invoiceResponse
             val invoiceId = "8858e03e-6017-41a4-9d0e-b618b7880e3f"
 
             //given
@@ -116,10 +114,10 @@ class InvoiceRepositoryTest {
         }
 
     @Test
-    fun `given invoicePostRequest When updateInvoice Then return expected invoice`() =
+    fun `given invoiceRequest When updateInvoice Then return expected invoice`() =
         runTest {
             val request = invoiceRequest
-            val expectedResult = invoice
+            val expectedResult = invoiceResponse
             val invoiceId = "8858e03e-6017-41a4-9d0e-b618b7880e3f"
 
             //given
