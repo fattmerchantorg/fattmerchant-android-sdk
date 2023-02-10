@@ -89,7 +89,7 @@ dependencies {
     implementation 'net.zetetic:android-database-sqlcipher:4.0.1@aar'
 
     // AnywhereCommerce
-    // compileOnly project(":awc")
+    compileOnly project(":awc")
 //    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "com.dvmms:dejapay:2.0.20"
     implementation 'com.google.code.gson:gson:2.8.5'
