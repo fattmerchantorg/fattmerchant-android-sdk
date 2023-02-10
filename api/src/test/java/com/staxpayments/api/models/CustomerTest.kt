@@ -1,6 +1,5 @@
 package com.staxpayments.api.models
 
-import com.staxpayments.api.models.Customer
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.MissingFieldException
 import kotlinx.serialization.decodeFromString
@@ -10,7 +9,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 @OptIn(ExperimentalSerializationApi::class)
-class CustomerUnitTest {
+class CustomerTest {
 
     private val originalData = Customer(
         id = "680afd1b-713f-46c1-af46-1a56b8b5f8a6",
