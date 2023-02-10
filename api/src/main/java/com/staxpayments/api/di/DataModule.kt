@@ -1,6 +1,7 @@
 package com.staxpayments.api.di
 
 import com.staxpayments.api.datasource.CustomerLiveRepository
+import com.staxpayments.api.datasource.ItemLiveRepository
 import com.staxpayments.api.network.NetworkClient
 
 sealed class Environment {
@@ -24,7 +25,9 @@ class DataModule {
         initializeModule()
     }
 
+
     private fun initializeModule(){
         CustomerLiveRepository(networkClients)
+        ItemLiveRepository(networkClients)
     }
 }
