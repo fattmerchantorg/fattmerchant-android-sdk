@@ -43,8 +43,7 @@ internal class VoidMobileReaderTransaction(
 
             // Do the 3rd-party refund
             val result = if (transaction.source?.contains("terminalservice.dejavoo") == true) {
-                mobileReaderDriverRepository.getTerminal()
-                    ?.voidTransaction(transaction)
+                null
             } else {
                 mobileReaderDriverRepository
                     .getDriverFor(transaction)
