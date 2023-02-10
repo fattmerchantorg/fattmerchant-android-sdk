@@ -23,6 +23,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -37,6 +38,9 @@ class NetworkClient(private val baseUrl: String) {
             return instance!!
         }
     }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    private val format = Json { explicitNulls = false }
 
     private val client = HttpClient {
         install(Logging) {
@@ -77,7 +81,7 @@ class NetworkClient(private val baseUrl: String) {
             is String -> request
             is Map<*, *> -> Json.encodeToString(request)
             else -> {
-                Json.encodeToString(request)
+                format.encodeToString(request)
             }
         }
 
@@ -94,7 +98,7 @@ class NetworkClient(private val baseUrl: String) {
             is String -> request
             is Map<*, *> -> Json.encodeToString(request)
             else -> {
-                Json.encodeToString(request)
+                format.encodeToString(request)
             }
         }
 
@@ -111,7 +115,7 @@ class NetworkClient(private val baseUrl: String) {
             is String -> request
             is Map<*, *> -> Json.encodeToString(request)
             else -> {
-                Json.encodeToString(request)
+                format.encodeToString(request)
             }
         }
 
