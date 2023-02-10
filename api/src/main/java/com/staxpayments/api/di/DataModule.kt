@@ -25,7 +25,8 @@ class DataModule {
         initializeModule()
     }
 
-    private fun initializeModule() {
+
+    private fun initializeModule(){
         CustomerLiveRepository(networkClients)
         ItemLiveRepository(networkClients)
     }
