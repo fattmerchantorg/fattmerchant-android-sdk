@@ -5,6 +5,13 @@ import com.staxpayments.api.network.NetworkClient
 import com.staxpayments.api.repository.CustomerRepository
 
 class CustomerLiveRepository(private val networkClients: NetworkClient) : CustomerRepository {
-    override suspend fun customer(): Customer =
-        networkClients.get("customer", responseType = Customer.serializer())
+
+    override suspend fun getCustomerById(id: String): Customer =
+        networkClients.get("customer/$id", responseType = Customer.serializer())
+
+    override suspend fun createCustomer(customer: Customer): Customer =
+        networkClients.post("customer", request = customer, responseType = Customer.serializer())
+
+    override suspend fun updateCustomer(customer: Customer, id: String): Customer =
+        networkClients.put("customer/$id", request = customer, responseType = Customer.serializer())
 }
