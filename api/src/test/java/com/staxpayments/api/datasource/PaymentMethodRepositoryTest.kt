@@ -11,7 +11,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.BDDMockito
+import org.mockito.BDDMockito.given
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 
@@ -102,7 +102,7 @@ class PaymentMethodRepositoryTest {
             val expectedResult = paymentMethod
 
             //given
-            BDDMockito.given(
+            given(
                 networkClients.get("payment-method/$paymentMethodId", responseType = PaymentMethod.serializer())
             ).willReturn(expectedResult)
 
