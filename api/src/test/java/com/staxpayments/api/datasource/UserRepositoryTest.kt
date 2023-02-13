@@ -1,6 +1,5 @@
-package com.staxpayments.api.models.datasource
+package com.staxpayments.api.datasource
 
-import com.staxpayments.api.datasource.UserLiveRepository
 import com.staxpayments.api.models.Merchant
 import com.staxpayments.api.models.User
 import com.staxpayments.api.network.NetworkClient
