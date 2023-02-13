@@ -1,6 +1,10 @@
 package com.staxpayments.api.di
 
-import com.staxpayments.api.datasource.*
+import com.staxpayments.api.datasource.CustomerLiveRepository
+import com.staxpayments.api.datasource.InvoiceLiveRepository
+import com.staxpayments.api.datasource.ItemLiveRepository
+import com.staxpayments.api.datasource.UserLiveRepository
+import com.staxpayments.api.datasource.MerchantLiveRepository
 import com.staxpayments.api.network.NetworkClient
 
 sealed class Environment {

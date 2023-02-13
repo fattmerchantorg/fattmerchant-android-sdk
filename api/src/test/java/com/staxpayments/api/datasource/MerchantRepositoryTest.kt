@@ -11,7 +11,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.BDDMockito
+import org.mockito.BDDMockito.given
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 
@@ -71,18 +71,18 @@ class MerchantRepositoryTest {
     }
 
     @Test
-    fun `given merchantId When getMerchant Then return expected merchant`() =
+    fun `given merchantId When getMerchantById Then return expected merchant`() =
         runTest {
             val merchantId = "dd36b936-1eb7-4ece-bebc-b514c6a36ebd"
             val expectedResult = merchant
 
             //given
-            BDDMockito.given(
+            given(
                 networkClients.get("merchant/$merchantId", responseType = Merchant.serializer())
             ).willReturn(expectedResult)
 
             // When
-            val actualCommand = classUnderTest.getMerchant(merchantId)
+            val actualCommand = classUnderTest.getMerchantById(merchantId)
 
             // Then
             assertEquals(expectedResult, actualCommand)
