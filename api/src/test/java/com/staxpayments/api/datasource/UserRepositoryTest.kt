@@ -1,12 +1,10 @@
-package com.staxpayments.api.models.datasource
+package com.staxpayments.api.datasource
 
-import com.staxpayments.api.datasource.UserLiveRepository
 import com.staxpayments.api.models.Merchant
 import com.staxpayments.api.models.User
 import com.staxpayments.api.network.NetworkClient
 import com.staxpayments.api.responses.UserResponse
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -18,7 +16,6 @@ import org.mockito.BDDMockito.given
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class UserRepositoryTest {
 
@@ -103,7 +100,7 @@ class UserRepositoryTest {
 
     @Test
     fun `given authenticated user When getUser Then return expected userResponse`() =
-        runTest {
+        runBlocking {
             val expectedResult = userResponse
 
             //given

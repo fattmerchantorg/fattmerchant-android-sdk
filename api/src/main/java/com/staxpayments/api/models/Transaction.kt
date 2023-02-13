@@ -4,6 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 
+
 @Serializable
 data class Transaction(
     @SerialName("child_transactions") val childTransactions: JsonElement?,
@@ -33,7 +34,7 @@ data class Transaction(
     val success: Boolean?,
     val total: Int?,
     val message: JsonElement?,
-    val meta: JsonElement?,
+    val meta: Meta?,
     val method: String?,
     val files: JsonElement?,
     val id: String,
