@@ -71,7 +71,7 @@ class MerchantRepositoryTest {
     }
 
     @Test
-    fun `given authenticated user When getUser Then return expected userResponse`() =
+    fun `given merchantId When getMerchant Then return expected merchant`() =
         runTest {
             val merchantId = "dd36b936-1eb7-4ece-bebc-b514c6a36ebd"
             val expectedResult = merchant
