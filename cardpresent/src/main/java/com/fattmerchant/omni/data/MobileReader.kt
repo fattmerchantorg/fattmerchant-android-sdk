@@ -1,5 +1,7 @@
 package com.fattmerchant.omni.data
 
+import com.fattmerchant.android.chipdna.ConnectionType
+
 /**
  * A mobile reader that can take a payment
  */
@@ -18,4 +20,7 @@ interface MobileReader {
 
     /** The serial number of the mobile reader */
     fun serialNumber(): String?
+
+    /** The connection type (BT, BLE, or USB) */
+    fun getConnectionType(): ConnectionType
 }

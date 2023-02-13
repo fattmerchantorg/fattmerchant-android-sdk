@@ -1,17 +1,8 @@
 package com.fattmerchant.android.chipdna
 
 import android.content.Context
-import com.creditcall.chipdnamobile.ChipDnaMobile
-import com.creditcall.chipdnamobile.ChipDnaMobileSerializer
-import com.creditcall.chipdnamobile.DeviceStatus
-import com.creditcall.chipdnamobile.IAvailablePinPadsListener
-import com.creditcall.chipdnamobile.IConfigurationUpdateListener
-import com.creditcall.chipdnamobile.IConnectAndConfigureFinishedListener
-import com.creditcall.chipdnamobile.IDeviceUpdateListener
-import com.creditcall.chipdnamobile.ParameterKeys
-import com.creditcall.chipdnamobile.ParameterValues
-import com.creditcall.chipdnamobile.Parameters
-import com.creditcall.chipdnamobile.ReceiptFieldKey
+import android.util.Log
+import com.creditcall.chipdnamobile.*
 import com.fattmerchant.omni.MobileReaderConnectionStatusListener
 import com.fattmerchant.omni.OmniGeneralException
 import com.fattmerchant.omni.SignatureProviding
@@ -41,7 +32,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-internal class ChipDnaDriver :
+public class ChipDnaDriver :
     CoroutineScope,
     MobileReaderDriver,
     IConfigurationUpdateListener,
@@ -87,7 +78,7 @@ internal class ChipDnaDriver :
         }
     }
 
-    inner class SelectablePinPad(var name: String, var connectionType: String)
+    public class SelectablePinPad(var name: String, var connectionType: String)
 
     /** A key used to communicate with TransactionGateway */
     private var securityKey: String = ""
@@ -153,7 +144,8 @@ internal class ChipDnaDriver :
             throw InitializeMobileReaderDriverException("Invalid credentials for reader")
         }
 
-        return result[ParameterKeys.Result] == ParameterValues.TRUE
+        val output = result[ParameterKeys.Result] == ParameterValues.TRUE
+        return output
     }
 
     override suspend fun isOmniRefundsSupported(): Boolean {
@@ -165,52 +157,117 @@ internal class ChipDnaDriver :
     }
 
     override suspend fun searchForReaders(args: Map<String, Any>): List<MobileReader> {
-        val parameters = Parameters().apply {
-            add(ParameterKeys.SearchConnectionTypeBluetooth, ParameterValues.TRUE)
-            // add(ParameterKeys.SearchConnectionTypeBluetoothLe, ParameterValues.TRUE)
-            // add(ParameterKeys.SearchConnectionTypeUsb, ParameterValues.TRUE)
+        val selectablePinPads = suspendCancellableCoroutine<List<SelectablePinPad>> { cont ->
+            ChipDnaMobile.getInstance().apply {
+                clearAllAvailablePinPadsListeners()
+                addAvailablePinPadsListener { params ->
+                    val availablePinPadsXml = params.getValue(ParameterKeys.AvailablePinPads)
+                    val isEmpty = availablePinPadsXml.isNullOrEmpty()
+                    val pinPads = if(isEmpty) listOf() else deserializePinPads(availablePinPadsXml)
+                    clearAllAvailablePinPadsListeners()
+                    cont.resume(pinPads)
+                }
+            }.getAvailablePinPads(
+                Parameters().apply {
+                    add(ParameterKeys.SearchConnectionTypeBluetooth, ParameterValues.TRUE)
+                    add(ParameterKeys.SearchConnectionTypeBluetoothLe, ParameterValues.TRUE)
+                    add(ParameterKeys.SearchConnectionTypeUsb, ParameterValues.TRUE)
+                }
+            )
         }
-        ChipDnaMobile.getInstance().clearAllAvailablePinPadsListeners()
 
-        val pinPads = suspendCancellableCoroutine<List<SelectablePinPad>> { cont ->
-            val availablePinPadsListener: IAvailablePinPadsListener? = null
-            ChipDnaMobile.getInstance().addAvailablePinPadsListener { params ->
-                val availablePinPadsXml = params?.getValue(ParameterKeys.AvailablePinPads)
-                val pinPads = deserializePinPads(availablePinPadsXml)
-                availablePinPadsListener?.let { ChipDnaMobile.getInstance().removeAvailablePinPadsListener(it) }
-
-                cont.resume(pinPads)
+        return selectablePinPads.map { pinPad ->
+            val connectionType = if (pinPad.connectionType.equals(
+                    ParameterValues.BluetoothConnectionType,
+                    ignoreCase = true
+                )
+            ) {
+                ConnectionType.BT
+            } else if (pinPad.connectionType.equals(
+                    ParameterValues.BluetoothLeConnectionType,
+                    ignoreCase = true
+                )
+            ) {
+                ConnectionType.BLE
+            } else if (pinPad.connectionType.equals(
+                    ParameterValues.UsbConnectionType,
+                    ignoreCase = true
+                )
+            ) {
+                ConnectionType.USB
+            } else {
+                ConnectionType.UNKNOWN
             }
 
-            ChipDnaMobile.getInstance().getAvailablePinPads(parameters)
-        }
-
-        return pinPads.map {
-            mapPinPadToMobileReader(it)
+            mapPinPadToMobileReader(pinPad, connectionType)
         }
     }
 
     override suspend fun connectReader(reader: MobileReader): MobileReader? {
-        val requestParams = Parameters().apply {
-            add(ParameterKeys.PinPadName, reader.getName())
-            add(ParameterKeys.PinPadConnectionType, ParameterValues.BluetoothConnectionType)
-            // add(ParameterKeys.PinPadConnectionType, ParameterValues.BluetoothLeConnectionType)
-            // add(ParameterKeys.PinPadConnectionType, ParameterValues.UsbConnectionType)
+        val connectionType: String = if (reader.getConnectionType() == ConnectionType.BT) {
+            ParameterValues.BluetoothConnectionType
+        } else if (reader.getConnectionType() == ConnectionType.BLE) {
+            ParameterValues.BluetoothLeConnectionType
+        } else if (reader.getConnectionType() == ConnectionType.USB) {
+            ParameterValues.UsbConnectionType
+        } else { // Default to BT
+            ParameterValues.BluetoothConnectionType
         }
 
-        ChipDnaMobile.getInstance().setProperties(requestParams)
-
         return suspendCancellableCoroutine { cont ->
-            var connectAndConfigureListener: IConnectAndConfigureFinishedListener? = null
-            connectAndConfigureListener = IConnectAndConfigureFinishedListener { params ->
-                ChipDnaMobile.getInstance().removeConnectAndConfigureFinishedListener(connectAndConfigureListener)
+            val updateListener = IConfigurationUpdateListener { params ->
+                Log.d("Stax", params.getValue(ParameterKeys.ConfigurationUpdate))
+            }
+            val finishedListener = IConnectAndConfigureFinishedListener { params ->
+                if (params.containsKey(ParameterKeys.Result) && params.getValue(ParameterKeys.Result).equals("True", ignoreCase = true)) {
+                    Log.d("Stax", "CONNECT SUCCEED")
+                    Companion.getConnectedReader()?.let { reader ->
+                        reader.serialNumber()?.let {  serialNumber ->
+                            familiarSerialNumbers.add(serialNumber)
+                        }
+                        cont.resume(reader)
+                    }
+                } else {
+                    Log.d("Stax", "CONNECT FAILED")
+                    val error = params[ParameterKeys.ErrorDescription]
+                    cont.resumeWithException(ConnectReaderException(error))
+                }
+            }
 
+            // Listeners
+            ChipDnaMobile.getInstance().clearAllConfigurationUpdateListeners()
+            ChipDnaMobile.getInstance().clearAllConnectAndConfigureFinishedListeners()
+            ChipDnaMobile.getInstance().clearAllTmsUpdateListener()
+
+
+            ChipDnaMobile.getInstance().addConfigurationUpdateListener(updateListener)
+            ChipDnaMobile.getInstance().addConnectAndConfigureFinishedListener(finishedListener)
+            ChipDnaMobile.getInstance().addTmsUpdateListener {
+                Log.d("Stax", "UPDATE TMS")
+                Log.d("Stax", it.toString())
+            }
+
+            // Connect & Configure
+            val requestParams = ChipDnaMobile.getInstance().getStatus(null)
+
+
+            // requestParams.add(ParameterKeys.ForceTmsUpdate, ParameterValues.TRUE)
+            requestParams.add(ParameterKeys.PinPadName, reader.getName())
+            requestParams.add(ParameterKeys.PinPadConnectionType, connectionType)
+            ChipDnaMobile.getInstance().connectAndConfigure(requestParams)
+        }
+
+        /*
+        val connectedReader = suspendCancellableCoroutine<MobileReader?> { cont ->
+            // On Connection Listener
+            val connectAndConfigureListener = IConnectAndConfigureFinishedListener { params ->
+                // ChipDnaMobile.getInstance().clearAllConnectAndConfigureFinishedListeners()
                 if (params[ParameterKeys.Result] == ParameterValues.TRUE) {
-                    // Reader is connected. Add the serial number to the list of familiar ones
-                    // And return the hydrated mobile reader
-                    Companion.getConnectedReader()?.let { connectedReader ->
-                        connectedReader.serialNumber()?.let { familiarSerialNumbers.add(it) }
-                        cont.resume(connectedReader)
+                    Companion.getConnectedReader()?.let { reader ->
+                        reader.serialNumber()?.let {  serialNumber ->
+                            familiarSerialNumbers.add(serialNumber)
+                        }
+                        cont.resume(reader)
                     }
                     return@IConnectAndConfigureFinishedListener
                 }
@@ -219,9 +276,21 @@ internal class ChipDnaDriver :
                 cont.resumeWithException(ConnectReaderException(error))
             }
 
-            ChipDnaMobile.getInstance().addConnectAndConfigureFinishedListener(connectAndConfigureListener)
-            ChipDnaMobile.getInstance().connectAndConfigure(requestParams)
+            // Actual connection code
+            ChipDnaMobile.getInstance().apply {
+                addConnectAndConfigureFinishedListener(connectAndConfigureListener)
+                connectAndConfigure(getStatus(null).apply {
+                    add(ParameterKeys.PinPadName, reader.getName())
+                    add(ParameterKeys.PinPadConnectionType, connectionType)
+                    if (reader.getConnectionType() == ConnectionType.BLE) {
+                        add(ParameterKeys.BLEScanTime, 10) // Scan for 10 seconds
+                    }
+                })
+            }
         }
+         */
+
+        return null
     }
 
     override suspend fun disconnect(reader: MobileReader, error: (OmniException) -> Unit): Boolean {

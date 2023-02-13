@@ -5,6 +5,7 @@ import com.anywherecommerce.android.sdk.devices.CardReader
 import com.anywherecommerce.android.sdk.endpoints.AnyPayTransaction
 import com.anywherecommerce.android.sdk.models.TransactionStatus
 import com.anywherecommerce.android.sdk.models.TransactionType
+import com.fattmerchant.android.chipdna.ConnectionType
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.TransactionResult
@@ -19,6 +20,7 @@ internal fun CardReader.toMobileReader(): MobileReader {
         override fun getMake(): String? = null
         override fun getModel(): String? = modelDisplayName
         override fun serialNumber(): String? = serialNumber
+        override fun getConnectionType(): ConnectionType = ConnectionType.UNKNOWN
     }
 }
 
