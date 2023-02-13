@@ -3,6 +3,9 @@ package com.staxpayments.api.datasource
 import com.staxpayments.api.models.Transaction
 import com.staxpayments.api.network.NetworkClient
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -27,7 +30,16 @@ class TransactionLiveRepositoryTest {
         isManual = null,
         success = false,
         message = null,
-        meta = null,
+        meta = JsonObject(
+            mapOf(
+                "cardDisplay" to JsonPrimitive("484718"),
+                "routingDisplay" to JsonNull,
+                "accountDisplay" to JsonNull,
+                "eligibleForCardUpdater" to JsonPrimitive(true),
+                "storageState" to JsonPrimitive("cached"),
+                "fingerprint" to JsonPrimitive("888999888777888999988")
+            )
+        ),
         createdAt = "10-10-2022",
         isRefundable = false,
         isVoidable = false,
