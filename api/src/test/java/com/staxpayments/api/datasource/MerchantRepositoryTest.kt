@@ -1,9 +1,7 @@
 package com.staxpayments.api.datasource
 
 import com.staxpayments.api.models.Merchant
-import com.staxpayments.api.models.User
 import com.staxpayments.api.network.NetworkClient
-import com.staxpayments.api.responses.UserResponse
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonNull
@@ -19,35 +17,12 @@ import org.mockito.junit.MockitoJUnitRunner
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
-class UserRepositoryTest {
+class MerchantRepositoryTest {
 
-    private lateinit var classUnderTest: UserLiveRepository
+    private lateinit var classUnderTest: MerchantLiveRepository
 
     @Mock
     private lateinit var networkClients: NetworkClient
-
-    private val user = User(
-        id = "82bec9c3-0259-45d4-b96b-6e1fe6a57908",
-        name = "api-key",
-        email = "osagie.omon@fattmerchant.com",
-        createdAt = "2022-11-16 19:04:33",
-        updatedAt = "2022-11-16 19:04:33",
-        emailVerificationSentAt = null,
-        emailVerifiedAt = null,
-        isDefault = false,
-        isApiKey = true,
-        deletedAt = null,
-        systemAdmin = false,
-        teamRole = "admin",
-        teamAdmin = true,
-        teamEnabled = true,
-        mfaEnabled = false,
-        merchantOptions = emptyList(),
-        gravatar = "www.gravatar.com/avatar/d41d8cd98f00b204e9800998ecf8427e",
-        acknowledgments = null,
-        options = null,
-        brand = "fattmerchant"
-    )
 
     private val merchant = Merchant(
         id = "dd36b936-1eb7-4ece-bebc-b514c6a36ebd",
@@ -88,30 +63,26 @@ class UserRepositoryTest {
         doesAllowAch = true
     )
 
-    private val userResponse = UserResponse(
-        user = user,
-        merchant = merchant
-    )
-
     @Before
     fun setUp() {
-        classUnderTest = UserLiveRepository(
+        classUnderTest = MerchantLiveRepository(
             networkClients
         )
     }
 
     @Test
-    fun `given authenticated user When getUser Then return expected userResponse`() =
+    fun `given merchantId When getMerchantById Then return expected merchant`() =
         runTest {
-            val expectedResult = userResponse
+            val merchantId = "dd36b936-1eb7-4ece-bebc-b514c6a36ebd"
+            val expectedResult = merchant
 
             //given
             given(
-                networkClients.get("self", responseType = UserResponse.serializer())
+                networkClients.get("merchant/$merchantId", responseType = Merchant.serializer())
             ).willReturn(expectedResult)
 
             // When
-            val actualCommand = classUnderTest.getUser()
+            val actualCommand = classUnderTest.getMerchantById(merchantId)
 
             // Then
             assertEquals(expectedResult, actualCommand)

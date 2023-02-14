@@ -4,6 +4,7 @@ import com.staxpayments.api.datasource.CustomerLiveRepository
 import com.staxpayments.api.datasource.InvoiceLiveRepository
 import com.staxpayments.api.datasource.ItemLiveRepository
 import com.staxpayments.api.datasource.UserLiveRepository
+import com.staxpayments.api.datasource.MerchantLiveRepository
 import com.staxpayments.api.datasource.PaymentMethodLiveRepository
 import com.staxpayments.api.datasource.TransactionLiveRepository
 import com.staxpayments.api.network.NetworkClient
@@ -34,6 +35,7 @@ class DataModule {
         CustomerLiveRepository(networkClients)
         InvoiceLiveRepository(networkClients)
         ItemLiveRepository(networkClients)
+        MerchantLiveRepository(networkClients)
         PaymentMethodLiveRepository(networkClients)
         TransactionLiveRepository(networkClients)
     }
