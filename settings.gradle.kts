@@ -1,0 +1,6 @@
+include(":tokenization")
+include(":cardpresent")
+include(":app")
+include(":api")
+include(":sdk")
+include(":sample")
