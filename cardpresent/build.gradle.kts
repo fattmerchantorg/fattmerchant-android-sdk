@@ -11,8 +11,6 @@ android {
     defaultConfig {
         minSdk = 23
         targetSdk = 33
-        versionCode = 15
-        versionName = "2.5.0"
     }
 
     compileOptions {
