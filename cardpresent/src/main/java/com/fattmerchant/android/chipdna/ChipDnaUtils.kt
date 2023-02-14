@@ -145,7 +145,7 @@ internal fun withTransactionRequest(request: TransactionRequest) = Parameters().
     add(ParameterKeys.TransactionType, ParameterValues.Sale)
 
     // Only autoconfirm if this is a preauth transaction
-    if (!request.preauth) {
+    if (request.preauth) {
         add(ParameterKeys.AutoConfirm, ParameterValues.TRUE)
     }
 
