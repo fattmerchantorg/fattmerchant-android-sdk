@@ -1,17 +1,14 @@
 package com.fattmerchant.android
 
 import com.fattmerchant.android.chipdna.ChipDnaDriver
-import com.fattmerchant.android.dejavoo.DejavooDriver
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.MobileReaderDriver
-import com.fattmerchant.omni.data.PaymentTerminalDriver
 import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.data.repository.MobileReaderDriverRepository
 
 internal class MobileReaderDriverRepository : MobileReaderDriverRepository {
 
     private var chipDna = ChipDnaDriver()
-    private var dejavooTerminal = DejavooDriver()
 
     override suspend fun getDrivers(): List<MobileReaderDriver> {
         return listOf(chipDna)
@@ -41,9 +38,5 @@ internal class MobileReaderDriverRepository : MobileReaderDriverRepository {
                 it.familiarSerialNumbers.contains(serial)
             }
         } ?: return null
-    }
-
-    override fun getTerminal(): PaymentTerminalDriver? {
-        return dejavooTerminal
     }
 }

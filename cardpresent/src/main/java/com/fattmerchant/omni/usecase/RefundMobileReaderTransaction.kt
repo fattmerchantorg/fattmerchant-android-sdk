@@ -42,16 +42,7 @@ internal class RefundMobileReaderTransaction(
 
             // Do the 3rd-party refund
             if (transaction.source?.contains("terminalservice.dejavoo") == true) {
-                val result = mobileReaderDriverRepository.getTerminal()
-                    ?.refundTransaction(transaction, refundAmount)
-
-                if (result == null || result.success == false) {
-                    throw RefundException()
-                }
-
-                return@coroutineScope postRefundedTransaction(result) {
-                    throw RefundException(it.message)
-                }
+                throw RefundException()
             }
 
             // Get the driver

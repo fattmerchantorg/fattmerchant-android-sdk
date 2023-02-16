@@ -93,6 +93,25 @@
                         android:text="Initialize" />
 
                     <Button
+                        android:id="@+id/buttonLocationPermission"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Request Location Permission" />
+
+                    <Button
+                        android:id="@+id/buttonBluetoothPermission"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Request Bluetooth Permission" />
+
+
+                    <Button
+                        android:id="@+id/buttonRawConnect"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Raw ChipDNA Connect" />
+
+                    <Button
                         android:id="@+id/buttonConnectReader"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

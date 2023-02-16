@@ -16,19 +16,27 @@ import java.util.Locale
 import com.creditcall.chipdnamobile.TransactionUpdate as ChipDnaTransactionUpdate
 import com.creditcall.chipdnamobile.UserNotification as ChipDnaUserNotification
 
+enum class ConnectionType {
+    BT,
+    BLE,
+    USB,
+    UNKNOWN,
+}
+
 /**
  * Makes an instance of [MobileReader] for the given [pinPad]
  *
  * @param pinPad a pin pad that can be connected
  * @return a [MobileReader]
  */
-internal fun mapPinPadToMobileReader(pinPad: ChipDnaDriver.SelectablePinPad): MobileReader {
+internal fun mapPinPadToMobileReader(pinPad: ChipDnaDriver.SelectablePinPad, connectionType: ConnectionType): MobileReader {
     return object : MobileReader {
         override fun getName() = pinPad.name
         override fun getFirmwareVersion(): String? = null
         override fun getMake(): String? = null
         override fun getModel(): String? = null
         override fun serialNumber(): String? = null
+        override fun getConnectionType(): ConnectionType = connectionType
     }
 }
 
@@ -45,6 +53,7 @@ internal fun mapDeviceStatusToMobileReader(deviceStatus: DeviceStatus): MobileRe
         override fun getMake(): String? = deviceStatus.make
         override fun getModel(): String? = deviceStatus.model
         override fun serialNumber(): String? = deviceStatus.serialNumber
+        override fun getConnectionType(): ConnectionType = ConnectionType.UNKNOWN
     }
 }
 
@@ -136,7 +145,7 @@ internal fun withTransactionRequest(request: TransactionRequest) = Parameters().
     add(ParameterKeys.TransactionType, ParameterValues.Sale)
 
     // Only autoconfirm if this is a preauth transaction
-    if (!request.preauth) {
+    if (request.preauth) {
         add(ParameterKeys.AutoConfirm, ParameterValues.TRUE)
     }
 

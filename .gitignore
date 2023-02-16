@@ -53,3 +53,13 @@ out/
 
 # Google Services (e.g. APIs or Firebase)
 google-services.json
+<<<<<<< HEAD
+=======
+
+# Freeline
+freeline.py
+freeline/
+freeline_project_description.json
+
+.DS_Store
+> release/2.5.0-with-awc

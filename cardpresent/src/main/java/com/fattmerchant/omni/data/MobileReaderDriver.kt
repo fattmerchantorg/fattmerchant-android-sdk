@@ -8,7 +8,7 @@ import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.usecase.CancelCurrentTransactionException
 
-internal interface MobileReaderDriver {
+public interface MobileReaderDriver {
 
     class PerformTransactionException(message: String? = null) :
         OmniException("Could not perform transaction", message)

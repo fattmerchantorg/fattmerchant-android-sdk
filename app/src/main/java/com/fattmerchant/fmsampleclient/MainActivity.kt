@@ -3,14 +3,21 @@ package com.fattmerchant.fmsampleclient
 import android.Manifest
 import android.app.AlertDialog
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
+import android.util.Log
 import android.view.View
 import android.widget.EditText
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
+import com.creditcall.chipdnamobile.*
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
+import com.fattmerchant.android.chipdna.ChipDnaDriver
+import com.fattmerchant.android.chipdna.get
 import com.fattmerchant.omni.Environment
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.UserNotificationListener
@@ -25,14 +32,18 @@ import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.models.PaymentMethod
 import com.fattmerchant.omni.data.models.Transaction
 import kotlinx.android.synthetic.main.activity_main.*
+import org.xmlpull.v1.XmlPullParserException
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.logging.Logger
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class MainActivity : AppCompatActivity(), PermissionsManager {
 
-    val staxKey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJtZXJjaGFudCI6ImViNDhlZjk5LWFhNzgtNDk2ZS05YjAxLTQyMWY4ZGFmNzMyMyIsImdvZFVzZXIiOnRydWUsImJyYW5kIjoiZmF0dG1lcmNoYW50Iiwic3ViIjoiMzBjNmVlYjYtNjRiNi00N2Y2LWJjZjYtNzg3YTljNTg3OThiIiwiaXNzIjoiaHR0cDovL2FwaWRldjAxLmZhdHRsYWJzLmNvbS9hdXRoZW50aWNhdGUiLCJpYXQiOjE2NDA1NzA4MDAsImV4cCI6MTY0MDY1NzIwMCwibmJmIjoxNjQwNTcwODAwLCJqdGkiOiJ3SjlDa0tqRGNlRHRzMzBhIn0.WcFvqSf0wDungNBPOX4nWfiGAv4uX8sXRVfMMCNx6LU"
+    val staxKey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnb2RVc2VyIjpmYWxzZSwibWVyY2hhbnQiOiI1ZjVkNGRkZi01N2E5LTQyMWMtOTMxMy0zMWI4ZDA5MTcyNjkiLCJzdWIiOiI4MmJlYzljMy0wMjU5LTQ1ZDQtYjk2Yi02ZTFmZTZhNTc5MDgiLCJicmFuZCI6ImZhdHRtZXJjaGFudCIsImlzcyI6Imh0dHA6Ly9hcGlwcm9kLmZhdHRsYWJzLmNvbS90ZWFtL2FwaWtleSIsImlhdCI6MTY2ODYyNTQ3MywiZXhwIjo0ODIyMjI1NDczLCJuYmYiOjE2Njg2MjU0NzMsImp0aSI6IlhqVmJBWFpjSnFBNkJGTnkiLCJhc3N1bWluZyI6ZmFsc2V9.zfu2HAyrZFb_Vmi7rptiuVFDEDEIrw2MCuORxk1XYBo"
 
     val log = Logger.getLogger("MainActivity")
 
@@ -71,6 +82,117 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
             permissionRequestLauncherCallback?.invoke(isGranted)
         }
 
+    private val locationPermissionRequestLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        updateStatus("Location permission received: $granted")
+    }
+
+    private val bluetoothPermissionRequestLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+            if (it.isNotEmpty()) {
+                var areAllGranted = true
+                for (granted in it.values) {
+                    if (!granted) {
+                        areAllGranted = false
+                        break
+                    }
+                }
+
+                updateStatus("Bluetooth permission received: $areAllGranted")
+            }
+        }
+
+    private fun setupRequestLocationPermissionButton() {
+        buttonLocationPermission.setOnClickListener {
+            locationPermissionRequestLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+    }
+
+    private fun setupRequestBluetoothPermissionButton() {
+        buttonBluetoothPermission.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val bluetoothPermissionArray = arrayOf(
+                    Manifest.permission.BLUETOOTH_SCAN,
+                    Manifest.permission.BLUETOOTH_CONNECT
+                )
+                bluetoothPermissionRequestLauncher.launch(bluetoothPermissionArray)
+            } else {
+                updateStatus("Bluetooth permission received: true")
+            }
+        }
+    }
+
+    val updateListener = IConfigurationUpdateListener { params ->
+        Log.d("Stax", params.getValue(ParameterKeys.ConfigurationUpdate))
+    }
+    val finishedListener = IConnectAndConfigureFinishedListener { params ->
+        if (params.containsKey(ParameterKeys.Result) && params.getValue(ParameterKeys.Result).equals("True", ignoreCase = true)) {
+            Log.d("Stax", "CONNECT SUCCEED")
+        } else {
+            Log.d("Stax", "CONNECT FAILED")
+        }
+    }
+    val tmsListener = ITmsUpdateListener {
+        Log.d("Stax", "UPDATE TMS")
+        Log.d("Stax", it.toString())
+    }
+
+    private fun setupRawConnectButton() {
+
+
+        buttonRawConnect.setOnClickListener {
+            ChipDnaMobile.getInstance().clearAllAvailablePinPadsListeners()
+            ChipDnaMobile.getInstance().addAvailablePinPadsListener { params ->
+                val availablePinPadsXml = params.getValue(ParameterKeys.AvailablePinPads)
+                val isEmpty = availablePinPadsXml.isNullOrEmpty()
+                val pinPads = if(isEmpty) listOf() else deserializePinPads(availablePinPadsXml)
+
+                // Listeners
+                ChipDnaMobile.getInstance().clearAllConfigurationUpdateListeners()
+                ChipDnaMobile.getInstance().clearAllConnectAndConfigureFinishedListeners()
+                ChipDnaMobile.getInstance().clearAllTmsUpdateListener()
+
+                ChipDnaMobile.getInstance().addConfigurationUpdateListener(updateListener)
+                ChipDnaMobile.getInstance().addConnectAndConfigureFinishedListener(finishedListener)
+                ChipDnaMobile.getInstance().addTmsUpdateListener(tmsListener)
+
+                val connectParams = ChipDnaMobile.getInstance().getStatus(null)
+                connectParams.add(ParameterKeys.PinPadName, pinPads[0].name)
+                connectParams.add(ParameterKeys.PinPadConnectionType, pinPads[0].connectionType)
+                ChipDnaMobile.getInstance().connectAndConfigure(connectParams)
+            }
+
+            val searchParams = ChipDnaMobile.getInstance().getStatus(null)
+            searchParams.add(ParameterKeys.SearchConnectionTypeBluetooth, ParameterValues.TRUE)
+            searchParams.add(ParameterKeys.SearchConnectionTypeBluetoothLe, ParameterValues.TRUE)
+            searchParams.add(ParameterKeys.SearchConnectionTypeUsb, ParameterValues.TRUE)
+
+            ChipDnaMobile.getInstance().getAvailablePinPads(searchParams)
+        }
+    }
+
+    private fun deserializePinPads(pinPadsXml: String?): List<ChipDnaDriver.SelectablePinPad> {
+        if (pinPadsXml == null) {
+            return listOf()
+        }
+
+        val availablePinPadsList = ArrayList<ChipDnaDriver.SelectablePinPad>()
+
+        try {
+            val availablePinPadsHashMap = ChipDnaMobileSerializer.deserializeAvailablePinPads(pinPadsXml)
+            for (connectionType in availablePinPadsHashMap.keys) {
+                for (pinPad in availablePinPadsHashMap[connectionType]!!) {
+                    availablePinPadsList.add(ChipDnaDriver.SelectablePinPad(pinPad, connectionType))
+                }
+            }
+        } catch (e: XmlPullParserException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        return availablePinPadsList
+    }
+
     private fun setupPerformSaleWithReaderButton() {
         buttonPerformSaleWithReader.setOnClickListener {
             val amount = Amount(getAmount())
@@ -97,32 +219,6 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
 
             Omni.shared()?.takeMobileReaderTransaction(request, {
 
-                val msg = if (it.success == true) {
-                    "Successfully executed transaction"
-                } else {
-                    "Transaction declined"
-                }
-
-                runOnUiThread {
-                    updateStatus(msg)
-                }
-
-                transaction = it
-            }, {
-                updateStatus("Couldn't perform sale: ${it.message}. ${it.detail}")
-            })
-        }
-
-        buttonPerformSaleWithReader.isEnabled = true
-    }
-
-    private fun setupPerformSaleWithTerminalButton() {
-        buttonPerformSaleWithTerminal.setOnClickListener {
-            val amount = Amount(getAmount())
-            updateStatus("Attempting to charge ${amount.dollarsString()}")
-            val request = TransactionRequest(amount)
-
-            Omni.shared()?.takePaymentTerminalTransaction(request, {
                 val msg = if (it.success == true) {
                     "Successfully executed transaction"
                 } else {
@@ -401,7 +497,6 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
     private fun setupButtons() {
         setupInitializeButton()
         setupPerformSaleWithReaderButton()
-        setupPerformSaleWithTerminalButton()
         setupPerformSaleButton()
         setupRefundButton()
         setupConnectReaderButton()
@@ -414,6 +509,9 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
         setupPerformAuthButton()
         setupCaptureLastAuthButton()
         setupVoidLastAuthButton()
+        setupRequestLocationPermissionButton()
+        setupRequestBluetoothPermissionButton()
+        setupRawConnectButton()
     }
 
     private fun Transaction.pretty(): String {
@@ -450,7 +548,9 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
         ) {
             updateStatus("Searching for readers...")
             Omni.shared()?.getAvailableReaders {
-                val readers = it.map { it.getName() }.toTypedArray()
+                val readers = it.map { r ->
+                    r.getName() + " - " + r.getConnectionType().toString()
+                }.toTypedArray()
                 updateStatus("Found readers: ${it.map { it.getName() }}")
 
                 runOnUiThread {
@@ -509,7 +609,7 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
         return "${dateFormat.format(Date())} | $msg"
     }
 
-    private fun initializeOmni(apiKey: String, environment: Environment = Environment.DEV) {
+    private fun initializeOmni(apiKey: String, environment: Environment = Environment.LIVE) {
 
         if (environment == Environment.QA()) {
             showQABuildHashDialog(apiKey = apiKey)

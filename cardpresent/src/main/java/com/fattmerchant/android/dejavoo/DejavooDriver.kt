@@ -74,7 +74,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
             dejavooRequest.printReceipt = DejavooTransactionRequest.ReceiptType.Both;
             dejavooRequest.clerkId = 0
 
-            InternalTerminal().commitTransaction(
+            InternalTerminal("").commitTransaction(
                 appContext, dejavooRequest, object : IRequestCallback<DejavooTransactionResponse> {
                     override fun onResponse(response: DejavooTransactionResponse) {
                         val auth = response.authenticationCode
@@ -118,7 +118,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                                 "referenceId" to response.referenceId
                             )
 
-                            gatewayResponse = DejavooDriverUtils.gatewayResponse(response)
+                            // gatewayResponse = DejavooDriverUtils.gatewayResponse(response)
                             this.request = request
                         }
 
@@ -147,7 +147,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
             dejavooRequest.referenceId = referenceId
             dejavooRequest.setAmount(transaction.total?.toDoubleOrNull() ?: 0.0)
 
-            InternalTerminal().commitTransaction(
+            InternalTerminal("").commitTransaction(
                 appContext, dejavooRequest, object : IRequestCallback<DejavooTransactionResponse> {
                     override fun onResponse(response: DejavooTransactionResponse) {
                         val auth = response.authenticationCode
@@ -184,7 +184,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                             cardExpiration = expiry
                             source = this@DejavooDriver.source
                             transactionSource = extData.entryTypeString
-                            gatewayResponse = DejavooDriverUtils.gatewayResponse(response)
+                            // gatewayResponse = DejavooDriverUtils.gatewayResponse(response)
                             transactionMeta = mutableMapOf(
                                 "RegisterId" to response.registerId,
                                 "AuthCode" to response.authenticationCode,
@@ -226,7 +226,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
             dejavooRequest.referenceId = referenceId
             dejavooRequest.setAmount(refundAmount?.dollars() ?: transaction.total?.toDoubleOrNull() ?: 0.0)
 
-            InternalTerminal().commitTransaction(
+            InternalTerminal("").commitTransaction(
                 appContext, dejavooRequest, object : IRequestCallback<DejavooTransactionResponse> {
                     override fun onResponse(response: DejavooTransactionResponse) {
                         val auth = response.authenticationCode
@@ -262,7 +262,7 @@ class DejavooDriver : CoroutineScope, PaymentTerminalDriver {
                             cardExpiration = expiry
                             source = this@DejavooDriver.source
                             transactionSource = extData.entryTypeString
-                            gatewayResponse = DejavooDriverUtils.gatewayResponse(response)
+                            // gatewayResponse = DejavooDriverUtils.gatewayResponse(response)
                             transactionMeta = mutableMapOf(
                                 "RegisterId" to response.registerId,
                                 "AuthCode" to response.authenticationCode,
