@@ -53,8 +53,3 @@ out/
 
 # Google Services (e.g. APIs or Firebase)
 google-services.json
-
-# Misc Files
-.DS_Store
-.ds_store
-.DS_store

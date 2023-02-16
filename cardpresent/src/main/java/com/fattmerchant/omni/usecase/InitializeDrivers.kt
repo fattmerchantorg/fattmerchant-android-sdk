@@ -38,6 +38,16 @@ internal class InitializeDrivers(
             }
         }.toMutableList()
 
+        // Initialize the payment terminals and
+        mobileReaderDriverRepository.getTerminal()?.let {
+            val initialized = try {
+                it.initialize(args)
+            } catch (e: Throwable) {
+                false
+            }
+            initializedDrivers.add(initialized)
+        }
+
         when {
             initializedDrivers.contains(true) -> return
             error != null -> onError(error!!)

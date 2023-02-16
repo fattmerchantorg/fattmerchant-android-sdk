@@ -116,6 +116,32 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
         buttonPerformSaleWithReader.isEnabled = true
     }
 
+    private fun setupPerformSaleWithTerminalButton() {
+        buttonPerformSaleWithTerminal.setOnClickListener {
+            val amount = Amount(getAmount())
+            updateStatus("Attempting to charge ${amount.dollarsString()}")
+            val request = TransactionRequest(amount)
+
+            Omni.shared()?.takePaymentTerminalTransaction(request, {
+                val msg = if (it.success == true) {
+                    "Successfully executed transaction"
+                } else {
+                    "Transaction declined"
+                }
+
+                runOnUiThread {
+                    updateStatus(msg)
+                }
+
+                transaction = it
+            }, {
+                updateStatus("Couldn't perform sale: ${it.message}. ${it.detail}")
+            })
+        }
+
+        buttonPerformSaleWithReader.isEnabled = true
+    }
+
     private fun setupPerformSaleButton() {
         buttonPerformSale.setOnClickListener {
             val amount = Amount(getAmount())
@@ -375,6 +401,7 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
     private fun setupButtons() {
         setupInitializeButton()
         setupPerformSaleWithReaderButton()
+        setupPerformSaleWithTerminalButton()
         setupPerformSaleButton()
         setupRefundButton()
         setupConnectReaderButton()

@@ -1,5 +1,6 @@
 package com.fattmerchant.omni
 
+import com.fattmerchant.android.dejavoo.DejavooDriverUtils
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.TransactionRequest
@@ -26,6 +27,7 @@ import com.fattmerchant.omni.usecase.RefundMobileReaderTransaction
 import com.fattmerchant.omni.usecase.SearchForReaders
 import com.fattmerchant.omni.usecase.TakeMobileReaderPayment
 import com.fattmerchant.omni.usecase.TakePayment
+import com.fattmerchant.omni.usecase.TakePaymentTerminalPayment
 import com.fattmerchant.omni.usecase.TokenizePaymentMethod
 import com.fattmerchant.omni.usecase.VoidMobileReaderTransaction
 import kotlinx.coroutines.CoroutineScope
@@ -109,6 +111,11 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
             val nmiDetails = MobileReaderDetails.NMIDetails()
             merchant.emvPassword()?.let { nmiDetails.securityKey = it }
             mutatedArgs["nmi"] = nmiDetails
+
+            // Dejavoo
+            DejavooDriverUtils().getCurrentTerminalCreds(merchant)?.let {
+                mutatedArgs["dejavoo"] = it
+            }
 
             omniApi.getMobileReaderSettings {
                 // error(OmniException("Could not get reader settings", it.message))
@@ -497,6 +504,40 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
         }
     }
 
+    fun takePaymentTerminalTransaction(
+        request: TransactionRequest,
+        completion: (Transaction) -> Unit,
+        error: (OmniException) -> Unit
+    ) {
+        coroutineScope.launch {
+
+            if (currentJob is TakePaymentTerminalPayment && currentJob?.isActive == true) {
+                error(OmniException("Could not take mobile reader transaction", "Transaction in progress"))
+                return@launch
+            }
+
+            val takePaymentJob = TakePaymentTerminalPayment(
+                invoiceRepository = invoiceRepository,
+                customerRepository = customerRepository,
+                paymentMethodRepository = paymentMethodRepository,
+                transactionRepository = transactionRepository,
+                request = request,
+                mobileReaderDriverRepository = mobileReaderDriverRepository,
+                coroutineContext = coroutineContext
+            )
+
+            currentJob = takePaymentJob
+
+            val result = takePaymentJob.start {
+                error(it)
+                return@start
+            }
+
+            result?.let {
+                completion(it)
+            }
+        }
+    }
     /**
      * Attempts to cancel a current mobile reader [transaction]
      *

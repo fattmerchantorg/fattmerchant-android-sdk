@@ -223,19 +223,3 @@ Or you can create the `CreditCard` or `BankAccount` object with the following te
 * Account: 9876543210
 
 To test failing bank accounts, use the given routing number and any other account number
-
-
-# Project Structure
-
-- api
-  - A type-safe Stax API client you can use to get resources from the Stax API
-- app
-  - The ***LEGACY*** sample application using the "Omni" sdk. It is deprecated and will be removed in Stax SDK v4
-- cardpresent
-  - The ***LEGACY*** "Omni" sdk. It is deprecated and will be removed in Stax SDK v4
-- sample
-  - A sample application using Jetpack Compose and the latest Stax SDK
-- sdk
-  - The Stax SDK for v3 and above
-- tokenization
-  - The ***LEGACY*** "Omni" sdk for tokenizing cards. It is deprecated and will be removed in Stax SDK v4
