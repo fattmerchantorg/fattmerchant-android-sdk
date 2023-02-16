@@ -1,6 +1,7 @@
 package com.fattmerchant.fmsampleclient
 
 import android.Manifest
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.os.Build
@@ -10,6 +11,10 @@ import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContentProviderCompat.requireContext
@@ -43,7 +48,9 @@ import kotlin.coroutines.resumeWithException
 
 class MainActivity : AppCompatActivity(), PermissionsManager {
 
+
     val staxKey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnb2RVc2VyIjpmYWxzZSwibWVyY2hhbnQiOiI1ZjVkNGRkZi01N2E5LTQyMWMtOTMxMy0zMWI4ZDA5MTcyNjkiLCJzdWIiOiI4MmJlYzljMy0wMjU5LTQ1ZDQtYjk2Yi02ZTFmZTZhNTc5MDgiLCJicmFuZCI6ImZhdHRtZXJjaGFudCIsImlzcyI6Imh0dHA6Ly9hcGlwcm9kLmZhdHRsYWJzLmNvbS90ZWFtL2FwaWtleSIsImlhdCI6MTY2ODYyNTQ3MywiZXhwIjo0ODIyMjI1NDczLCJuYmYiOjE2Njg2MjU0NzMsImp0aSI6IlhqVmJBWFpjSnFBNkJGTnkiLCJhc3N1bWluZyI6ZmFsc2V9.zfu2HAyrZFb_Vmi7rptiuVFDEDEIrw2MCuORxk1XYBo"
+       // "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnb2RVc2VyIjpmYWxzZSwibWVyY2hhbnQiOiI1ZjVkNGRkZi01N2E5LTQyMWMtOTMxMy0zMWI4ZDA5MTcyNjkiLCJzdWIiOiI4MmJlYzljMy0wMjU5LTQ1ZDQtYjk2Yi02ZTFmZTZhNTc5MDgiLCJicmFuZCI6ImZhdHRtZXJjaGFudCIsImlzcyI6Imh0dHA6Ly9hcGlwcm9kLmZhdHRsYWJzLmNvbS90ZWFtL2FwaWtleSIsImlhdCI6MTY2ODYyNTQ3MywiZXhwIjo0ODIyMjI1NDczLCJuYmYiOjE2Njg2MjU0NzMsImp0aSI6IlhqVmJBWFpjSnFBNkJGTnkiLCJhc3N1bWluZyI6ZmFsc2V9.zfu2HAyrZFb_Vmi7rptiuVFDEDEIrw2MCuORxk1XYBo"
 
     val log = Logger.getLogger("MainActivity")
 
@@ -56,6 +63,7 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
     var transaction: Transaction? = null
 
     fun getAmount(): Int {
+
         return textInput_amount.text.toString().toFloat().times(100).toInt()
     }
 
@@ -76,8 +84,13 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
     override fun getContext(): Context {
         return this
     }
+    private fun <I, O> Activity.registerForActivityResult(
+        contract: ActivityResultContract<I, O>,
+        callback: ActivityResultCallback<O>
+    ) = (this as ComponentActivity).registerForActivityResult(contract, callback)
 
-    override var permissionRequestLauncher =
+
+    override var permissionRequestLauncher: ActivityResultLauncher<String> =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
             permissionRequestLauncherCallback?.invoke(isGranted)
         }
