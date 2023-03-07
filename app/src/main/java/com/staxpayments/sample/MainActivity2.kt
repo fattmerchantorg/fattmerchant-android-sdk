@@ -1,23 +1,17 @@
+/*
+
 package com.fattmerchant.fmsampleclient
 
-import android.Manifest
 import android.app.AlertDialog
-import android.content.Context
-import android.os.Build
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.View
 import android.widget.EditText
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContentProviderCompat.requireContext
 import com.creditcall.chipdnamobile.*
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
-import com.fattmerchant.android.chipdna.ChipDnaDriver
-import com.fattmerchant.android.chipdna.get
 import com.fattmerchant.omni.Environment
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.UserNotificationListener
@@ -32,16 +26,12 @@ import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.data.models.PaymentMethod
 import com.fattmerchant.omni.data.models.Transaction
 import kotlinx.android.synthetic.main.activity_main.*
-import org.xmlpull.v1.XmlPullParserException
-import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.logging.Logger
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
-class MainActivity : AppCompatActivity(), PermissionsManager {
+class MainActivity2 : AppCompatActivity() {
 
     val staxKey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJnb2RVc2VyIjpmYWxzZSwibWVyY2hhbnQiOiI1ZjVkNGRkZi01N2E5LTQyMWMtOTMxMy0zMWI4ZDA5MTcyNjkiLCJzdWIiOiI4MmJlYzljMy0wMjU5LTQ1ZDQtYjk2Yi02ZTFmZTZhNTc5MDgiLCJicmFuZCI6ImZhdHRtZXJjaGFudCIsImlzcyI6Imh0dHA6Ly9hcGlwcm9kLmZhdHRsYWJzLmNvbS90ZWFtL2FwaWtleSIsImlhdCI6MTY2ODYyNTQ3MywiZXhwIjo0ODIyMjI1NDczLCJuYmYiOjE2Njg2MjU0NzMsImp0aSI6IlhqVmJBWFpjSnFBNkJGTnkiLCJhc3N1bWluZyI6ZmFsc2V9.zfu2HAyrZFb_Vmi7rptiuVFDEDEIrw2MCuORxk1XYBo"
 
@@ -68,59 +58,6 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
 //        showApiKeyDialog()
     }
 
-    override var permissionRequestLauncherCallback: ((Boolean) -> Unit)? = null
-    override fun getActivity(): AppCompatActivity {
-        return this
-    }
-
-    override fun getContext(): Context {
-        return this
-    }
-
-    override var permissionRequestLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-            permissionRequestLauncherCallback?.invoke(isGranted)
-        }
-
-    private val locationPermissionRequestLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        updateStatus("Location permission received: $granted")
-    }
-
-    private val bluetoothPermissionRequestLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-            if (it.isNotEmpty()) {
-                var areAllGranted = true
-                for (granted in it.values) {
-                    if (!granted) {
-                        areAllGranted = false
-                        break
-                    }
-                }
-
-                updateStatus("Bluetooth permission received: $areAllGranted")
-            }
-        }
-
-    private fun setupRequestLocationPermissionButton() {
-        buttonLocationPermission.setOnClickListener {
-            locationPermissionRequestLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
-    }
-
-    private fun setupRequestBluetoothPermissionButton() {
-        buttonBluetoothPermission.setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val bluetoothPermissionArray = arrayOf(
-                    Manifest.permission.BLUETOOTH_SCAN,
-                    Manifest.permission.BLUETOOTH_CONNECT
-                )
-                bluetoothPermissionRequestLauncher.launch(bluetoothPermissionArray)
-            } else {
-                updateStatus("Bluetooth permission received: true")
-            }
-        }
-    }
-
     val updateListener = IConfigurationUpdateListener { params ->
         Log.d("Stax", params.getValue(ParameterKeys.ConfigurationUpdate))
     }
@@ -134,63 +71,6 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
     val tmsListener = ITmsUpdateListener {
         Log.d("Stax", "UPDATE TMS")
         Log.d("Stax", it.toString())
-    }
-
-    private fun setupRawConnectButton() {
-
-
-        buttonRawConnect.setOnClickListener {
-            ChipDnaMobile.getInstance().clearAllAvailablePinPadsListeners()
-            ChipDnaMobile.getInstance().addAvailablePinPadsListener { params ->
-                val availablePinPadsXml = params.getValue(ParameterKeys.AvailablePinPads)
-                val isEmpty = availablePinPadsXml.isNullOrEmpty()
-                val pinPads = if(isEmpty) listOf() else deserializePinPads(availablePinPadsXml)
-
-                // Listeners
-                ChipDnaMobile.getInstance().clearAllConfigurationUpdateListeners()
-                ChipDnaMobile.getInstance().clearAllConnectAndConfigureFinishedListeners()
-                ChipDnaMobile.getInstance().clearAllTmsUpdateListener()
-
-                ChipDnaMobile.getInstance().addConfigurationUpdateListener(updateListener)
-                ChipDnaMobile.getInstance().addConnectAndConfigureFinishedListener(finishedListener)
-                ChipDnaMobile.getInstance().addTmsUpdateListener(tmsListener)
-
-                val connectParams = ChipDnaMobile.getInstance().getStatus(null)
-                connectParams.add(ParameterKeys.PinPadName, pinPads[0].name)
-                connectParams.add(ParameterKeys.PinPadConnectionType, pinPads[0].connectionType)
-                ChipDnaMobile.getInstance().connectAndConfigure(connectParams)
-            }
-
-            val searchParams = ChipDnaMobile.getInstance().getStatus(null)
-            searchParams.add(ParameterKeys.SearchConnectionTypeBluetooth, ParameterValues.TRUE)
-            searchParams.add(ParameterKeys.SearchConnectionTypeBluetoothLe, ParameterValues.TRUE)
-            searchParams.add(ParameterKeys.SearchConnectionTypeUsb, ParameterValues.TRUE)
-
-            ChipDnaMobile.getInstance().getAvailablePinPads(searchParams)
-        }
-    }
-
-    private fun deserializePinPads(pinPadsXml: String?): List<ChipDnaDriver.SelectablePinPad> {
-        if (pinPadsXml == null) {
-            return listOf()
-        }
-
-        val availablePinPadsList = ArrayList<ChipDnaDriver.SelectablePinPad>()
-
-        try {
-            val availablePinPadsHashMap = ChipDnaMobileSerializer.deserializeAvailablePinPads(pinPadsXml)
-            for (connectionType in availablePinPadsHashMap.keys) {
-                for (pinPad in availablePinPadsHashMap[connectionType]!!) {
-                    availablePinPadsList.add(ChipDnaDriver.SelectablePinPad(pinPad, connectionType))
-                }
-            }
-        } catch (e: XmlPullParserException) {
-            e.printStackTrace()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-
-        return availablePinPadsList
     }
 
     private fun setupPerformSaleWithReaderButton() {
@@ -509,9 +389,6 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
         setupPerformAuthButton()
         setupCaptureLastAuthButton()
         setupVoidLastAuthButton()
-        setupRequestLocationPermissionButton()
-        setupRequestBluetoothPermissionButton()
-        setupRawConnectButton()
     }
 
     private fun Transaction.pretty(): String {
@@ -539,40 +416,32 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
     }
 
     private fun searchAndConnectReader() {
-        runIfPermissionGranted(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            R.string.permission_rationale_title,
-            R.string.permission_rationale_message_fine_location,
-            R.string.permission_denied_title,
-            R.string.permission_rationale_message_fine_location
-        ) {
-            updateStatus("Searching for readers...")
-            Omni.shared()?.getAvailableReaders {
-                val readers = it.map { r ->
-                    r.getName() + " - " + r.getConnectionType().toString()
-                }.toTypedArray()
-                updateStatus("Found readers: ${it.map { it.getName() }}")
+        updateStatus("Searching for readers...")
+        Omni.shared()?.getAvailableReaders {
+            val readers = it.map { r ->
+                r.getName() + " - " + r.getConnectionType().toString()
+            }.toTypedArray()
+            updateStatus("Found readers: ${it.map { it.getName() }}")
 
-                runOnUiThread {
-                    AlertDialog.Builder(this@MainActivity)
-                        .setItems(readers) { dialog, which ->
-                            val selected = it[which]
+            runOnUiThread {
+                AlertDialog.Builder(this@MainActivity)
+                    .setItems(readers) { dialog, which ->
+                        val selected = it[which]
 
-                            updateStatus("Trying to connect to [${selected.getName()}]")
+                        updateStatus("Trying to connect to [${selected.getName()}]")
 
-                            Omni.shared()?.connectReader(selected, { reader ->
-                                this.connectedReader = reader
-                                buttonDisconnectReader.isEnabled = true
-                                updateStatus("Connected to [${reader.getName()}]")
+                        Omni.shared()?.connectReader(selected, { reader ->
+                            this.connectedReader = reader
+                            buttonDisconnectReader.isEnabled = true
+                            updateStatus("Connected to [${reader.getName()}]")
 
-                                runOnUiThread {
-                                    buttonPerformSaleWithReader.isEnabled = true
-                                }
-                            }, { error ->
-                                updateStatus("Error connecting: $error")
-                            })
-                        }.create().show()
-                }
+                            runOnUiThread {
+                                buttonPerformSaleWithReader.isEnabled = true
+                            }
+                        }, { error ->
+                            updateStatus("Error connecting: $error")
+                        })
+                    }.create().show()
             }
         }
     }
@@ -648,3 +517,4 @@ class MainActivity : AppCompatActivity(), PermissionsManager {
 //        }
     }
 }
+*/
