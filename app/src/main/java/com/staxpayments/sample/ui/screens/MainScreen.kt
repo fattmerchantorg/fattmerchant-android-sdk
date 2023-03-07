@@ -2,9 +2,7 @@ package com.staxpayments.sample.ui.screens
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,8 +17,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,8 +40,9 @@ fun MainScreen(
     staxViewModel: StaxViewModel = viewModel()
 ) {
     val topAppBarColor = if (isSystemInDarkTheme()) Purple800 else Purple500
+    val padding = 16.dp
 
-    val horizontalPadding = 20.dp
+    val staxUiState by staxViewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = { TopAppBar(
@@ -59,27 +60,29 @@ fun MainScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = horizontalPadding)
+                .padding(horizontal = padding)
         ) {
-            Spacer(modifier = Modifier.size(it.calculateTopPadding() + 8.dp))
+            Spacer(modifier = Modifier.size(it.calculateTopPadding() + 16.dp))
 
             // Content
             Column {
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.Red)
-                    .weight(3f)
+                // Log View
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(3f)
+                        .verticalScroll(rememberScrollState()),
+                    text = staxUiState.logString
                 )
 
-                Spacer(modifier = Modifier.size(16.dp))
+                // Amount Text Input
                 OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = padding),
                     value = "0.01",
                     onValueChange = {},
                     enabled = false,
                     label = { Text("Amount") }
                 )
-                Spacer(modifier = Modifier.size(16.dp))
 
                 // Buttons
                 Column(
@@ -87,9 +90,10 @@ fun MainScreen(
                         .verticalScroll(rememberScrollState())
                         .weight(2f)
                 ) {
+                    val context = LocalContext.current
+
                     WideButton(text = "Initialize") { staxViewModel.onInitialize() }
-                    WideButton(text = "Search for Reader") { staxViewModel.onSearchForReaders() }
-                    WideButton(text = "Connect to Selected Reader") { staxViewModel.onConnectToSelectedReader() }
+                    WideButton(text = "Search & Connect to Reader") { staxViewModel.onSearchAndConnectToReaders(context) }
                     WideButton(text = "Perform Sale With Reader") { staxViewModel.onPerformSaleWithReader() }
                     WideButton(text = "Perform Auth With Reader") { staxViewModel.onPerformAuthWithReader() }
                     WideButton(text = "Capture Last Auth") { staxViewModel.onCaptureLastAuth() }
@@ -99,6 +103,7 @@ fun MainScreen(
                     WideButton(text = "Get Connected Reader Details") { staxViewModel.onGetConnectedReaderDetails() }
                     WideButton(text = "Disconnect Reader") { staxViewModel.onDisconnectReader() }
                 }
+                Spacer(modifier = Modifier.size(padding))
             }
         }
     }
