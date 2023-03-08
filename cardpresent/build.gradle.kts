@@ -76,8 +76,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
 
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.12.0")
     implementation("com.jakewharton.timber:timber:4.7.1")
     implementation("net.zetetic:android-database-sqlcipher:4.5.0@aar")
@@ -91,7 +89,6 @@ dependencies {
     // Ktor
     implementation("io.ktor:ktor-client-core:1.1.2")
     implementation("io.ktor:ktor-client-okhttp:1.1.2")
-    implementation("io.ktor:ktor-client-ios:1.1.2")
     implementation("io.ktor:ktor-client-json:1.1.2")
     implementation("io.ktor:ktor-client-gson:1.1.2")
 }
