@@ -2,7 +2,6 @@ package com.fattmerchant.omni.data.repository
 
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.MobileReaderDriver
-import com.fattmerchant.omni.data.PaymentTerminalDriver
 import com.fattmerchant.omni.data.models.Transaction
 
 internal interface MobileReaderDriverRepository {

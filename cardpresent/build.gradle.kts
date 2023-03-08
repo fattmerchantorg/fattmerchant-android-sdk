@@ -85,7 +85,6 @@ dependencies {
     // AnywhereCommerce
     compileOnly(project(":awc"))
 
-    implementation("com.dvmms:dejapay:2.0.37")
     implementation("com.google.code.gson:gson:2.10")
 
     // Ktor
