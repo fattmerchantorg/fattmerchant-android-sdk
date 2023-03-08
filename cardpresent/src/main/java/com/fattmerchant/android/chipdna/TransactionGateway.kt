@@ -2,6 +2,7 @@ package com.fattmerchant.android.chipdna
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
 
 /**
  * Communicates with Transaction Gateway via the Direct Post API
@@ -22,8 +23,8 @@ internal class TransactionGateway {
          */
         suspend fun getTransactionCcExpiration(securityKey: String, transactionId: String): String? {
             val client = HttpClient {}
-            val response = client.get<String>(urlString = "$baseUrl?security_key=$securityKey&transaction_id=$transactionId")
-            return ChipDnaXMLTransactionParser.parseExpirationDate(response, transactionId)
+            val response = client.get(urlString = "$baseUrl?security_key=$securityKey&transaction_id=$transactionId")
+            return ChipDnaXMLTransactionParser.parseExpirationDate(response.bodyAsText(), transactionId)
         }
     }
 }

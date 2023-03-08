@@ -52,6 +52,8 @@ android {
 
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+    implementation("net.zetetic:android-database-sqlcipher:4.5.0@aar")
+    implementation("androidx.sqlite:sqlite:2.3.0")
 
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation("androidx.test:core:1.5.0")
@@ -84,11 +86,12 @@ dependencies {
     compileOnly(project(":awc"))
 
     implementation("com.dvmms:dejapay:2.0.37")
-    implementation("com.google.code.gson:gson:2.9.1")
+    implementation("com.google.code.gson:gson:2.10")
 
     // Ktor
-    implementation("io.ktor:ktor-client-core:1.1.2")
-    implementation("io.ktor:ktor-client-okhttp:1.1.2")
-    implementation("io.ktor:ktor-client-json:1.1.2")
-    implementation("io.ktor:ktor-client-gson:1.1.2")
+    implementation("io.ktor:ktor-client-core:2.2.3")
+    implementation("io.ktor:ktor-client-okhttp:2.2.3")
+    implementation("io.ktor:ktor-serialization-gson:2.2.3")
+    implementation("io.ktor:ktor-client-content-negotiation:2.2.3")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.2.3")
 }
