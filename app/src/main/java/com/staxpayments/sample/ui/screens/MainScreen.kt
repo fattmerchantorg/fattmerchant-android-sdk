@@ -1,7 +1,9 @@
 package com.staxpayments.sample.ui.screens
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -26,6 +29,9 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.accompanist.permissions.rememberPermissionState
 import com.staxpayments.sample.ui.components.WideButton
 import com.staxpayments.sample.ui.theme.Gray50
 import com.staxpayments.sample.ui.theme.Purple500
@@ -33,8 +39,18 @@ import com.staxpayments.sample.ui.theme.Purple800
 import com.staxpayments.sample.ui.theme.StaxAndroidSDKTheme
 import com.staxpayments.sample.viewmodel.StaxViewModel
 
+// Only use bluetooth permissions if on Android S (12) or higher.
+val bluetoothPermissionsList = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+    listOf(
+        Manifest.permission.BLUETOOTH_CONNECT,
+        Manifest.permission.BLUETOOTH_SCAN,
+    )
+} else {
+    listOf()
+}
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun MainScreen(
     staxViewModel: StaxViewModel = viewModel()
@@ -43,6 +59,17 @@ fun MainScreen(
     val padding = 16.dp
 
     val staxUiState by staxViewModel.uiState.collectAsState()
+
+
+    val locationPermissionLauncher = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+    val bluetoothPermissionLauncher = rememberMultiplePermissionsState(bluetoothPermissionsList) {
+        // TODO: Check Permissions Results
+        locationPermissionLauncher.launchPermissionRequest()
+    }
+
+    LaunchedEffect(Unit) {
+        bluetoothPermissionLauncher.launchMultiplePermissionRequest()
+    }
 
     Scaffold(
         topBar = { TopAppBar(
@@ -77,7 +104,9 @@ fun MainScreen(
 
                 // Amount Text Input
                 OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = padding),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = padding),
                     value = "0.01",
                     onValueChange = {},
                     enabled = false,
@@ -97,7 +126,6 @@ fun MainScreen(
                     WideButton(text = "Perform Sale With Reader") { staxViewModel.onPerformSaleWithReader() }
                     WideButton(text = "Perform Auth With Reader") { staxViewModel.onPerformAuthWithReader() }
                     WideButton(text = "Capture Last Auth") { staxViewModel.onCaptureLastAuth() }
-                    WideButton(text = "Void Last Auth") { staxViewModel.onVoidLastAuth() }
                     WideButton(text = "Void Last Transaction") { staxViewModel.onVoidLastTransaction() }
                     WideButton(text = "Tokenize Card") { staxViewModel.onTokenizeCard() }
                     WideButton(text = "Get Connected Reader Details") { staxViewModel.onGetConnectedReaderDetails() }

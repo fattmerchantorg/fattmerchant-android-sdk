@@ -78,4 +78,7 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    // Google Accompanist
+    implementation("com.google.accompanist:accompanist-permissions:0.28.0")
 }

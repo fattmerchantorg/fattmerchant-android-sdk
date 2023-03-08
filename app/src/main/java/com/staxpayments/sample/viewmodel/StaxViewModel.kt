@@ -7,7 +7,15 @@ import androidx.lifecycle.ViewModel
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
 import com.fattmerchant.omni.Environment
+import com.fattmerchant.omni.TransactionUpdateListener
+import com.fattmerchant.omni.UserNotificationListener
+import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.MobileReader
+import com.fattmerchant.omni.data.TransactionRequest
+import com.fattmerchant.omni.data.TransactionUpdate
+import com.fattmerchant.omni.data.UserNotification
+import com.fattmerchant.omni.data.models.CreditCard
+import com.fattmerchant.omni.data.models.Transaction
 import com.staxpayments.sample.BuildConfig
 import com.staxpayments.sample.MainApplication
 import com.staxpayments.sample.SignatureProvider
@@ -25,6 +33,7 @@ import java.util.Locale
 class StaxViewModel : ViewModel() {
     private val apiKey = BuildConfig.STAX_API_KEY
     private var reader: MobileReader? = null
+    private var lastTransaction: Transaction? = null
 
     private val _uiState = MutableStateFlow(StaxUiState())
     val uiState: StateFlow<StaxUiState> = _uiState.asStateFlow()
@@ -89,35 +98,162 @@ class StaxViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Performs a charge of $0.01 on the reader
+     * TODO: Add better docs once Omni -> Stax rebranding
+     * TODO: Read value from text input
+     */
     fun onPerformSaleWithReader() {
+        val amount = Amount(1)
+        log("Attempting to charge ${amount.dollarsString()}")
+        val request = TransactionRequest(amount)
 
+        // Listen to transaction updates delivered by the Omni SDK
+        Omni.shared()?.transactionUpdateListener = object : TransactionUpdateListener {
+            override fun onTransactionUpdate(transactionUpdate: TransactionUpdate) {
+                log("${transactionUpdate.value} | ${transactionUpdate.userFriendlyMessage}")
+            }
+        }
+
+        Omni.shared()?.userNotificationListener = object : UserNotificationListener {
+            override fun onUserNotification(userNotification: UserNotification) {
+                log("${userNotification.value} | ${userNotification.userFriendlyMessage}")
+            }
+
+            override fun onRawUserNotification(userNotification: String) {
+                log(userNotification)
+            }
+        }
+
+        Omni.shared()?.takeMobileReaderTransaction(request, { transaction ->
+            val msg = if (transaction.success == true) {
+                "Successfully executed transaction"
+            } else {
+                "Transaction declined"
+            }
+            log(msg)
+
+            lastTransaction = transaction
+        }, {
+            log("Couldn't perform sale: ${it.message}. ${it.detail}")
+        })
     }
 
+    /**
+     * Performs a pre auth of $0.01 on the reader
+     * TODO: Add better docs once Omni -> Stax rebranding
+     * TODO: Read value from text input
+     */
     fun onPerformAuthWithReader() {
+        val amount = Amount(0.01)
+        log("Attempting to auth ${amount.dollarsString()}")
 
+        val request = TransactionRequest(amount)
+        request.preauth = true
+        Omni.shared()?.takeMobileReaderTransaction(request, { transaction ->
+
+            val msg = if (transaction.success == true) {
+                "Successfully authed transaction"
+            } else {
+                "Transaction declined"
+            }
+
+            log(msg)
+
+            lastTransaction = transaction
+        }, {
+            log("Couldn't perform auth: ${it.message}. ${it.detail}")
+        })
     }
 
+    /**
+     * Takes the last transaction as a pre-auth and attempts to capture it
+     * TODO: Add better docs once Omni -> Stax rebranding
+     * TODO: Read value from text input
+     */
     fun onCaptureLastAuth() {
+        if (lastTransaction?.id == null) { return }
 
+        val transactionId = lastTransaction?.id!!
+
+        val amount = Amount(0.01)
+        log("Attempting to capture last auth")
+
+        Omni.shared()?.capturePreauthTransaction(transactionId, amount, { transaction ->
+            val msg = if (transaction.success == true) {
+                "Successfully captured transaction"
+            } else {
+                "Transaction declined"
+            }
+            log(msg)
+        }, {
+            log("Couldn't perform capture: ${it.message}. ${it.detail}")
+        })
     }
 
-    fun onVoidLastAuth() {
-
-    }
-
+    /**
+     * Takes the last transaction as a pre-auth and attempts to void it
+     * TODO: Add better docs once Omni -> Stax rebranding
+     */
     fun onVoidLastTransaction() {
+        if (lastTransaction?.id == null) { return }
+        val transactionId = lastTransaction?.id!!
 
+        Omni.shared()?.voidTransaction(transactionId, { transaction ->
+            val msg = if (transaction.success == true) {
+                "Successfully voided transaction"
+            } else {
+                "Transaction declined"
+            }
+            log(msg)
+        }, {
+            log("Couldn't perform void: ${it.message}. ${it.detail}")
+        })
     }
 
+    /**
+     * Tokenize the test card
+     * TODO: Show building Credit Card instead of test card
+     */
     fun onTokenizeCard() {
-
+        Omni.shared()?.tokenize(CreditCard.testCreditCard(), { paymentMethod ->
+            log("Successfully tokenized credit card")
+            log(paymentMethod.toString())
+        }, {
+            log("Couldn't tokenize card: ${it.message}. ${it.detail}")
+        })
     }
 
+    /**
+     * Show reader details
+     * TODO: cleanup code
+     */
     fun onGetConnectedReaderDetails() {
-
+        Omni.shared()?.getConnectedReader({ connectedReader ->
+            connectedReader?.let { reader ->
+                log("Connected Reader:")
+                log(reader.toString())
+            } ?: log("There is no connected reader")
+        }, { exception ->
+            log(exception.toString())
+        }) ?: log("Could not get connected reader")
     }
 
+    /**
+     * Disconnect the current reader
+     * TODO: Cleanup example code
+     */
     fun onDisconnectReader() {
-
+        Omni.shared()?.getConnectedReader({ connectedReader ->
+            connectedReader?.let { reader ->
+                Omni.shared()?.disconnectReader(reader, {
+                    log("Reader disconnected")
+                }, {
+                    log(it.toString())
+                })
+            } ?: log("There is no connected reader")
+        }, { exception ->
+            log(exception.toString())
+        }) ?: log("Could not get connected reader")
     }
 }
