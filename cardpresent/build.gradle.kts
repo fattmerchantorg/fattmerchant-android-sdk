@@ -70,11 +70,8 @@ dependencies {
 
     androidTestImplementation("org.hamcrest:hamcrest-library:2.2")
     androidTestImplementation("androidx.test.uiautomator:uiautomator:2.2.0")
-    androidTestImplementation("net.zetetic:android-database-sqlcipher:4.0.1")
-
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.1")
-
-    androidTestImplementation("net.zetetic:android-database-sqlcipher:3.5.1")
+    androidTestImplementation("net.zetetic:android-database-sqlcipher:4.5.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
@@ -84,22 +81,13 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.12.0")
     implementation("com.jakewharton.timber:timber:4.7.1")
-    implementation("net.zetetic:android-database-sqlcipher:4.0.1@aar")
+    implementation("net.zetetic:android-database-sqlcipher:4.5.0@aar")
 
     // AnywhereCommerce
     compileOnly(project(":awc"))
+
     implementation("com.dvmms:dejapay:2.0.37")
     implementation("com.google.code.gson:gson:2.9.1")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
-    implementation("com.github.smart-fun:XmlToJson:1.4.4")
-    api("org.slf4j:slf4j-api:1.7.36")
-    api("com.github.tony19:logback-android:2.0.0")
-    api("com.googlecode.libphonenumber:libphonenumber:8.5.0")
-    implementation("com.squareup.retrofit2:converter-scalars:2.3.0")
-    implementation("org.simpleframework:simple-xml:2.7.1") {
-        exclude(group = "stax", module = "stax-api")
-        exclude(group = "xpp3", module = "xpp3")
-    }
 
     // Ktor
     implementation("io.ktor:ktor-client-core:1.1.2")
