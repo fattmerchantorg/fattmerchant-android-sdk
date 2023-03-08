@@ -7,7 +7,6 @@ group = "com.github.fattmerchantorg"
 
 android {
     compileSdk = 33
-
     defaultConfig {
         minSdk = 23
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
