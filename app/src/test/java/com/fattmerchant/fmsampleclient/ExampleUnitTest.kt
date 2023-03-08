@@ -1,4 +1,4 @@
-package com.fattmerchant.fmsampleclient
+package com.fattmerchant.sample
 
 import org.junit.Test
 
