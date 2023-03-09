@@ -1,9 +1,9 @@
 package com.staxpayments.sdk.usecase
 
+import com.staxpayments.exceptions.StaxException
 import com.staxpayments.sdk.data.models.BankAccount
 import com.staxpayments.sdk.data.models.CreditCard
 import com.staxpayments.sdk.data.models.Customer
-import com.staxpayments.sdk.data.models.OmniException
 import com.staxpayments.sdk.data.models.PaymentMethod
 import com.staxpayments.sdk.data.repository.CustomerRepository
 import com.staxpayments.sdk.data.repository.PaymentMethodRepository
@@ -18,7 +18,7 @@ internal class TokenizePaymentMethod(
         val bankAccount: BankAccount? = null,
         override val coroutineContext: CoroutineContext) : CoroutineScope {
 
-    suspend fun start(failure: (OmniException) -> Unit): PaymentMethod? = coroutineScope {
+    suspend fun start(failure: (StaxException) -> Unit): PaymentMethod? = coroutineScope {
         var firstName: String? = null
         var lastName: String? = null
         var customer: Customer? = null
@@ -31,7 +31,7 @@ internal class TokenizePaymentMethod(
                 firstName = bankAccount.firstName()
                 lastName = bankAccount.lastName()
             } ?: run {
-                failure(OmniException("No name supplied."))
+                failure(StaxException("No name supplied."))
                 return@coroutineScope null
             }
         }
@@ -72,7 +72,7 @@ internal class TokenizePaymentMethod(
                     personName = bank.personName
                 }
             } ?: run {
-                failure(OmniException("No credit card or bank information was supplied."))
+                failure(StaxException("No credit card or bank information was supplied."))
                 return@coroutineScope null
             }
         }

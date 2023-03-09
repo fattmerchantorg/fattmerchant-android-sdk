@@ -1,6 +1,7 @@
 package com.staxpayments.sdk.usecase
 
 import com.staxpayments.android.chipdna.ChipDnaDriver
+import com.staxpayments.exceptions.StaxException
 import com.staxpayments.sdk.SignatureProviding
 import com.staxpayments.sdk.TransactionUpdateListener
 import com.staxpayments.sdk.UserNotificationListener
@@ -9,7 +10,6 @@ import com.staxpayments.sdk.data.TransactionRequest
 import com.staxpayments.sdk.data.TransactionResult
 import com.staxpayments.sdk.data.models.Customer
 import com.staxpayments.sdk.data.models.Invoice
-import com.staxpayments.sdk.data.models.OmniException
 import com.staxpayments.sdk.data.models.Transaction
 import com.staxpayments.sdk.data.repository.CustomerRepository
 import com.staxpayments.sdk.data.repository.InvoiceRepository
@@ -34,7 +34,7 @@ internal class TakeMobileReaderPayment(
 ) : CoroutineScope {
 
     class TakeMobileReaderPaymentException(message: String? = null) :
-        OmniException("Could not take mobile reader payment", message)
+        StaxException("Could not take mobile reader payment", message)
 
     companion object {
         internal fun transactionMetaFrom(result: TransactionResult): Map<String, Any> {
@@ -84,7 +84,7 @@ internal class TakeMobileReaderPayment(
         }
     }
 
-    suspend fun start(onError: (OmniException) -> Unit): Transaction? = coroutineScope {
+    suspend fun start(onError: (StaxException) -> Unit): Transaction? = coroutineScope {
 
         // Get the reader responsible for taking the payment
         val reader = getAvailableMobileReaderDriver(mobileReaderDriverRepository)
@@ -132,7 +132,7 @@ internal class TakeMobileReaderPayment(
             return@coroutineScope null
         }
 
-        val voidAndFail = { exception: OmniException ->
+        val voidAndFail = { exception: StaxException ->
             reader.voidTransaction(result) {
                 onError(exception)
             }

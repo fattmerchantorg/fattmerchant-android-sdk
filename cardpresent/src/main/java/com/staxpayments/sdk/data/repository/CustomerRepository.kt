@@ -1,21 +1,21 @@
 package com.staxpayments.sdk.data.repository
 
+import com.staxpayments.exceptions.StaxException
 import com.staxpayments.sdk.data.models.Customer
-import com.staxpayments.sdk.data.models.OmniException
 
 internal interface CustomerRepository : ModelRepository<Customer> {
 
-    class CreateCustomerException(message: String? = null) : OmniException("Could not create customer", message)
-    class GetCustomerException(message: String? = null) : OmniException("Could not get customer", message)
+    class CreateCustomerException(message: String? = null) : StaxException("Could not create customer", message)
+    class GetCustomerException(message: String? = null) : StaxException("Could not get customer", message)
 
-    override suspend fun create(model: Customer, error: (OmniException) -> Unit): Customer? {
-        return omniApi.createCustomer(model) {
+    override suspend fun create(model: Customer, error: (StaxException) -> Unit): Customer? {
+        return staxApi.createCustomer(model) {
             error(CreateCustomerException(it.message))
         }
     }
 
-    override suspend fun getById(id: String, error: (OmniException) -> Unit): Customer? {
-        return omniApi.getCustomer(id) {
+    override suspend fun getById(id: String, error: (StaxException) -> Unit): Customer? {
+        return staxApi.getCustomer(id) {
             error(GetCustomerException(it.message))
         }
     }

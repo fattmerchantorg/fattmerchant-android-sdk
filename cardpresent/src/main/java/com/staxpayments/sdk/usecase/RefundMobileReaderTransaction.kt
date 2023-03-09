@@ -1,16 +1,16 @@
 package com.staxpayments.sdk.usecase
 
+import com.staxpayments.exceptions.StaxException
 import com.staxpayments.sdk.data.Amount
 import com.staxpayments.sdk.data.TransactionResult
-import com.staxpayments.sdk.data.models.OmniException
 import com.staxpayments.sdk.data.models.Transaction
 import com.staxpayments.sdk.data.repository.MobileReaderDriverRepository
 import com.staxpayments.sdk.data.repository.TransactionRepository
-import com.staxpayments.sdk.networking.OmniApi
+import com.staxpayments.sdk.networking.StaxApi
 import kotlinx.coroutines.coroutineScope
 
 /**
- * Refunds the given [Transaction] and records the refund in Omni
+ * Refunds the given [Transaction] and records the refund in Stax
  *
  * @property mobileReaderDriverRepository
  * @property transactionRepository
@@ -21,12 +21,12 @@ internal class RefundMobileReaderTransaction(
     private val transactionRepository: TransactionRepository,
     internal val transaction: Transaction,
     private var refundAmount: Amount?,
-    private val omniApi: OmniApi
+    private val staxApi: StaxApi
 ) {
 
-    class RefundException(message: String? = null) : OmniException("Could not refund transaction", message)
+    class RefundException(message: String? = null) : StaxException("Could not refund transaction", message)
 
-    suspend fun start(onError: (OmniException) -> Unit): Transaction? = coroutineScope {
+    suspend fun start(onError: (StaxException) -> Unit): Transaction? = coroutineScope {
         try {
             // Validate the refund
             validateRefund(transaction, refundAmount)?.let { throw it }
@@ -47,10 +47,10 @@ internal class RefundMobileReaderTransaction(
 
             // Get the driver
             mobileReaderDriverRepository.getDriverFor(transaction).let { driver ->
-                // Check if Omni refund is supported by driver
-                if (driver?.isOmniRefundsSupported()!!) {
+                // Check if Stax refund is supported by driver
+                if (driver?.isStaxRefundsSupported()!!) {
                     transaction.id?.let { transactionId ->
-                        val response = omniApi.postVoidOrRefund(transactionId, refundAmount?.dollarsString()) {
+                        val response = staxApi.postVoidOrRefund(transactionId, refundAmount?.dollarsString()) {
                             throw RefundException()
                         }
 
@@ -84,7 +84,7 @@ internal class RefundMobileReaderTransaction(
         }
     }
 
-    private suspend fun postRefundedTransaction(result: TransactionResult, error: (OmniException) -> Unit): Transaction? {
+    private suspend fun postRefundedTransaction(result: TransactionResult, error: (StaxException) -> Unit): Transaction? {
         val refundedTransaction = Transaction().apply {
             total = result.amount?.dollarsString()
             paymentMethodId = transaction.paymentMethodId
@@ -102,7 +102,7 @@ internal class RefundMobileReaderTransaction(
     }
 
     companion object {
-        internal fun validateRefund(transaction: Transaction, refundAmount: Amount? = null): OmniException? {
+        internal fun validateRefund(transaction: Transaction, refundAmount: Amount? = null): StaxException? {
             // Ensure transaction isn't voided
             if (transaction.isVoided == true) {
                 return RefundException("Can not refund voided transaction")

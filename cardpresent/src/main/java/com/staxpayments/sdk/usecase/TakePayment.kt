@@ -1,13 +1,13 @@
 package com.staxpayments.sdk.usecase
 
+import com.staxpayments.exceptions.StaxException
 import com.staxpayments.sdk.data.Amount
 import com.staxpayments.sdk.data.TransactionRequest
 import com.staxpayments.sdk.data.models.ChargeRequest
-import com.staxpayments.sdk.data.models.OmniException
 import com.staxpayments.sdk.data.models.Transaction
 import com.staxpayments.sdk.data.repository.CustomerRepository
 import com.staxpayments.sdk.data.repository.PaymentMethodRepository
-import com.staxpayments.sdk.networking.OmniApi
+import com.staxpayments.sdk.networking.StaxApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlin.coroutines.CoroutineContext
@@ -16,14 +16,14 @@ internal class TakePayment(
     val customerRepository: CustomerRepository,
     val paymentMethodRepository: PaymentMethodRepository,
     val request: TransactionRequest,
-    val omniApi: OmniApi,
+    val staxApi: StaxApi,
     override val coroutineContext: CoroutineContext
 ) : CoroutineScope {
 
-    suspend fun start(failure: (OmniException) -> Unit): Transaction? = coroutineScope {
+    suspend fun start(failure: (StaxException) -> Unit): Transaction? = coroutineScope {
 
         if (request.card == null) {
-            failure(OmniException("No payment method provided."))
+            failure(StaxException("No payment method provided."))
             return@coroutineScope null
         }
 
@@ -40,8 +40,8 @@ internal class TakePayment(
 
         tokenizedPaymentMethod.id?.let {
             val chargeRequest = createChargeRequest(request.amount, it)
-            omniApi.charge(chargeRequest) {
-                failure(OmniException("Charging the payment method was unsuccessful."))
+            staxApi.charge(chargeRequest) {
+                failure(StaxException("Charging the payment method was unsuccessful."))
             }
         } ?: return@coroutineScope null
     }

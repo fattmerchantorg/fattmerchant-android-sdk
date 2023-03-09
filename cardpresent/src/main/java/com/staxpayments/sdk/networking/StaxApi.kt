@@ -28,7 +28,7 @@ import io.ktor.http.isSuccess
 import io.ktor.serialization.gson.gson
 import org.json.JSONObject
 
-class OmniApi {
+class StaxApi {
 
     private fun baseUrl(): String = when (environment) {
         LIVE -> "https://apiprod.fattlabs.com/"
@@ -81,7 +81,7 @@ class OmniApi {
     internal suspend fun getInvoice(id: String, error: (Error) -> Unit): Invoice? = get("invoice/$id", error)
 
     /**
-     * Creates a new invoice in Omni
+     * Creates a new invoice in Stax
      *
      * @param invoice
      * @return the created invoice
@@ -90,7 +90,7 @@ class OmniApi {
         post("invoice", JsonParser.toJson(invoice), error)
 
     /**
-     * Updates an new invoice in Omni
+     * Updates an new invoice in Stax
      *
      * @param invoice
      * @return the updated invoice
@@ -107,7 +107,7 @@ class OmniApi {
     internal suspend fun getCustomer(id: String, error: (Error) -> Unit): Customer? = get("customer/$id", error)
 
     /**
-     * Creates a new customer in Omni
+     * Creates a new customer in Stax
      *
      * @param customer
      * @return the created customer
@@ -116,7 +116,7 @@ class OmniApi {
         post("customer", JsonParser.toJson(customer), error)
 
     /**
-     * Creates a transaction in Omni
+     * Creates a transaction in Stax
      *
      * @param transaction
      * @return the created transaction
@@ -125,7 +125,7 @@ class OmniApi {
         post("transaction", JsonParser.toJson(transaction), error)
 
     /**
-     * Posts a void-or-refund to Omni
+     * Posts a void-or-refund to Stax
      *
      * @param transactionId the id of the transaction to void or refund
      * @param total the amount in dollars to void or refund
@@ -148,7 +148,7 @@ class OmniApi {
     }
 
     /**
-     * Updates an transaction in Omni
+     * Updates an transaction in Stax
      *
      * @param transaction
      * @return the updated transaction
@@ -157,7 +157,7 @@ class OmniApi {
         put("transaction/${transaction.id}", JsonParser.toJson(transaction))
 
     /**
-     * Gets a list of transactions from Omni
+     * Gets a list of transactions from Stax
      *
      * @return the list of transactions
      */
@@ -165,7 +165,7 @@ class OmniApi {
         get<PaginatedData<Transaction>>("transaction", error)?.data
 
     /**
-     * Gets a list of transactions from Omni
+     * Gets a list of transactions from Stax
      *
      * @return the list of transactions
      */
@@ -173,14 +173,14 @@ class OmniApi {
         get<PaginatedData<Invoice>>("invoice", error)?.data
 
     /**
-     * Creates a payment method in Omni
+     * Creates a payment method in Stax
      *
      * @param paymentMethod
      * @return the created payment method
      */
     internal suspend fun createPaymentMethod(paymentMethod: PaymentMethod, error: (Error) -> Unit): PaymentMethod? {
         // If the payment method is already tokenized, use the payment-method/token route
-        // that allows us to pass the token to Omni
+        // that allows us to pass the token to Stax
         val url = if (paymentMethod.paymentToken != null) {
             "payment-method/token"
         } else {

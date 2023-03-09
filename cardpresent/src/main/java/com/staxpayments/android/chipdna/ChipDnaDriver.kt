@@ -2,8 +2,9 @@ package com.staxpayments.android.chipdna
 
 import android.content.Context
 import com.creditcall.chipdnamobile.*
+import com.staxpayments.exceptions.StaxException
+import com.staxpayments.exceptions.StaxGeneralException
 import com.staxpayments.sdk.MobileReaderConnectionStatusListener
-import com.staxpayments.sdk.OmniGeneralException
 import com.staxpayments.sdk.SignatureProviding
 import com.staxpayments.sdk.TransactionUpdateListener
 import com.staxpayments.sdk.UserNotificationListener
@@ -17,7 +18,6 @@ import com.staxpayments.sdk.data.TransactionRequest
 import com.staxpayments.sdk.data.TransactionResult
 import com.staxpayments.sdk.data.models.MobileReaderConnectionStatus
 import com.staxpayments.sdk.data.models.MobileReaderDetails
-import com.staxpayments.sdk.data.models.OmniException
 import com.staxpayments.sdk.data.models.Transaction
 import com.staxpayments.sdk.usecase.CancelCurrentTransactionException
 import kotlinx.coroutines.CoroutineScope
@@ -31,7 +31,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-public class ChipDnaDriver :
+class ChipDnaDriver :
     CoroutineScope,
     MobileReaderDriver,
     IConfigurationUpdateListener,
@@ -147,7 +147,7 @@ public class ChipDnaDriver :
         return output
     }
 
-    override suspend fun isOmniRefundsSupported(): Boolean {
+    override suspend fun isStaxRefundsSupported(): Boolean {
         return true
     }
 
@@ -240,7 +240,7 @@ public class ChipDnaDriver :
         }
     }
 
-    override suspend fun disconnect(reader: MobileReader, error: (OmniException) -> Unit): Boolean {
+    override suspend fun disconnect(reader: MobileReader, error: (StaxException) -> Unit): Boolean {
         ChipDnaMobile.dispose(null)
         mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(MobileReaderConnectionStatus.DISCONNECTED)
         initialize(initArgs)
@@ -250,7 +250,7 @@ public class ChipDnaDriver :
     override suspend fun getConnectedReader(): MobileReader? {
         // ChipDna must be initialized
         if (!ChipDnaMobile.isInitialized()) {
-            throw OmniGeneralException.uninitialized
+            throw StaxGeneralException.uninitialized
         } else {
             return Companion.getConnectedReader()
         }
@@ -451,7 +451,7 @@ public class ChipDnaDriver :
         }
     }
 
-    override suspend fun cancelCurrentTransaction(error: ((OmniException) -> Unit)?): Boolean {
+    override suspend fun cancelCurrentTransaction(error: ((StaxException) -> Unit)?): Boolean {
         val result = ChipDnaMobile.getInstance().terminateTransaction(null)
         result?.let {
             val success = result[ParameterKeys.Result] == ParameterValues.TRUE

@@ -1,7 +1,7 @@
 package com.staxpayments.sdk
 
 /**
- * Provides a signature to Omni when required
+ * Provides a signature to Stax when required
  *
  * This should provide the signature image as a base64 encoded string
  */

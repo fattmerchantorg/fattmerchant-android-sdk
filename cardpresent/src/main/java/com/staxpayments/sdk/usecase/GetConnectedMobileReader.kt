@@ -1,14 +1,14 @@
 package com.staxpayments.sdk.usecase
 
-import com.staxpayments.sdk.OmniGeneralException
+import com.staxpayments.exceptions.StaxException
+import com.staxpayments.exceptions.StaxGeneralException
 import com.staxpayments.sdk.data.MobileReader
 import com.staxpayments.sdk.data.MobileReaderDriver
-import com.staxpayments.sdk.data.models.OmniException
 import com.staxpayments.sdk.data.repository.MobileReaderDriverRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
 
-class GetConnectedMobileReaderException(detail: String) : OmniException("Could not get connected mobile reader", detail) {
+class GetConnectedMobileReaderException(detail: String) : StaxException("Could not get connected mobile reader", detail) {
     companion object {
         val noReaderAvailable = GetConnectedMobileReaderException("No mobile reader is available")
     }
@@ -31,7 +31,7 @@ internal class GetConnectedMobileReader(
      *
      * @return the connected [MobileReader], or if none found
      */
-    suspend fun start(onError: (OmniException) -> Unit): MobileReader? {
+    suspend fun start(onError: (StaxException) -> Unit): MobileReader? {
         try {
             val driver = mobileReaderDriverRepository.getInitializedDrivers().firstOrNull()
 
@@ -41,10 +41,10 @@ internal class GetConnectedMobileReader(
             }
 
             return driver.getConnectedReader()
-        } catch (e: OmniException) {
+        } catch (e: StaxException) {
             onError(e)
         } catch (e: Error) {
-            onError(OmniGeneralException.unknown)
+            onError(StaxGeneralException.unknown)
         }
 
         return null

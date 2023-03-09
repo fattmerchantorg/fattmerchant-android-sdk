@@ -1,29 +1,29 @@
 package com.staxpayments.sdk.data
 
+import com.staxpayments.exceptions.StaxException
 import com.staxpayments.sdk.MobileReaderConnectionStatusListener
 import com.staxpayments.sdk.SignatureProviding
 import com.staxpayments.sdk.TransactionUpdateListener
 import com.staxpayments.sdk.UserNotificationListener
-import com.staxpayments.sdk.data.models.OmniException
 import com.staxpayments.sdk.data.models.Transaction
 import com.staxpayments.sdk.usecase.CancelCurrentTransactionException
 
 public interface MobileReaderDriver {
 
     class PerformTransactionException(message: String? = null) :
-        OmniException("Could not perform transaction", message)
+        StaxException("Could not perform transaction", message)
 
     class VoidTransactionException(message: String? = null) :
-        OmniException("Could not void transaction", message)
+        StaxException("Could not void transaction", message)
 
     class RefundTransactionException(message: String? = null) :
-        OmniException("Could not refund transaction", message)
+        StaxException("Could not refund transaction", message)
 
     open class ConnectReaderException(message: String? = null) :
-        OmniException("Could not connect mobile reader", message)
+        StaxException("Could not connect mobile reader", message)
 
     class InitializeMobileReaderDriverException(message: String? = null) :
-        OmniException("Could not initialize mobile reader driver", message)
+        StaxException("Could not initialize mobile reader driver", message)
 
     /** A list of serial numbers that this driver has previously connected to */
     var familiarSerialNumbers: MutableList<String>
@@ -39,16 +39,16 @@ public interface MobileReaderDriver {
     suspend fun isReadyToTakePayment(): Boolean
 
     /**
-     * True when the Omni API can perform the refund
+     * True when the Stax API can perform the refund
      *
-     * Some `MobileReaderDriver`s, like NMI, support a deeper integration with Omni, such that Omni can facilitate the
+     * Some `MobileReaderDriver`s, like NMI, support a deeper integration with Stax, such that Stax can facilitate the
      * void/refund. This allows the SDK to relieve itself of the responsibility of having to perform the refund directly
      * with the vendor (NMI), via the vendored SDK (ChipDNA).
      *
      * Other `MobileReaderDriver`s, like AWC, do not support this integration. For that reason, the SDK must perform
      * the void/refund directly with AWC via the AWC sdk.
      */
-    suspend fun isOmniRefundsSupported(): Boolean
+    suspend fun isStaxRefundsSupported(): Boolean
 
     /**
      * Attempts to initialize the [MobileReaderDriver]
@@ -86,7 +86,7 @@ public interface MobileReaderDriver {
      * @param error a block to run if something goes wrong
      * @return true if the reader was disconnected
      */
-    suspend fun disconnect(reader: MobileReader, error: (OmniException) -> Unit): Boolean
+    suspend fun disconnect(reader: MobileReader, error: (StaxException) -> Unit): Boolean
 
     /**
      * Gets the [MobileReader] that is currently connected and accessible via the receiver
@@ -152,5 +152,5 @@ public interface MobileReaderDriver {
      * @return the result of the operation
      */
     @Throws(CancelCurrentTransactionException::class)
-    suspend fun cancelCurrentTransaction(error: ((OmniException) -> Unit)?): Boolean
+    suspend fun cancelCurrentTransaction(error: ((StaxException) -> Unit)?): Boolean
 }

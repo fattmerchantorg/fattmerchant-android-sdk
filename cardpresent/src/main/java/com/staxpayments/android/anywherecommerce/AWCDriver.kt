@@ -19,6 +19,7 @@ import com.anywherecommerce.android.sdk.models.Signature
 import com.anywherecommerce.android.sdk.models.TransactionType
 import com.anywherecommerce.android.sdk.transactions.listener.CardTransactionListener
 import com.anywherecommerce.android.sdk.transactions.listener.TransactionListener
+import com.staxpayments.exceptions.StaxException
 import com.staxpayments.sdk.MobileReaderConnectionStatusListener
 import com.staxpayments.sdk.SignatureProviding
 import com.staxpayments.sdk.TransactionUpdateListener
@@ -33,7 +34,6 @@ import com.staxpayments.sdk.data.TransactionUpdate
 import com.staxpayments.sdk.data.TransactionRequest
 import com.staxpayments.sdk.data.TransactionResult
 import com.staxpayments.sdk.data.models.MobileReaderDetails
-import com.staxpayments.sdk.data.models.OmniException
 import com.staxpayments.sdk.data.models.Transaction
 import com.staxpayments.sdk.usecase.CancelCurrentTransactionException
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -73,7 +73,7 @@ internal class AWCDriver : MobileReaderDriver {
         return true
     }
 
-    override suspend fun isOmniRefundsSupported(): Boolean {
+    override suspend fun isStaxRefundsSupported(): Boolean {
         return false
     }
 
@@ -166,11 +166,11 @@ internal class AWCDriver : MobileReaderDriver {
     override suspend fun getConnectedReader(): MobileReader? =
         CardReaderController.getConnectedReader()?.toMobileReader()
 
-    override suspend fun disconnect(reader: MobileReader, error: (OmniException) -> Unit): Boolean {
+    override suspend fun disconnect(reader: MobileReader, error: (StaxException) -> Unit): Boolean {
 
         if (CardReaderController.isCardReaderConnected() && CardReaderController.getConnectedReader().connectionMethod == CardReader.ConnectionMethod.BLUETOOTH) {
             CardReaderController.getConnectedReader()?.disconnect() ?: run {
-                error(OmniException("Unable to disconnect reader", "Card reader is null"))
+                error(StaxException("Unable to disconnect reader", "Card reader is null"))
             }
 
             return true
@@ -282,7 +282,7 @@ internal class AWCDriver : MobileReaderDriver {
         }
     }
 
-    override suspend fun cancelCurrentTransaction(error: ((OmniException) -> Unit)?): Boolean {
+    override suspend fun cancelCurrentTransaction(error: ((StaxException) -> Unit)?): Boolean {
         currentTransaction?.let {
             it.cancel()
             return true

@@ -5,7 +5,7 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.staxpayments.android.InitParams
-import com.staxpayments.android.Omni
+import com.staxpayments.android.Stax
 import com.staxpayments.sdk.Environment
 import com.staxpayments.sdk.TransactionUpdateListener
 import com.staxpayments.sdk.UserNotificationListener
@@ -53,7 +53,7 @@ class StaxViewModel : ViewModel() {
      */
     fun onInitialize() {
         log("Initializing...")
-        Omni.initialize(
+        Stax.initialize(
             params = InitParams(
                 MainApplication.context,
                 MainApplication.application,
@@ -62,7 +62,7 @@ class StaxViewModel : ViewModel() {
             ),
             completion = {
                 log("Initialized!")
-                Omni.shared()?.signatureProvider = SignatureProvider()
+                Stax.shared()?.signatureProvider = SignatureProvider()
             },
             error = {
                 Log.d("Stax SDK", "Fail to initialize...")
@@ -78,7 +78,7 @@ class StaxViewModel : ViewModel() {
      */
     fun onSearchAndConnectToReaders(ctx: Context) {
         log("Searching for readers...")
-        Omni.shared()?.getAvailableReaders { found ->
+        Stax.shared()?.getAvailableReaders { found ->
             val readers = found.map { "${it.getName()} - ${it.getConnectionType()}" }.toTypedArray()
             log("Found readers: ${found.map { it.getName() }}")
 
@@ -86,7 +86,7 @@ class StaxViewModel : ViewModel() {
                 .setItems(readers) { _, which ->
                     val selected = found[which]
                     log("Trying to connect to [${selected.getName()}]")
-                    Omni.shared()?.connectReader(selected, { connectedReader ->
+                    Stax.shared()?.connectReader(selected, { connectedReader ->
                         this.reader = connectedReader
                         log("Connected to [${this.reader?.getName()}]")
                     }, { error ->
@@ -107,13 +107,13 @@ class StaxViewModel : ViewModel() {
         val request = TransactionRequest(amount)
 
         // Listen to transaction updates delivered by the Omni SDK
-        Omni.shared()?.transactionUpdateListener = object : TransactionUpdateListener {
+        Stax.shared()?.transactionUpdateListener = object : TransactionUpdateListener {
             override fun onTransactionUpdate(transactionUpdate: TransactionUpdate) {
                 log("${transactionUpdate.value} | ${transactionUpdate.userFriendlyMessage}")
             }
         }
 
-        Omni.shared()?.userNotificationListener = object : UserNotificationListener {
+        Stax.shared()?.userNotificationListener = object : UserNotificationListener {
             override fun onUserNotification(userNotification: UserNotification) {
                 log("${userNotification.value} | ${userNotification.userFriendlyMessage}")
             }
@@ -123,7 +123,7 @@ class StaxViewModel : ViewModel() {
             }
         }
 
-        Omni.shared()?.takeMobileReaderTransaction(request, { transaction ->
+        Stax.shared()?.takeMobileReaderTransaction(request, { transaction ->
             val msg = if (transaction.success == true) {
                 "Successfully executed transaction"
             } else {
@@ -148,7 +148,7 @@ class StaxViewModel : ViewModel() {
 
         val request = TransactionRequest(amount)
         request.preauth = true
-        Omni.shared()?.takeMobileReaderTransaction(request, { transaction ->
+        Stax.shared()?.takeMobileReaderTransaction(request, { transaction ->
 
             val msg = if (transaction.success == true) {
                 "Successfully authed transaction"
@@ -177,7 +177,7 @@ class StaxViewModel : ViewModel() {
         val amount = Amount(0.01)
         log("Attempting to capture last auth")
 
-        Omni.shared()?.capturePreauthTransaction(transactionId, amount, { transaction ->
+        Stax.shared()?.capturePreauthTransaction(transactionId, amount, { transaction ->
             val msg = if (transaction.success == true) {
                 "Successfully captured transaction"
             } else {
@@ -197,7 +197,7 @@ class StaxViewModel : ViewModel() {
         if (lastTransaction?.id == null) { return }
         val transactionId = lastTransaction?.id!!
 
-        Omni.shared()?.voidTransaction(transactionId, { transaction ->
+        Stax.shared()?.voidTransaction(transactionId, { transaction ->
             val msg = if (transaction.success == true) {
                 "Successfully voided transaction"
             } else {
@@ -214,7 +214,7 @@ class StaxViewModel : ViewModel() {
      * TODO: Show building Credit Card instead of test card
      */
     fun onTokenizeCard() {
-        Omni.shared()?.tokenize(CreditCard.testCreditCard(), { paymentMethod ->
+        Stax.shared()?.tokenize(CreditCard.testCreditCard(), { paymentMethod ->
             log("Successfully tokenized credit card")
             log(paymentMethod.toString())
         }, {
@@ -227,7 +227,7 @@ class StaxViewModel : ViewModel() {
      * TODO: cleanup code
      */
     fun onGetConnectedReaderDetails() {
-        Omni.shared()?.getConnectedReader({ connectedReader ->
+        Stax.shared()?.getConnectedReader({ connectedReader ->
             connectedReader?.let { reader ->
                 log("Connected Reader:")
                 log(reader.toString())
@@ -242,9 +242,9 @@ class StaxViewModel : ViewModel() {
      * TODO: Cleanup example code
      */
     fun onDisconnectReader() {
-        Omni.shared()?.getConnectedReader({ connectedReader ->
+        Stax.shared()?.getConnectedReader({ connectedReader ->
             connectedReader?.let { reader ->
-                Omni.shared()?.disconnectReader(reader, {
+                Stax.shared()?.disconnectReader(reader, {
                     log("Reader disconnected")
                 }, {
                     log(it.toString())

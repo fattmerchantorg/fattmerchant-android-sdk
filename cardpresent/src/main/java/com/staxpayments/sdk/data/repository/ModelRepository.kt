@@ -1,11 +1,11 @@
 package com.staxpayments.sdk.data.repository
 
+import com.staxpayments.exceptions.StaxException
 import com.staxpayments.sdk.data.models.Model
-import com.staxpayments.sdk.data.models.OmniException
-import com.staxpayments.sdk.networking.OmniApi
+import com.staxpayments.sdk.networking.StaxApi
 
 /**
- * Provides communication with Omni to manage models of the given type
+ * Provides communication with Stax to manage models of the given type
  *
  * Implementors of this interface will be responsible for CRUD operations
  *
@@ -13,35 +13,35 @@ import com.staxpayments.sdk.networking.OmniApi
  */
 internal interface ModelRepository<T : Model> {
 
-    /** Responsible for communications with Omni */
-    var omniApi: OmniApi
+    /** Responsible for communications with Stax */
+    var staxApi: StaxApi
 
     /**
-     * Saves a model of type [T] in Omni
+     * Saves a model of type [T] in Stax
      *
-     * @param model the model to save in Omni
+     * @param model the model to save in Stax
      * @param error
      * @return
      */
-    suspend fun create(model: T, error: (OmniException) -> Unit): T? = null
+    suspend fun create(model: T, error: (StaxException) -> Unit): T? = null
 
     /**
-     * Updates a model of type [T] in Omni
+     * Updates a model of type [T] in Stax
      *
-     * @param model the model to update in Omni
+     * @param model the model to update in Stax
      * @param error
      * @return
      */
-    suspend fun update(model: T, error: (OmniException) -> Unit): T? = null
+    suspend fun update(model: T, error: (StaxException) -> Unit): T? = null
 
     /**
-     * Deletes model of type [T] in Omni
+     * Deletes model of type [T] in Stax
      *
      * @param model
      * @param error
      * @return
      */
-    suspend fun delete(model: T, error: (OmniException) -> Unit): Boolean? = null
+    suspend fun delete(model: T, error: (StaxException) -> Unit): Boolean? = null
 
     /**
      * Gets a model with the given [id]
@@ -50,13 +50,13 @@ internal interface ModelRepository<T : Model> {
      * @param error
      * @return the model itself, if found
      */
-    suspend fun getById(id: String, error: (OmniException) -> Unit): T? = null
+    suspend fun getById(id: String, error: (StaxException) -> Unit): T? = null
 
     /**
-     * Gets a list of models of type [T] from Omni
+     * Gets a list of models of type [T] from Stax
      *
      * @param error
      * @return the list of models, if found
      */
-    suspend fun get(error: (OmniException) -> Unit): List<T>? = null
+    suspend fun get(error: (StaxException) -> Unit): List<T>? = null
 }

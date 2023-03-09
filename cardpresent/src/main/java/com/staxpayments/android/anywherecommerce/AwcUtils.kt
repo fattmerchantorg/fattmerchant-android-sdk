@@ -44,7 +44,7 @@ internal fun Amount.Companion.from(anyPayAmount: ANPAmount): Amount {
 
 /**
  * For card type, AWC gives us a string like "Visa Credit". This function takes that and returns
- * "visa", which is what Omni expects
+ * "visa", which is what Stax expects
  *
  * @param cardType
  * @return the actual card type

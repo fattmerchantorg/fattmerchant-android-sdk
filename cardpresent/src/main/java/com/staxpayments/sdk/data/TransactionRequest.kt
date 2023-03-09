@@ -31,13 +31,13 @@ data class TransactionRequest(
 
     /** A list of [CatalogItem]s to associate with the [Transaction]
      *
-     * - The [CatalogItem]s do not need to currently exist within Omni
+     * - The [CatalogItem]s do not need to currently exist within Stax
      * - This will **not** update the [CatalogItem.item], [CatalogItem.quantity], [CatalogItem.price]
-     * or [CatalogItem.details] within Omni.
+     * or [CatalogItem.details] within Stax.
      * - Passing a [CatalogItem] with an id of an existing CatalogItem affects the amount in stock
-     * of that item within Omni. For example, if you CatalogItem in Omni has amountInStock = 100,
+     * of that item within Stax. For example, if you CatalogItem in Stax has amountInStock = 100,
      * and you submit a TransactionRequest with that CatalogItem.quantity = 9, then the
-     * amountInStock of the CatalogItem in Omni will be decremented by to reflect a final
+     * amountInStock of the CatalogItem in Stax will be decremented by to reflect a final
      * amountInStock of 91.
      * */
     var lineItems: List<CatalogItem>? = listOf(),

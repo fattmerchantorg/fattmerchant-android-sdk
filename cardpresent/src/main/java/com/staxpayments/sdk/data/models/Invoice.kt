@@ -1,8 +1,7 @@
 package com.staxpayments.sdk.data.models
 
 /**
- * An Omni invoice
- *
+ * A Stax invoice
  */
 open class Invoice : Model {
     override var id: String? = null

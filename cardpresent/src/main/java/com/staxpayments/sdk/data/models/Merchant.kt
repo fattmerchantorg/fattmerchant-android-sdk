@@ -1,7 +1,7 @@
 package com.staxpayments.sdk.data.models
 
 /**
- * An Omni Merchant
+ * A Stax Merchant
  *
  */
 class Merchant : Model {

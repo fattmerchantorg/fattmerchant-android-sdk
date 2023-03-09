@@ -1,4 +1,4 @@
-# Omni Cardpresent
+# Stax Cardpresent
 
 
 ## <a name="installation">Installation</a>
@@ -28,7 +28,7 @@ implementation 'com.github.fattmerchantorg:fattmerchant-android-sdk:1.2.0'
 
 In order to take mobile reader payments, you will need the following:
 
-* **Ephemeral Omni API Key**: Using your Omni API key, you will need to create an ephemeral token. The cardpresent codebase does not store your token, so you'll need to pass one in every time you create the `Omni` object. [Here](https://fattmerchant.docs.apiary.io/#reference/0/authentication-tokens/generate-an-ephemeral-token) is a helpful guide showing you how to create an ephemeral token
+* **Ephemeral Stax API Key**: Using your Stax API key, you will need to create an ephemeral token. The cardpresent codebase does not store your token, so you'll need to pass one in every time you create the `Stax` object. [Here](https://fattmerchant.docs.apiary.io/#reference/0/authentication-tokens/generate-an-ephemeral-token) is a helpful guide showing you how to create an ephemeral token
 * **App Name**: A name for your app!
 * **Mobile Reader**: A Fattmerchant-provided mobile reader
 
@@ -38,21 +38,21 @@ In order to take mobile reader payments, you will need the following:
 Create an instance of `InitParams`
 
 ```kotlin
-var initParams = InitParams(applicationContext, ephemeralApiKey, OmniApi.Environment.DEV)
+var initParams = InitParams(applicationContext, ephemeralApiKey, StaxApi.Environment.DEV)
 ```
 
-Pass the initParams to `Omni.initialize(...)`, along with a completion lambda and an error lambda
+Pass the initParams to `Stax.initialize(...)`, along with a completion lambda and an error lambda
 
 ```kotlin
-Omni.initialize(params, {
+Stax.initialize(params, {
 	// Success!
-    System.out.println("Omni is initialized")
+    System.out.println("Stax is initialized")
 }) {
 	// There was an error
 }
 ```
 
-You can now use `Omni.shared()` to get the instance of Omni that you will be using
+You can now use `Stax.shared()` to get the instance of Stax that you will be using
 
 ## Pairing the Reader
 **Miura M010**
@@ -74,7 +74,7 @@ Once the reader has been paired, you should be able to find and connect to it us
 The first step is to search for a list of available readers
 
 ```kotlin
-Omni.shared().getAvailableReaders { readers ->
+Stax.shared().getAvailableReaders { readers ->
 	
 }
 ```
@@ -82,8 +82,8 @@ Omni.shared().getAvailableReaders { readers ->
 Once you have the list of available ones, you can choose which one you'd like to connect
 
 ```kotlin
-Omni.shared().getAvailableReaders { readers ->
-	Omni.shared().connectReader(mobileReader, onConnected: { reader ->
+Stax.shared().getAvailableReaders { readers ->
+	Stax.shared().connectReader(mobileReader, onConnected: { reader ->
 		// Reader is connected
 	}, onFail: { error ->
 		// Error connecting reader
@@ -92,7 +92,7 @@ Omni.shared().getAvailableReaders { readers ->
 ```
 
 ## Taking a Payment
-To take a payment, simply create a `TransactionRequest` and pass it along to `omni.takeMobileReaderTransaction(...)`
+To take a payment, simply create a `TransactionRequest` and pass it along to `Stax.takeMobileReaderTransaction(...)`
 
 ```kotlin
 // Create an Amount
@@ -102,7 +102,7 @@ var amount = Amount(50)
 var request = TransactionRequest(amount)
     
 // Take the payment
-Omni.shared()?.takeMobileReaderTransaction(request, {
+Stax.shared()?.takeMobileReaderTransaction(request, {
     // Payment successful!
 }) {
     // Error
@@ -110,7 +110,7 @@ Omni.shared()?.takeMobileReaderTransaction(request, {
 ```
 
 ## Subcribing to Transaction Updates
-To receive Transaction updates, register a `TransactionUpdateListener` on the Omni object. This object will receive transaction updates such as:
+To receive Transaction updates, register a `TransactionUpdateListener` on the Stax object. This object will receive transaction updates such as:
 
 - `PromptSwipeCard` - The mobile reader is waiting for a card to be swiped
 - `CardSwiped` - A card was swiped on the mobile reader
@@ -121,18 +121,18 @@ These will be instances of `TransactionUpdate`, and will each have a `value` and
 
 ```kotlin
 // Register to listen to the transaction events
-Omni.shared()?.transactionUpdateListener = object: TransactionUpdateListener {
+Stax.shared()?.transactionUpdateListener = object: TransactionUpdateListener {
     override fun onTransactionUpdate(transactionUpdate: TransactionUpdate) {
         print("${transactionUpdate.value} | ${transactionUpdate.userFriendlyMessage}")
     }
 }
 
 // Begin the transaction
-Omni.shared()?.takeMobileReaderTransaction(...) 
+Stax.shared()?.takeMobileReaderTransaction(...) 
 ```
 
 ## Providing a Signature
-Should a transaction require a signature, one can be provided by registering a `SignatureProviding` on the Omni object. This object will be required to implement a method called 
+Should a transaction require a signature, one can be provided by registering a `SignatureProviding` on the Stax object. This object will be required to implement a method called 
 
 ```kotlin
 /**
@@ -147,7 +147,7 @@ fun signatureRequired(completion: (String) -> Unit)
 You can then pass a base64 encoded string representation of the signature and pass it to the completion block.
 
 ```kotlin
-Omni.shared()?.signatureProvider = object : SignatureProviding {
+Stax.shared()?.signatureProvider = object : SignatureProviding {
   override fun signatureRequired(completion: (String) -> Unit) {
        var base64EncodedSignature = // ...
        completion(base64EncodedSignature)
@@ -157,7 +157,7 @@ Omni.shared()?.signatureProvider = object : SignatureProviding {
 
 
 ## Refunding a Payment
-To refund a payment, you must first get the `Transaction` that you want to refund. You can use the [Omni API](https://fattmerchant.docs.apiary.io/#reference/0/transactions) to do so. 
+To refund a payment, you must first get the `Transaction` that you want to refund. You can use the [Stax API](https://fattmerchant.docs.apiary.io/#reference/0/transactions) to do so. 
 Once you get the transaction, you can use the `refundMobileReaderTransaction` method to attempt the refund.
 
 > At this time, you may only refund transactions that were performed on the same device that performed the original transaction 
@@ -167,7 +167,7 @@ Once you get the transaction, you can use the `refundMobileReaderTransaction` me
 var transaction = Transaction()
     
 // Perform refund
-Omni.shared()?.refundMobileReaderTransaction(transaction, {
+Stax.shared()?.refundMobileReaderTransaction(transaction, {
     // Refund successful!
 }) {
     // Error

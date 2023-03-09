@@ -58,10 +58,10 @@ internal fun mapDeviceStatusToMobileReader(deviceStatus: DeviceStatus): MobileRe
 }
 
 /**
- * Maps a ChipDna TransactionUpdate to an Omni Transaction Update
+ * Maps a ChipDna TransactionUpdate to an Stax Transaction Update
  *
  * @param transactionUpdate the value of a ChipDnaTransactionUpdate
- * @return an Omni [TransactionUpdate]
+ * @return an Stax [TransactionUpdate]
  */
 fun mapTransactionUpdate(transactionUpdate: String): TransactionUpdate? {
     return when (transactionUpdate) {
@@ -77,10 +77,10 @@ fun mapTransactionUpdate(transactionUpdate: String): TransactionUpdate? {
 }
 
 /**
- * Maps a ChipDna UserNotification to an Omni UserNotification
+ * Maps a ChipDna UserNotification to an Stax UserNotification
  *
  * @param userNotification the value of a ChipDnaUserNotification
- * @return an Omni [UserNotification]
+ * @return an Stax [UserNotification]
  */
 fun mapUserNotification(userNotification: String): UserNotification? {
     return when (userNotification) {

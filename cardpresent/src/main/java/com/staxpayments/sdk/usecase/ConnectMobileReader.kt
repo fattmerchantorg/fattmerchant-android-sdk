@@ -1,8 +1,8 @@
 package com.staxpayments.sdk.usecase
 
+import com.staxpayments.exceptions.StaxException
 import com.staxpayments.sdk.MobileReaderConnectionStatusListener
 import com.staxpayments.sdk.data.MobileReader
-import com.staxpayments.sdk.data.models.OmniException
 import com.staxpayments.sdk.data.repository.MobileReaderDriverRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
@@ -39,7 +39,7 @@ internal class ConnectMobileReader(
                 }
                 return null
             }
-        } catch (e: OmniException) {
+        } catch (e: StaxException) {
             null
         }
     }

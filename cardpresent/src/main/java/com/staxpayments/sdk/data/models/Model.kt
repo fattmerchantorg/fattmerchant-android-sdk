@@ -1,7 +1,7 @@
 package com.staxpayments.sdk.data.models
 
 /**
- * An Omni Model
+ * A Stax Model
  *
  */
 interface Model {

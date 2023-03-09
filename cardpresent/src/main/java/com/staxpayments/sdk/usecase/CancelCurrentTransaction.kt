@@ -1,11 +1,11 @@
 package com.staxpayments.sdk.usecase
 
-import com.staxpayments.sdk.data.models.OmniException
+import com.staxpayments.exceptions.StaxException
 import com.staxpayments.sdk.data.repository.MobileReaderDriverRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
 
-class CancelCurrentTransactionException(message: String? = null) : OmniException("", message) {
+class CancelCurrentTransactionException(message: String? = null) : StaxException("", message) {
     companion object {
         val NoTransactionToCancel = CancelCurrentTransactionException("There is no transaction to cancel")
         val Unknown = CancelCurrentTransactionException("Unknown error")
@@ -25,7 +25,7 @@ internal class CancelCurrentTransaction(
      *
      * @return result of cancelling [transaction] attempt
      */
-    suspend fun start(error: (OmniException) -> Unit): Boolean {
+    suspend fun start(error: (StaxException) -> Unit): Boolean {
         val drivers = mobileReaderDriverRepository.getInitializedDrivers()
         var success = true
         drivers.forEach { driver ->

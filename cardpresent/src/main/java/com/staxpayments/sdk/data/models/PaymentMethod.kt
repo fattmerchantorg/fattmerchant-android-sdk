@@ -1,8 +1,7 @@
 package com.staxpayments.sdk.data.models
 
 /**
- * An Omni Payment Method
- *
+ * A Stax Payment Method
  */
 open class PaymentMethod : Model {
     override var id: String? = null
@@ -35,7 +34,7 @@ open class PaymentMethod : Model {
     open var updatedAt: String? = null
 
     /**
-     * Whether or not Omni should tokenize this PaymentMethod
+     * Whether or not Stax should tokenize this PaymentMethod
      *
      * @note If this field is true, `paymentToken` must be `null`
      */
@@ -44,12 +43,12 @@ open class PaymentMethod : Model {
     /**
      * The token that represents this payment method
      *
-     * The only use-case for this field is storing the token within Omni.
+     * The only use-case for this field is storing the token within Stax.
      * After cardpresent tokenization, we can create a PaymentMethod using this class.
      * If we include the paymentToken, then we can later store it as an already-tokenized
      * PaymentMethod
      *
-     * Omni performs transactions with this token. Therefore, it is crucial that only the actual
+     * Stax performs transactions with this token. Therefore, it is crucial that only the actual
      * payment token be placed here
      *
      * @note If this field is not `null`, then `tokenize` must be `false`

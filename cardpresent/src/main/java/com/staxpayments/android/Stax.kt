@@ -1,36 +1,36 @@
 package com.staxpayments.android
 
+import com.staxpayments.exceptions.StaxException
+import com.staxpayments.sdk.CommonStax
 import com.staxpayments.sdk.Environment
-import com.staxpayments.sdk.data.models.OmniException
-import com.staxpayments.sdk.networking.OmniApi
+import com.staxpayments.sdk.networking.StaxApi
 import kotlinx.coroutines.launch
-import com.staxpayments.sdk.Omni as CommonOmni
 import com.staxpayments.sdk.data.repository.MobileReaderDriverRepository as CommonMobileReaderDriverRepo
 
 /**
- * Communicates with the Omni platform and bluetooth mobile readers
+ * Communicates with the Stax platform and bluetooth mobile readers
  *
  * ## Usage
  * ```
- * // First, initialize Omni using InitParams
+ * // First, initialize Stax using InitParams
  * val initParams = InitParams(myAppContext, apiKey)
- * Omni.initialize(initParams, {
- *   // Omni is now initialized and ready!
+ * Stax.initialize(initParams, {
+ *   // Stax is now initialized and ready!
  *
- * }, { omniException ->
+ * }, { staxException ->
  *
  * )
  * ```
  *
- * Once initialized, you can use methods like `Omni.shared().getAvailableReaders`
+ * Once initialized, you can use methods like `Stax.shared().getAvailableReaders`
  *
  * @see InitParams
- * @property omniApi
+ * @property staxApi
  */
-class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
+class Stax internal constructor(staxApi: StaxApi) : CommonStax(staxApi) {
 
     /**
-     * Thrown when Omni failed to initialize
+     * Thrown when Stax failed to initialize
      *
      * @param message describes what went wrong
      * */
@@ -40,16 +40,16 @@ class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
 
     companion object {
 
-        private var sharedInstance: Omni? = null
+        private var sharedInstance: Stax? = null
 
         /**
-         * Prepares [Omni] for usage
+         * Prepares [Stax] for usage
          *
          * @param params an [InitParams] instance that has all the necessary info for initialization
          *
          * @throws InitializationError if you don't pass an apiKey
          */
-        fun initialize(params: InitParams, completion: () -> Unit, error: (OmniException) -> Unit) {
+        fun initialize(params: InitParams, completion: () -> Unit, error: (StaxException) -> Unit) {
             val paramMap = mutableMapOf(
                 "apiKey" to params.apiKey,
                 "appContext" to params.appContext,
@@ -64,29 +64,29 @@ class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
         }
 
         /**
-         * Prepares [Omni] for usage
+         * Prepares [Stax] for usage
          *
-         * @param params a [Map] containing the necessary information to initialize Omni
+         * @param params a [Map] containing the necessary information to initialize Stax
          * @param completion block to execute once completed
          *
          * @throws InitializationError if you don't pass an apiKey
          */
-        fun initialize(params: Map<String, Any>, environment: Environment, completion: () -> Unit, error: (OmniException) -> Unit) {
+        fun initialize(params: Map<String, Any>, environment: Environment, completion: () -> Unit, error: (StaxException) -> Unit) {
             // Init the API
-            val omniApi = OmniApi()
+            val staxApi = StaxApi()
 
-            omniApi.environment = environment
+            staxApi.environment = environment
 
-            omniApi.token = params["apiKey"] as? String ?: ""
+            staxApi.token = params["apiKey"] as? String ?: ""
 
-            // Create the shared Omni object
-            val omni = Omni(omniApi)
-            sharedInstance = omni
+            // Create the shared Stax object
+            val stax = Stax(staxApi)
+            sharedInstance = stax
 
-            // Init com.fattmerchant.omni
-            omni.coroutineScope.launch {
+            // Init com.staxpayments.sdk
+            stax.coroutineScope.launch {
                 try {
-                    omni.initialize(params, {
+                    stax.initialize(params, {
                         completion()
                     }) {
                         error(it)
@@ -98,6 +98,6 @@ class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
             }
         }
 
-        fun shared(): Omni? = sharedInstance
+        fun shared(): Stax? = sharedInstance
     }
 }

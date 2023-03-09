@@ -1,6 +1,6 @@
 package com.staxpayments.sdk.usecase
 
-import com.staxpayments.sdk.data.models.OmniException
+import com.staxpayments.exceptions.StaxException
 import com.staxpayments.sdk.data.models.Transaction
 import com.staxpayments.sdk.data.repository.MobileReaderDriverRepository
 import com.staxpayments.sdk.data.repository.TransactionRepository
@@ -9,7 +9,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlin.coroutines.CoroutineContext
 
 /**
- * Voids the given [Transaction] and records the void in Omni
+ * Voids the given [Transaction] and records the void in Stax
  *
  * @property mobileReaderDriverRepository
  * @property transactionRepository
@@ -23,9 +23,9 @@ internal class VoidMobileReaderTransaction(
     override val coroutineContext: CoroutineContext
 ) : CoroutineScope {
 
-    class VoidTransactionException(message: String? = null) : OmniException("Error voiding transaction", message)
+    class VoidTransactionException(message: String? = null) : StaxException("Error voiding transaction", message)
 
-    suspend fun start(error: (OmniException) -> Unit): Transaction? = coroutineScope {
+    suspend fun start(error: (StaxException) -> Unit): Transaction? = coroutineScope {
 
         try {
 
