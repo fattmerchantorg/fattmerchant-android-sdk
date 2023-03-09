@@ -80,13 +80,13 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
      * This method will kick off procedures like preparing the mobile reader drivers so the client is ready to take
      * requests for payments
      */
-    internal fun initialize(args: Map<String, Any>, completion: () -> Unit, error: (StaxException) -> Unit) {
+    internal fun initialize(args: Map<String, Any>, onCompletion: () -> Unit, onError: (StaxException) -> Unit) {
         coroutineScope.launch {
 
             val merchant = staxApi.getSelf {
-                error(StaxException("Could not get reader settings", it.message))
+                onError(StaxException("Could not get reader settings", it.message))
             }?.merchant ?: run {
-                error(StaxException("Could not get reader settings", "Merchant object is null"))
+                onError(StaxException("Could not get reader settings", "Merchant object is null"))
                 return@launch
             }
 
@@ -104,7 +104,7 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
             mutatedArgs["nmi"] = nmiDetails
 
             staxApi.getMobileReaderSettings {
-                error(StaxException("Could not get reader settings", it.message))
+                onError(StaxException("Could not get reader settings", it.message))
             }?.let { mobileReaderDetails ->
                 mobileReaderDetails.nmi?.let {
                     mutatedArgs["nmi"] = it
@@ -118,18 +118,18 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
                     mobileReaderDriverRepository,
                     mutatedArgs,
                     coroutineContext
-                ).start(error)
+                ).start(onError)
             }
 
             InitializeDrivers(
                 mobileReaderDriverRepository,
                 mutatedArgs,
                 coroutineContext
-            ).start(error)
+            ).start(onError)
 
             initialized = true
 
-            completion()
+            onCompletion()
         }
     }
 
@@ -237,11 +237,11 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
      *
      * @param transactionRequest a [TransactionRequest] object that includes all the information needed to
      * run this transaction including [TransactionRequest.amount] and [TransactionRequest.tokenize]
-     * @param completion a block to run once the transaction is finished. Receives the completed
+     * @param onCompletion a block to run once the transaction is finished. Receives the completed
      * [Transaction]
-     * @param error a block to run if an error is thrown. Receives an [StaxException]
+     * @param onError a block to run if an error is thrown. Receives an [StaxException]
      */
-    fun pay(transactionRequest: TransactionRequest, completion: (Transaction) -> Unit, error: (StaxException) -> Unit) {
+    fun pay(transactionRequest: TransactionRequest, onCompletion: (Transaction) -> Unit, onError: (StaxException) -> Unit) {
         coroutineScope.launch {
             val takePaymentJob = TakePayment(
                 customerRepository = customerRepository,
@@ -254,17 +254,17 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
             currentJob = takePaymentJob
 
             val result = takePaymentJob.start {
-                error(it)
+                onError(it)
                 return@start
             }
 
             result?.let {
-                completion(it)
+                onCompletion(it)
             }
         }
     }
 
-    fun tokenize(bankAccount: com.staxpayments.api.models.BankAccount, completion: (PaymentMethod) -> Unit, error: (StaxException) -> Unit) {
+    fun tokenize(bankAccount: com.staxpayments.api.models.BankAccount, onCompletion: (PaymentMethod) -> Unit, onError: (StaxException) -> Unit) {
         coroutineScope.launch {
             val tokenizeJob = TokenizePaymentMethod(
                 customerRepository = customerRepository,
@@ -275,17 +275,17 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
 
             currentJob = tokenizeJob
             val result = tokenizeJob.start {
-                error(it)
+                onError(it)
                 return@start
             }
 
             result?.let {
-                completion(it)
+                onCompletion(it)
             }
         }
     }
 
-    fun tokenize(creditCard: CreditCard, completion: (PaymentMethod) -> Unit, error: (StaxException) -> Unit) {
+    fun tokenize(creditCard: CreditCard, onCompletion: (PaymentMethod) -> Unit, onError: (StaxException) -> Unit) {
         coroutineScope.launch {
             val tokenizeJob = TokenizePaymentMethod(
                 customerRepository = customerRepository,
@@ -296,12 +296,12 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
 
             currentJob = tokenizeJob
             val result = tokenizeJob.start {
-                error(it)
+                onError(it)
                 return@start
             }
 
             result?.let {
-                completion(it)
+                onCompletion(it)
             }
         }
     }
@@ -317,9 +317,9 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
      *
      * ```
      * Stax.shared()?.signatureProvider = object : SignatureProviding {
-     *     override fun signatureRequired(completion: (String) -> Unit) {
+     *     override fun signatureRequired(onCompletion: (String) -> Unit) {
      *          var base64EncodedSignature = // ...
-     *          completion(base64EncodedSignature)
+     *          onCompletion(base64EncodedSignature)
      *     }
      * }
      * ```
@@ -340,19 +340,19 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
      *
      * @param request a [TransactionRequest] object that includes all the information needed to
      * run this transaction including [TransactionRequest.amount] and [TransactionRequest.tokenize]
-     * @param completion a block to run once the transaction is finished. Receives the completed
+     * @param onCompletion a block to run once the transaction is finished. Receives the completed
      * [Transaction]
-     * @param error a block to run if an error is thrown. Receives an [StaxException]
+     * @param onError a block to run if an error is thrown. Receives an [StaxException]
      */
     fun takeMobileReaderTransaction(
         request: TransactionRequest,
-        completion: (Transaction) -> Unit,
-        error: (StaxException) -> Unit
+        onCompletion: (Transaction) -> Unit,
+        onError: (StaxException) -> Unit
     ) {
         coroutineScope.launch {
 
             if (currentJob is TakeMobileReaderPayment && currentJob?.isActive == true) {
-                error(StaxException("Could not take mobile reader transaction", "Transaction in progress"))
+                onError(StaxException("Could not take mobile reader transaction", "Transaction in progress"))
                 return@launch
             }
 
@@ -372,12 +372,12 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
             currentJob = takePaymentJob
 
             val result = takePaymentJob.start {
-                error(it)
+                onError(it)
                 return@start
             }
 
             result?.let {
-                completion(it)
+                onCompletion(it)
             }
         }
     }
@@ -387,33 +387,33 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
      *
      * @param transactionId The id of the transaction you want to capture
      * @param amount the amount that you want to capture. If null, then the original transaction amount will be captured
-     * @param completion Called when the operation is completed successfully. Receives a transaction
-     * @param error Receives any errors that happened whiel attempting the operation
+     * @param onCompletion Called when the operation is completed successfully. Receives a transaction
+     * @param onError Receives any errors that happened while attempting the operation
      */
-    fun capturePreauthTransaction(
+    fun capturePreAuthTransaction(
         transactionId: String,
         amount: Amount? = null,
-        completion: (Transaction) -> Unit,
-        error: (StaxException) -> Unit
+        onCompletion: (Transaction) -> Unit,
+        onError: (StaxException) -> Unit
     ) {
         coroutineScope.launch {
             CapturePreAuthTransaction(transactionId, staxApi, amount, coroutineContext).start {
-                error(it)
-            }?.let { completion(it) }
+                onError(it)
+            }?.let { onCompletion(it) }
         }
     }
 
     /**
      * Voids the given transaction and returns a new [Transaction] that represents the void in Stax
      *
-     * @param transaction The transaction to void
-     * @param completion A block to execute with the new, voided [Transaction]
-     * @param error a block to run in case an error occurs
+     * @param transactionId The id of the transaction to void
+     * @param onCompletion A block to execute with the new, voided [Transaction]
+     * @param onError a block to run in case an error occurs
      */
     fun voidTransaction(
         transactionId: String,
-        completion: (Transaction) -> Unit,
-        error: (StaxException) -> Unit
+        onCompletion: (Transaction) -> Unit,
+        onError: (StaxException) -> Unit
     ) {
         coroutineScope.launch {
             VoidTransaction(
@@ -421,8 +421,8 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
                 staxApi,
                 coroutineContext
             ).start {
-                error(it)
-            }?.let { completion(it) }
+                onError(it)
+            }?.let { onCompletion(it) }
         }
     }
 
@@ -430,13 +430,13 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
      * Voids the given transaction and returns a new [Transaction] that represents the void in Stax
      *
      * @param transaction The transaction to void
-     * @param completion A block to execute with the new, voided [Transaction]
-     * @param error a block to run in case an error occurs
+     * @param onCompletion A block to execute with the new, voided [Transaction]
+     * @param onError a block to run in case an error occurs
      */
     fun voidMobileReaderTransaction(
         transaction: Transaction,
-        completion: (Transaction) -> Unit,
-        error: (StaxException) -> Unit
+        onCompletion: (Transaction) -> Unit,
+        onError: (StaxException) -> Unit
     ) {
         coroutineScope.launch {
             VoidMobileReaderTransaction(
@@ -445,8 +445,8 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
                 transaction,
                 coroutineContext
             ).start {
-                error(it)
-            }?.let { completion(it) }
+                onError(it)
+            }?.let { onCompletion(it) }
         }
     }
 
@@ -454,28 +454,28 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
      * Refunds the given transaction and returns a new [Transaction] that represents the refund in Stax
      *
      * @param transaction
-     * @param completion
-     * @param error a block to run in case an error occurs
+     * @param onCompletion
+     * @param onError a block to run in case an error occurs
      */
     fun refundMobileReaderTransaction(
         transaction: Transaction,
-        completion: (Transaction) -> Unit,
-        error: (error: StaxException) -> Unit
-    ) = refundMobileReaderTransaction(transaction, null, completion, error)
+        onCompletion: (Transaction) -> Unit,
+        onError: (error: StaxException) -> Unit
+    ) = refundMobileReaderTransaction(transaction, null, onCompletion, onError)
 
     /**
      * Refunds the given transaction and returns a new [Transaction] that represents the refund in Stax
      *
      * @param transaction
      * @param refundAmount The [Amount] to refund. When present, this **must** be greater than zero and lesser than or equal to the transaction total
-     * @param completion
-     * @param error a block to run in case an error occurs
+     * @param onCompletion
+     * @param onError a block to run in case an error occurs
      */
     fun refundMobileReaderTransaction(
         transaction: Transaction,
         refundAmount: Amount? = null,
-        completion: (Transaction) -> Unit,
-        error: (error: StaxException) -> Unit
+        onCompletion: (Transaction) -> Unit,
+        onError: (error: StaxException) -> Unit
     ) {
         coroutineScope.launch {
             RefundMobileReaderTransaction(
@@ -485,27 +485,27 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
                 refundAmount,
                 staxApi
             ).start {
-                error(it)
-            }?.let { completion(it) }
+                onError(it)
+            }?.let { onCompletion(it) }
         }
     }
 
     /**
      * Attempts to cancel a current mobile reader [transaction]
      *
-     * @param completion
-     * @param error a block to run in case an error occurs
+     * @param onCompletion
+     * @param onError a block to run in case an error occurs
      */
     fun cancelMobileReaderTransaction(
-        completion: (Boolean) -> Unit,
-        error: (error: StaxException) -> Unit
+        onCompletion: (Boolean) -> Unit,
+        onError: (error: StaxException) -> Unit
     ) {
         coroutineScope.launch {
-            completion(
+            onCompletion(
                 CancelCurrentTransaction(
                     coroutineContext,
                     mobileReaderDriverRepository
-                ).start(error)
+                ).start(onError)
             )
         }
     }
@@ -513,24 +513,24 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
     /**
      * Gets the invoices
      *
-     * @param completion a block of code to execute when finished
+     * @param onCompletion a block of code to execute when finished
      */
-    fun getInvoices(completion: (List<Invoice>) -> Unit, error: (StaxException) -> Unit) {
+    fun getInvoices(onCompletion: (List<Invoice>) -> Unit, onError: (StaxException) -> Unit) {
         coroutineScope.launch {
-            invoiceRepository.get(error)
-                ?.let { completion(it) }
+            invoiceRepository.get(onError)
+                ?.let { onCompletion(it) }
         }
     }
 
     /**
      * Gets the transactions
      *
-     * @param completion a block of code to execute when finished
+     * @param onCompletion a block of code to execute when finished
      */
-    fun getTransactions(completion: (List<Transaction>) -> Unit, error: (StaxException) -> Unit) {
+    fun getTransactions(onCompletion: (List<Transaction>) -> Unit, onError: (StaxException) -> Unit) {
         coroutineScope.launch {
-            transactionRepository.get(error)
-                ?.let { completion(it) }
+            transactionRepository.get(onError)
+                ?.let { onCompletion(it) }
         }
     }
 }

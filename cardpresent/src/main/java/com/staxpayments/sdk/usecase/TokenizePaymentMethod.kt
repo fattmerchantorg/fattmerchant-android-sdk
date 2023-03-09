@@ -15,7 +15,7 @@ internal class TokenizePaymentMethod(
     val customerRepository: CustomerRepository,
     val paymentMethodRepository: PaymentMethodRepository,
     val creditCard: CreditCard? = null,
-    val bankAccount: com.staxpayments.api.models.BankAccount? = null,
+    val bankAccount: BankAccount? = null,
     override val coroutineContext: CoroutineContext) : CoroutineScope {
 
     suspend fun start(failure: (StaxException) -> Unit): PaymentMethod? = coroutineScope {

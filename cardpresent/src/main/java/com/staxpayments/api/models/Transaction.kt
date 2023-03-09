@@ -37,7 +37,7 @@ open class Transaction : Model {
     open var sourceIp: String? = null
     open var response: Any? = null
     open var token: String? = null
-    open var success: Boolean? = null
+    open var success: Boolean = false
     open var total: String? = null
     open var totalRefunded: String? = null
     open var type: String? = null
