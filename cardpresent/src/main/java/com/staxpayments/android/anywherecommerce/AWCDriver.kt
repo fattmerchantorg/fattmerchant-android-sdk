@@ -34,8 +34,8 @@ import com.staxpayments.sdk.data.MobileReaderDriver
 import com.staxpayments.sdk.data.TransactionUpdate
 import com.staxpayments.sdk.data.TransactionRequest
 import com.staxpayments.sdk.data.TransactionResult
-import com.staxpayments.sdk.data.models.MobileReaderDetails
-import com.staxpayments.sdk.data.models.Transaction
+import com.staxpayments.api.models.MobileReaderDetails
+import com.staxpayments.api.models.Transaction
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException

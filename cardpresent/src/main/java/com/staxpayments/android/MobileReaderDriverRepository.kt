@@ -1,10 +1,10 @@
 package com.staxpayments.android
 
 import com.staxpayments.android.chipdna.ChipDnaDriver
+import com.staxpayments.api.models.Transaction
 import com.staxpayments.sdk.data.MobileReader
 import com.staxpayments.sdk.data.MobileReaderDriver
-import com.staxpayments.sdk.data.models.Transaction
-import com.staxpayments.sdk.data.repository.MobileReaderDriverRepository
+import com.staxpayments.api.repository.MobileReaderDriverRepository
 
 internal class MobileReaderDriverRepository : MobileReaderDriverRepository {
 

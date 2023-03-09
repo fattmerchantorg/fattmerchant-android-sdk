@@ -18,9 +18,9 @@ import com.staxpayments.sdk.data.MobileReader
 import com.staxpayments.sdk.data.MobileReaderDriver
 import com.staxpayments.sdk.data.TransactionRequest
 import com.staxpayments.sdk.data.TransactionResult
-import com.staxpayments.sdk.data.models.MobileReaderConnectionStatus
-import com.staxpayments.sdk.data.models.MobileReaderDetails
-import com.staxpayments.sdk.data.models.Transaction
+import com.staxpayments.api.models.MobileReaderConnectionStatus
+import com.staxpayments.api.models.MobileReaderDetails
+import com.staxpayments.api.models.Transaction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine

@@ -1,4 +1,4 @@
-package com.staxpayments.sdk.data.models
+package com.staxpayments.api.models
 
 open class Customer : Model {
     override var id: String? = null

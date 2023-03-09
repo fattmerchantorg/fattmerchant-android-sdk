@@ -5,7 +5,7 @@ import com.staxpayments.exceptions.StaxException
 import com.staxpayments.exceptions.StaxGeneralException
 import com.staxpayments.sdk.data.MobileReader
 import com.staxpayments.sdk.data.MobileReaderDriver
-import com.staxpayments.sdk.data.repository.MobileReaderDriverRepository
+import com.staxpayments.api.repository.MobileReaderDriverRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
 

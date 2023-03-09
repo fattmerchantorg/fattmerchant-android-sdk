@@ -3,11 +3,11 @@ package com.staxpayments.sdk.usecase
 import com.staxpayments.exceptions.StaxException
 import com.staxpayments.sdk.data.Amount
 import com.staxpayments.sdk.data.TransactionRequest
-import com.staxpayments.sdk.data.models.ChargeRequest
-import com.staxpayments.sdk.data.models.Transaction
-import com.staxpayments.sdk.data.repository.CustomerRepository
-import com.staxpayments.sdk.data.repository.PaymentMethodRepository
-import com.staxpayments.sdk.networking.StaxApi
+import com.staxpayments.api.models.ChargeRequest
+import com.staxpayments.api.models.Transaction
+import com.staxpayments.api.repository.CustomerRepository
+import com.staxpayments.api.repository.PaymentMethodRepository
+import com.staxpayments.api.StaxApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlin.coroutines.CoroutineContext

@@ -1,6 +1,6 @@
 package com.staxpayments.sdk.data
 
-import com.staxpayments.sdk.data.models.*
+import com.staxpayments.api.models.*
 
 /**
  * A request for a transaction
@@ -27,7 +27,7 @@ data class TransactionRequest(
     var card: CreditCard? = null,
 
     /** The [BankAccount] to charge */
-    var bankAccount: BankAccount? = null,
+    var bankAccount: com.staxpayments.api.models.BankAccount? = null,
 
     /** A list of [CatalogItem]s to associate with the [Transaction]
      *
@@ -121,7 +121,7 @@ data class TransactionRequest(
      * @param amount The [Amount] to be collected during the transaction
      * @param bankAccount The [BankAccount] used for the transaction
      * */
-    constructor(amount: Amount, bankAccount: BankAccount) : this(amount, true, bankAccount = bankAccount)
+    constructor(amount: Amount, bankAccount: com.staxpayments.api.models.BankAccount) : this(amount, true, bankAccount = bankAccount)
 
     /**
      * Initializes a Transaction with the given [Amount] and invoiceId

@@ -1,8 +1,8 @@
-package com.staxpayments.sdk.data.repository
+package com.staxpayments.api.repository
 
 import com.staxpayments.exceptions.StaxException
-import com.staxpayments.sdk.data.models.Model
-import com.staxpayments.sdk.networking.StaxApi
+import com.staxpayments.api.StaxApi
+import com.staxpayments.api.models.Model
 
 /**
  * Provides communication with Stax to manage models of the given type

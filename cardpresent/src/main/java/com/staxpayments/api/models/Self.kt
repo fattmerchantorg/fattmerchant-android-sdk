@@ -1,4 +1,4 @@
-package com.staxpayments.sdk.data.models
+package com.staxpayments.api.models
 
 /**
  * This is a representation of the current user

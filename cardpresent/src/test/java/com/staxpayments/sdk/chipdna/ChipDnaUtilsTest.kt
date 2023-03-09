@@ -6,7 +6,7 @@ import com.staxpayments.android.chipdna.extractUserReference
 import com.staxpayments.android.chipdna.withTransactionRequest
 import com.staxpayments.sdk.data.Amount
 import com.staxpayments.sdk.data.TransactionRequest
-import com.staxpayments.sdk.data.models.Transaction
+import com.staxpayments.api.models.Transaction
 import junit.framework.Assert.assertFalse
 import org.junit.Test
 

@@ -1,4 +1,4 @@
-package com.staxpayments.sdk.data.models
+package com.staxpayments.api.models
 
 import com.squareup.moshi.Json
 
@@ -88,7 +88,13 @@ class BankAccount(
          *
          * @return a test bank account
          */
-        fun testBankAccount() = BankAccount(personName = "Jim Parsnip", bankType = "savings", bankAccount = "9876543210", bankRouting = "021000021", addressZip = "32822").apply {
+        fun testBankAccount() = com.staxpayments.api.models.BankAccount(
+            personName = "Jim Parsnip",
+            bankType = "savings",
+            bankAccount = "9876543210",
+            bankRouting = "021000021",
+            addressZip = "32822"
+        ).apply {
             address1 = "123 Orange Ave"
             address2 = "Unit 309"
             addressCity = "Orlando"
@@ -103,7 +109,12 @@ class BankAccount(
          *
          * @return a test bank account
          */
-        fun failingTestBankAccount() = BankAccount(personName = "Jim Parsnip", bankAccount = "9876543210", bankRouting = "021000021", addressZip = "32822").apply {
+        fun failingTestBankAccount() = com.staxpayments.api.models.BankAccount(
+            personName = "Jim Parsnip",
+            bankAccount = "9876543210",
+            bankRouting = "021000021",
+            addressZip = "32822"
+        ).apply {
             address1 = "123 Orange Ave"
             address2 = "Unit 309"
             addressCity = "Orlando"

@@ -1,4 +1,4 @@
-package com.staxpayments.sdk.data.models
+package com.staxpayments.api.models
 
 /**
  * A Stax Model

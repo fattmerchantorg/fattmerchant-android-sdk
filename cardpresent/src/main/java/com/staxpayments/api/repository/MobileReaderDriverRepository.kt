@@ -1,8 +1,8 @@
-package com.staxpayments.sdk.data.repository
+package com.staxpayments.api.repository
 
+import com.staxpayments.api.models.Transaction
 import com.staxpayments.sdk.data.MobileReader
 import com.staxpayments.sdk.data.MobileReaderDriver
-import com.staxpayments.sdk.data.models.Transaction
 
 internal interface MobileReaderDriverRepository {
 

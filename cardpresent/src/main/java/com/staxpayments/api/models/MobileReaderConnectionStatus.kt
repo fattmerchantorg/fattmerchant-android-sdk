@@ -1,4 +1,4 @@
-package com.staxpayments.sdk.data.models
+package com.staxpayments.api.models
 
 /** The status of a {MobileReader} */
 enum class MobileReaderConnectionStatus(val status: String) {

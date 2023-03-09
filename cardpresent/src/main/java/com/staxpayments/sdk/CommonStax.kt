@@ -5,18 +5,17 @@ import com.staxpayments.exceptions.StaxGeneralException
 import com.staxpayments.sdk.data.Amount
 import com.staxpayments.sdk.data.MobileReader
 import com.staxpayments.sdk.data.TransactionRequest
-import com.staxpayments.sdk.data.models.BankAccount
-import com.staxpayments.sdk.data.models.CreditCard
-import com.staxpayments.sdk.data.models.Invoice
-import com.staxpayments.sdk.data.models.MobileReaderDetails
-import com.staxpayments.sdk.data.models.PaymentMethod
-import com.staxpayments.sdk.data.models.Transaction
-import com.staxpayments.sdk.data.repository.CustomerRepository
-import com.staxpayments.sdk.data.repository.InvoiceRepository
-import com.staxpayments.sdk.data.repository.MobileReaderDriverRepository
-import com.staxpayments.sdk.data.repository.PaymentMethodRepository
-import com.staxpayments.sdk.data.repository.TransactionRepository
-import com.staxpayments.sdk.networking.StaxApi
+import com.staxpayments.api.models.CreditCard
+import com.staxpayments.api.models.Invoice
+import com.staxpayments.api.models.MobileReaderDetails
+import com.staxpayments.api.models.PaymentMethod
+import com.staxpayments.api.models.Transaction
+import com.staxpayments.api.repository.CustomerRepository
+import com.staxpayments.api.repository.InvoiceRepository
+import com.staxpayments.api.repository.MobileReaderDriverRepository
+import com.staxpayments.api.repository.PaymentMethodRepository
+import com.staxpayments.api.repository.TransactionRepository
+import com.staxpayments.api.StaxApi
 import com.staxpayments.sdk.usecase.*
 import com.staxpayments.sdk.usecase.CancelCurrentTransaction
 import com.staxpayments.sdk.usecase.ConnectMobileReader
@@ -265,7 +264,7 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
         }
     }
 
-    fun tokenize(bankAccount: BankAccount, completion: (PaymentMethod) -> Unit, error: (StaxException) -> Unit) {
+    fun tokenize(bankAccount: com.staxpayments.api.models.BankAccount, completion: (PaymentMethod) -> Unit, error: (StaxException) -> Unit) {
         coroutineScope.launch {
             val tokenizeJob = TokenizePaymentMethod(
                 customerRepository = customerRepository,

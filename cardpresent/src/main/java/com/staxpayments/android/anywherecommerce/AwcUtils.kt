@@ -10,7 +10,7 @@ import com.staxpayments.sdk.data.Amount
 import com.staxpayments.sdk.data.MobileReader
 import com.staxpayments.sdk.data.TransactionResult
 import com.staxpayments.sdk.data.TransactionUpdate
-import com.staxpayments.sdk.data.models.Transaction
+import com.staxpayments.api.models.Transaction
 import com.anywherecommerce.android.sdk.util.Amount as ANPAmount
 
 internal fun CardReader.toMobileReader(): MobileReader {

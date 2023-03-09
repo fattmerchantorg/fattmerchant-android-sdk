@@ -10,7 +10,7 @@ import com.staxpayments.sdk.MobileReaderConnectionStatusListener
 import com.staxpayments.sdk.SignatureProviding
 import com.staxpayments.sdk.TransactionUpdateListener
 import com.staxpayments.sdk.UserNotificationListener
-import com.staxpayments.sdk.data.models.Transaction
+import com.staxpayments.api.models.Transaction
 
 interface MobileReaderDriver {
     /** A list of serial numbers that this driver has previously connected to */

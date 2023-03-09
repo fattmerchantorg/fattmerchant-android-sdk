@@ -14,8 +14,8 @@ import com.staxpayments.sdk.data.MobileReader
 import com.staxpayments.sdk.data.TransactionRequest
 import com.staxpayments.sdk.data.TransactionUpdate
 import com.staxpayments.sdk.data.UserNotification
-import com.staxpayments.sdk.data.models.CreditCard
-import com.staxpayments.sdk.data.models.Transaction
+import com.staxpayments.api.models.CreditCard
+import com.staxpayments.api.models.Transaction
 import com.staxpayments.sample.BuildConfig
 import com.staxpayments.sample.MainApplication
 import com.staxpayments.sample.SignatureProvider

@@ -1,9 +1,9 @@
 package com.staxpayments.sdk.data
 
-import com.staxpayments.sdk.data.models.Customer
-import com.staxpayments.sdk.data.models.Invoice
-import com.staxpayments.sdk.data.models.PaymentMethod
-import com.staxpayments.sdk.data.models.Transaction
+import com.staxpayments.api.models.Customer
+import com.staxpayments.api.models.Invoice
+import com.staxpayments.api.models.PaymentMethod
+import com.staxpayments.api.models.Transaction
 
 /**
  * A request to log a transaction

@@ -1,9 +1,9 @@
 package com.staxpayments.sdk.usecase
 
 import com.staxpayments.exceptions.StaxException
-import com.staxpayments.sdk.data.models.Transaction
-import com.staxpayments.sdk.data.repository.MobileReaderDriverRepository
-import com.staxpayments.sdk.data.repository.TransactionRepository
+import com.staxpayments.api.models.Transaction
+import com.staxpayments.api.repository.MobileReaderDriverRepository
+import com.staxpayments.api.repository.TransactionRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlin.coroutines.CoroutineContext

@@ -1,7 +1,7 @@
-package com.staxpayments.sdk.data.repository
+package com.staxpayments.api.repository
 
+import com.staxpayments.api.models.PaymentMethod
 import com.staxpayments.exceptions.StaxException
-import com.staxpayments.sdk.data.models.PaymentMethod
 
 internal interface PaymentMethodRepository : ModelRepository<PaymentMethod> {
 

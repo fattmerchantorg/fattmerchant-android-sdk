@@ -1,7 +1,7 @@
-package com.staxpayments.sdk.data.repository
+package com.staxpayments.api.repository
 
+import com.staxpayments.api.models.Invoice
 import com.staxpayments.exceptions.StaxException
-import com.staxpayments.sdk.data.models.Invoice
 
 internal interface InvoiceRepository : ModelRepository<Invoice> {
 

@@ -8,8 +8,8 @@ import com.staxpayments.sdk.data.MobileReader
 import com.staxpayments.sdk.data.TransactionRequest
 import com.staxpayments.sdk.data.TransactionUpdate
 import com.staxpayments.sdk.data.UserNotification
-import com.staxpayments.sdk.data.models.MobileReaderConnectionStatus
-import com.staxpayments.sdk.data.models.Transaction
+import com.staxpayments.api.models.MobileReaderConnectionStatus
+import com.staxpayments.api.models.Transaction
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

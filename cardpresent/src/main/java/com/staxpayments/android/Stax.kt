@@ -3,9 +3,9 @@ package com.staxpayments.android
 import com.staxpayments.exceptions.StaxException
 import com.staxpayments.sdk.CommonStax
 import com.staxpayments.sdk.Environment
-import com.staxpayments.sdk.networking.StaxApi
+import com.staxpayments.api.StaxApi
 import kotlinx.coroutines.launch
-import com.staxpayments.sdk.data.repository.MobileReaderDriverRepository as CommonMobileReaderDriverRepo
+import com.staxpayments.api.repository.MobileReaderDriverRepository as CommonMobileReaderDriverRepo
 
 /**
  * Communicates with the Stax platform and bluetooth mobile readers

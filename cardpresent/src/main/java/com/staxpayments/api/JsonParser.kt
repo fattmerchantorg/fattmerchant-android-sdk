@@ -1,4 +1,4 @@
-package com.staxpayments.sdk.networking
+package com.staxpayments.api
 
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.GsonBuilder

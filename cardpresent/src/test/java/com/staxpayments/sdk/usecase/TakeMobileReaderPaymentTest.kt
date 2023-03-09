@@ -3,7 +3,7 @@ package com.staxpayments.sdk.usecase
 import com.staxpayments.sdk.data.Amount
 import com.staxpayments.sdk.data.TransactionRequest
 import com.staxpayments.sdk.data.TransactionResult
-import com.staxpayments.sdk.data.models.CatalogItem
+import com.staxpayments.api.models.CatalogItem
 import org.junit.Test
 
 class TakeMobileReaderPaymentTest {

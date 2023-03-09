@@ -1,7 +1,7 @@
 package com.staxpayments.sdk.usecase
 
 import com.staxpayments.sdk.data.MobileReader
-import com.staxpayments.sdk.data.repository.MobileReaderDriverRepository
+import com.staxpayments.api.repository.MobileReaderDriverRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
 

@@ -1,22 +1,22 @@
 package com.staxpayments.sdk.usecase
 
 import com.staxpayments.exceptions.StaxException
-import com.staxpayments.sdk.data.models.BankAccount
-import com.staxpayments.sdk.data.models.CreditCard
-import com.staxpayments.sdk.data.models.Customer
-import com.staxpayments.sdk.data.models.PaymentMethod
-import com.staxpayments.sdk.data.repository.CustomerRepository
-import com.staxpayments.sdk.data.repository.PaymentMethodRepository
+import com.staxpayments.api.models.BankAccount
+import com.staxpayments.api.models.CreditCard
+import com.staxpayments.api.models.Customer
+import com.staxpayments.api.models.PaymentMethod
+import com.staxpayments.api.repository.CustomerRepository
+import com.staxpayments.api.repository.PaymentMethodRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlin.coroutines.CoroutineContext
 
 internal class TokenizePaymentMethod(
-        val customerRepository: CustomerRepository,
-        val paymentMethodRepository: PaymentMethodRepository,
-        val creditCard: CreditCard? = null,
-        val bankAccount: BankAccount? = null,
-        override val coroutineContext: CoroutineContext) : CoroutineScope {
+    val customerRepository: CustomerRepository,
+    val paymentMethodRepository: PaymentMethodRepository,
+    val creditCard: CreditCard? = null,
+    val bankAccount: com.staxpayments.api.models.BankAccount? = null,
+    override val coroutineContext: CoroutineContext) : CoroutineScope {
 
     suspend fun start(failure: (StaxException) -> Unit): PaymentMethod? = coroutineScope {
         var firstName: String? = null
