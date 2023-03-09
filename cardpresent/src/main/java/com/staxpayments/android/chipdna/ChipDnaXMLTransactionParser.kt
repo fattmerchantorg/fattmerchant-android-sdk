@@ -12,15 +12,15 @@ internal class ChipDnaXMLTransactionParser {
     companion object {
         /**
          * Parses the expiration date from the XML
-         * @param transactionId the ID of the transaction with the payment method in question
-         * @param transactionXml an xml-formatted Transaction from TransactionGateway
+         * @param xml an xml-formatted Transaction from TransactionGateway
+         * @param id the ID of the transaction with the payment method in question
          */
-        fun parseExpirationDate(transactionXml: String, transactionId: String): String? {
+        fun parseExpirationDate(xml: String, id: String): String? {
             val factory = XmlPullParserFactory.newInstance()
             factory.isNamespaceAware = true
 
             val parser = factory.newPullParser()
-            parser.setInput(StringReader(transactionXml))
+            parser.setInput(StringReader(xml))
 
             var eventType = parser.eventType
 
@@ -33,29 +33,26 @@ internal class ChipDnaXMLTransactionParser {
             // Loop over the document, looking for the cc_exp of the transaction
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 when (eventType) {
-
                     XmlPullParser.START_TAG -> {
                         currentElementName = parser.name
                     }
 
                     XmlPullParser.TEXT -> {
-                        val text = parser.text
                         when (currentElementName) {
                             "transaction_id" -> {
-                                if (parser.text == transactionId) {
+                                if (parser.text == id) {
                                     isParsingTargetTransaction = true
                                 }
                             }
 
                             "cc_exp" -> {
                                 if (isParsingTargetTransaction) {
-                                    return text
+                                    return parser.text
                                 }
                             }
                         }
                     }
                 }
-
                 eventType = parser.next()
             }
 

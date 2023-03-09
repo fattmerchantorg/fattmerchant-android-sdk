@@ -48,7 +48,7 @@ class StaxViewModel : ViewModel() {
     }
 
     /**
-     * Runs the main Omni.initialize() code
+     * Runs the main Stax.initialize() code
      * TODO: Add better docs once Omni -> Stax rebranding
      */
     fun onInitialize() {
@@ -60,11 +60,11 @@ class StaxViewModel : ViewModel() {
                 apiKey,
                 Environment.LIVE
             ),
-            completion = {
+            onCompletion = {
                 log("Initialized!")
-                Stax.shared()?.signatureProvider = SignatureProvider()
+                Stax.instance().signatureProvider = SignatureProvider()
             },
-            error = {
+            onError = {
                 Log.d("Stax SDK", "Fail to initialize...")
                 Log.e("Stax SDK", it.toString())
                 log("${it.message}. ${it.detail}")
@@ -78,7 +78,8 @@ class StaxViewModel : ViewModel() {
      */
     fun onSearchAndConnectToReaders(ctx: Context) {
         log("Searching for readers...")
-        Stax.shared()?.getAvailableReaders { found ->
+
+        Stax.instance().getAvailableReaders { found ->
             val readers = found.map { "${it.getName()} - ${it.getConnectionType()}" }.toTypedArray()
             log("Found readers: ${found.map { it.getName() }}")
 
@@ -86,7 +87,7 @@ class StaxViewModel : ViewModel() {
                 .setItems(readers) { _, which ->
                     val selected = found[which]
                     log("Trying to connect to [${selected.getName()}]")
-                    Stax.shared()?.connectReader(selected, { connectedReader ->
+                    Stax.instance().connectReader(selected, { connectedReader ->
                         this.reader = connectedReader
                         log("Connected to [${this.reader?.getName()}]")
                     }, { error ->
@@ -107,13 +108,13 @@ class StaxViewModel : ViewModel() {
         val request = TransactionRequest(amount)
 
         // Listen to transaction updates delivered by the Omni SDK
-        Stax.shared()?.transactionUpdateListener = object : TransactionUpdateListener {
+        Stax.instance().transactionUpdateListener = object : TransactionUpdateListener {
             override fun onTransactionUpdate(transactionUpdate: TransactionUpdate) {
                 log("${transactionUpdate.value} | ${transactionUpdate.userFriendlyMessage}")
             }
         }
 
-        Stax.shared()?.userNotificationListener = object : UserNotificationListener {
+        Stax.instance().userNotificationListener = object : UserNotificationListener {
             override fun onUserNotification(userNotification: UserNotification) {
                 log("${userNotification.value} | ${userNotification.userFriendlyMessage}")
             }
@@ -123,7 +124,7 @@ class StaxViewModel : ViewModel() {
             }
         }
 
-        Stax.shared()?.takeMobileReaderTransaction(request, { transaction ->
+        Stax.instance().takeMobileReaderTransaction(request, { transaction ->
             val msg = if (transaction.success == true) {
                 "Successfully executed transaction"
             } else {
@@ -148,7 +149,7 @@ class StaxViewModel : ViewModel() {
 
         val request = TransactionRequest(amount)
         request.preauth = true
-        Stax.shared()?.takeMobileReaderTransaction(request, { transaction ->
+        Stax.instance().takeMobileReaderTransaction(request, { transaction ->
 
             val msg = if (transaction.success == true) {
                 "Successfully authed transaction"
@@ -177,7 +178,7 @@ class StaxViewModel : ViewModel() {
         val amount = Amount(0.01)
         log("Attempting to capture last auth")
 
-        Stax.shared()?.capturePreauthTransaction(transactionId, amount, { transaction ->
+        Stax.instance().capturePreauthTransaction(transactionId, amount, { transaction ->
             val msg = if (transaction.success == true) {
                 "Successfully captured transaction"
             } else {
@@ -197,7 +198,7 @@ class StaxViewModel : ViewModel() {
         if (lastTransaction?.id == null) { return }
         val transactionId = lastTransaction?.id!!
 
-        Stax.shared()?.voidTransaction(transactionId, { transaction ->
+        Stax.instance().voidTransaction(transactionId, { transaction ->
             val msg = if (transaction.success == true) {
                 "Successfully voided transaction"
             } else {
@@ -214,7 +215,7 @@ class StaxViewModel : ViewModel() {
      * TODO: Show building Credit Card instead of test card
      */
     fun onTokenizeCard() {
-        Stax.shared()?.tokenize(CreditCard.testCreditCard(), { paymentMethod ->
+        Stax.instance().tokenize(CreditCard.testCreditCard(), { paymentMethod ->
             log("Successfully tokenized credit card")
             log(paymentMethod.toString())
         }, {
@@ -227,14 +228,14 @@ class StaxViewModel : ViewModel() {
      * TODO: cleanup code
      */
     fun onGetConnectedReaderDetails() {
-        Stax.shared()?.getConnectedReader({ connectedReader ->
+        Stax.instance().getConnectedReader({ connectedReader ->
             connectedReader?.let { reader ->
                 log("Connected Reader:")
                 log(reader.toString())
             } ?: log("There is no connected reader")
         }, { exception ->
             log(exception.toString())
-        }) ?: log("Could not get connected reader")
+        })
     }
 
     /**
@@ -242,9 +243,9 @@ class StaxViewModel : ViewModel() {
      * TODO: Cleanup example code
      */
     fun onDisconnectReader() {
-        Stax.shared()?.getConnectedReader({ connectedReader ->
+        Stax.instance().getConnectedReader({ connectedReader ->
             connectedReader?.let { reader ->
-                Stax.shared()?.disconnectReader(reader, {
+                Stax.instance().disconnectReader(reader, {
                     log("Reader disconnected")
                 }, {
                     log(it.toString())
@@ -252,6 +253,6 @@ class StaxViewModel : ViewModel() {
             } ?: log("There is no connected reader")
         }, { exception ->
             log(exception.toString())
-        }) ?: log("Could not get connected reader")
+        })
     }
 }

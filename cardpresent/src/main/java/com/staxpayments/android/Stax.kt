@@ -1,9 +1,12 @@
 package com.staxpayments.android
 
+import android.app.Application
+import android.content.Context
 import com.staxpayments.exceptions.StaxException
 import com.staxpayments.sdk.CommonStax
 import com.staxpayments.sdk.Environment
 import com.staxpayments.api.StaxApi
+import com.staxpayments.exceptions.StaxGeneralException
 import kotlinx.coroutines.launch
 import com.staxpayments.api.repository.MobileReaderDriverRepository as CommonMobileReaderDriverRepo
 
@@ -43,13 +46,41 @@ class Stax internal constructor(staxApi: StaxApi) : CommonStax(staxApi) {
         private var sharedInstance: Stax? = null
 
         /**
-         * Prepares [Stax] for usage
-         *
-         * @param params an [InitParams] instance that has all the necessary info for initialization
-         *
+         * Initializes the [Stax] SDK for usage
+         * @param context the Android application Context
+         * @param application your custom Android Application class
+         * @param apiKey the Stax API Key
+         * @param onCompletion the completion callback on successful initialization
+         * @param onError the error callback on a failed initialization
+         * @param environment An optional parameter for testing against the developer API. If unsure, leave this blank
+         * @param appId An optional parameter for testing against the developer API. If unsure, leave this blank
          * @throws InitializationError if you don't pass an apiKey
          */
-        fun initialize(params: InitParams, completion: () -> Unit, error: (StaxException) -> Unit) {
+        fun initialize(
+            context: Context,
+            application: Application,
+            apiKey: String,
+            onCompletion: () -> Unit,
+            onError: (StaxException) -> Unit,
+            appId: String = "appid",
+            environment: Environment = Environment.LIVE,
+        ) {
+            val paramMap = mutableMapOf(
+                "apiKey" to apiKey,
+                "appContext" to context,
+                "appId" to appId,
+                "application" to application
+            )
+
+            initialize(paramMap, environment, onCompletion, onError)
+        }
+
+        /**
+         * Prepares [Stax] for usage
+         * @param params an [InitParams] instance that has all the necessary info for initialization
+         * @throws InitializationError if you don't pass an apiKey
+         */
+        fun initialize(params: InitParams, onCompletion: () -> Unit, onError: (StaxException) -> Unit) {
             val paramMap = mutableMapOf(
                 "apiKey" to params.apiKey,
                 "appContext" to params.appContext,
@@ -60,23 +91,22 @@ class Stax internal constructor(staxApi: StaxApi) : CommonStax(staxApi) {
                 paramMap["application"] = it
             }
 
-            initialize(paramMap, params.environment, completion, error)
+            initialize(paramMap, params.environment, onCompletion, onError)
         }
 
         /**
          * Prepares [Stax] for usage
          *
          * @param params a [Map] containing the necessary information to initialize Stax
-         * @param completion block to execute once completed
+         * @param onCompletion block to execute once completed
          *
          * @throws InitializationError if you don't pass an apiKey
          */
-        fun initialize(params: Map<String, Any>, environment: Environment, completion: () -> Unit, error: (StaxException) -> Unit) {
+        private fun initialize(params: Map<String, Any>, environment: Environment, onCompletion: () -> Unit, onError: (StaxException) -> Unit) {
             // Init the API
             val staxApi = StaxApi()
 
             staxApi.environment = environment
-
             staxApi.token = params["apiKey"] as? String ?: ""
 
             // Create the shared Stax object
@@ -87,17 +117,24 @@ class Stax internal constructor(staxApi: StaxApi) : CommonStax(staxApi) {
             stax.coroutineScope.launch {
                 try {
                     stax.initialize(params, {
-                        completion()
+                        onCompletion()
                     }) {
-                        error(it)
+                        onError(it)
                     }
-                }catch (e: Exception){
+                } catch (e: StaxException){
+                    onError(e)
+                } catch (e: Exception) {
                     error(e)
                 }
-
             }
         }
 
-        fun shared(): Stax? = sharedInstance
+        /**
+         * Get the shared instance of the Stax SDK
+         * @throws StaxGeneralException A Stax Exception if your SDK has not been initialized
+         */
+        fun instance(): Stax {
+            return sharedInstance ?: throw StaxGeneralException.uninitialized
+        }
     }
 }

@@ -1,4 +1,5 @@
 package com.staxpayments.android.chipdna
+
 import com.creditcall.chipdnamobile.ChipDnaMobile
 import com.creditcall.chipdnamobile.IApplicationSelectionListener
 import com.creditcall.chipdnamobile.IDeferredAuthorizationListener

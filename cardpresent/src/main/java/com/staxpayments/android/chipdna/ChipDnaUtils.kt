@@ -1,5 +1,7 @@
 package com.staxpayments.android.chipdna
 
+import com.creditcall.chipdnamobile.ChipDnaMobile
+import com.creditcall.chipdnamobile.ChipDnaMobileSerializer
 import com.creditcall.chipdnamobile.DeviceStatus
 import com.creditcall.chipdnamobile.ParameterKeys
 import com.creditcall.chipdnamobile.ParameterValues
@@ -181,4 +183,19 @@ fun MobileReaderConnectionStatus.Companion.from(chipDnaDeviceStatus: DeviceStatu
     DeviceStatus.DeviceStatusEnum.DeviceStatusDisconnected -> MobileReaderConnectionStatus.DISCONNECTED
     DeviceStatus.DeviceStatusEnum.DeviceStatusConnected -> MobileReaderConnectionStatus.CONNECTED
     else -> null
+}
+
+/**
+ * Attempts to get the connected mobile reader.
+ * @return the connected [MobileReader], if found. Null otherwise
+ */
+internal fun getConnectedChipDnaReader(): MobileReader? {
+    val chipDnaMobileStatus = ChipDnaMobile.getInstance().getStatus(null)
+    val deviceStatusXml = chipDnaMobileStatus[ParameterKeys.DeviceStatus] ?: return null
+    val deviceStatus = ChipDnaMobileSerializer.deserializeDeviceStatus(deviceStatusXml)
+
+    return when (deviceStatus.status) {
+        DeviceStatus.DeviceStatusEnum.DeviceStatusConnected -> mapDeviceStatusToMobileReader(deviceStatus)
+        else -> null
+    }
 }

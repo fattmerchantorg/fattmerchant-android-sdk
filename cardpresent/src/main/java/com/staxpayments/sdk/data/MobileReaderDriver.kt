@@ -122,7 +122,7 @@ interface MobileReaderDriver {
      * @return the result of the operation
      */
     @Throws(VoidTransactionException::class)
-    fun voidTransaction(transactionResult: TransactionResult, completion: (Boolean) -> Unit)
+    fun voidTransaction(transactionResult: TransactionResult, onCompletion: (Boolean) -> Unit)
 
     /**
      * Attempts to refund the given [transaction]
@@ -136,9 +136,9 @@ interface MobileReaderDriver {
     /**
      * Attempts to cancel a current mobile reader [transaction]
      *
-     * @param error
+     * @param onError
      * @return the result of the operation
      */
     @Throws(CancelCurrentTransactionException::class)
-    suspend fun cancelCurrentTransaction(error: ((StaxException) -> Unit)?): Boolean
+    suspend fun cancelCurrentTransaction(onError: ((StaxException) -> Unit)?): Boolean
 }
