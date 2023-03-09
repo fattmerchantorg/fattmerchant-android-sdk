@@ -1,30 +1,18 @@
 package com.staxpayments.sdk.data
 
+import com.staxpayments.exceptions.CancelCurrentTransactionException
+import com.staxpayments.exceptions.InitializeMobileReaderDriverException
+import com.staxpayments.exceptions.PerformTransactionException
+import com.staxpayments.exceptions.RefundTransactionException
 import com.staxpayments.exceptions.StaxException
+import com.staxpayments.exceptions.VoidTransactionException
 import com.staxpayments.sdk.MobileReaderConnectionStatusListener
 import com.staxpayments.sdk.SignatureProviding
 import com.staxpayments.sdk.TransactionUpdateListener
 import com.staxpayments.sdk.UserNotificationListener
 import com.staxpayments.sdk.data.models.Transaction
-import com.staxpayments.sdk.usecase.CancelCurrentTransactionException
 
-public interface MobileReaderDriver {
-
-    class PerformTransactionException(message: String? = null) :
-        StaxException("Could not perform transaction", message)
-
-    class VoidTransactionException(message: String? = null) :
-        StaxException("Could not void transaction", message)
-
-    class RefundTransactionException(message: String? = null) :
-        StaxException("Could not refund transaction", message)
-
-    open class ConnectReaderException(message: String? = null) :
-        StaxException("Could not connect mobile reader", message)
-
-    class InitializeMobileReaderDriverException(message: String? = null) :
-        StaxException("Could not initialize mobile reader driver", message)
-
+interface MobileReaderDriver {
     /** A list of serial numbers that this driver has previously connected to */
     var familiarSerialNumbers: MutableList<String>
 

@@ -2,6 +2,11 @@ package com.staxpayments.android.chipdna
 
 import android.content.Context
 import com.creditcall.chipdnamobile.*
+import com.staxpayments.exceptions.CancelCurrentTransactionException
+import com.staxpayments.exceptions.ConnectReaderException
+import com.staxpayments.exceptions.InitializeMobileReaderDriverException
+import com.staxpayments.exceptions.PerformTransactionException
+import com.staxpayments.exceptions.RefundTransactionException
 import com.staxpayments.exceptions.StaxException
 import com.staxpayments.exceptions.StaxGeneralException
 import com.staxpayments.sdk.MobileReaderConnectionStatusListener
@@ -11,15 +16,11 @@ import com.staxpayments.sdk.UserNotificationListener
 import com.staxpayments.sdk.data.Amount
 import com.staxpayments.sdk.data.MobileReader
 import com.staxpayments.sdk.data.MobileReaderDriver
-import com.staxpayments.sdk.data.MobileReaderDriver.InitializeMobileReaderDriverException
-import com.staxpayments.sdk.data.MobileReaderDriver.PerformTransactionException
-import com.staxpayments.sdk.data.MobileReaderDriver.RefundTransactionException
 import com.staxpayments.sdk.data.TransactionRequest
 import com.staxpayments.sdk.data.TransactionResult
 import com.staxpayments.sdk.data.models.MobileReaderConnectionStatus
 import com.staxpayments.sdk.data.models.MobileReaderDetails
 import com.staxpayments.sdk.data.models.Transaction
-import com.staxpayments.sdk.usecase.CancelCurrentTransactionException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -37,8 +38,8 @@ class ChipDnaDriver :
     IConfigurationUpdateListener,
     IDeviceUpdateListener {
 
-    class ConnectReaderException(message: String? = null) :
-        MobileReaderDriver.ConnectReaderException(mapDetailMessage(message)) {
+    class NmiConnectReaderException(message: String? = null) :
+        ConnectReaderException(mapDetailMessage(message)) {
         companion object {
             fun mapDetailMessage(chipDnaMessage: String?): String? {
                 return when (chipDnaMessage) {
@@ -51,22 +52,12 @@ class ChipDnaDriver :
     }
 
     companion object {
-        /** The make of the pin pad */
-        internal final class PinPadManufacturer(val name: String) {
-            companion object {
-                val Miura = PinPadManufacturer("Miura")
-                val BBPOS = PinPadManufacturer("BBPOS")
-            }
-        }
-
         /**
          * Attempts to get the connected mobile reader.
-         *
-         * @param chipDnaMobileStatus the result of [ChipDnaMobile.getStatus]. If none is provided, this
-         * method will retrieve it
          * @return the connected [MobileReader], if found. Null otherwise
          */
-        internal fun getConnectedReader(chipDnaMobileStatus: Parameters? = ChipDnaMobile.getInstance().getStatus(null)): MobileReader? {
+        internal fun getConnectedReader(): MobileReader? {
+            val chipDnaMobileStatus = ChipDnaMobile.getInstance().getStatus(null)
             val deviceStatusXml = chipDnaMobileStatus[ParameterKeys.DeviceStatus] ?: return null
             val deviceStatus = ChipDnaMobileSerializer.deserializeDeviceStatus(deviceStatusXml)
 
@@ -77,7 +68,7 @@ class ChipDnaDriver :
         }
     }
 
-    public class SelectablePinPad(var name: String, var connectionType: String)
+    class SelectablePinPad(var name: String, var connectionType: String)
 
     /** A key used to communicate with TransactionGateway */
     private var securityKey: String = ""
@@ -147,16 +138,23 @@ class ChipDnaDriver :
         return output
     }
 
-    override suspend fun isStaxRefundsSupported(): Boolean {
-        return true
-    }
+    override suspend fun isStaxRefundsSupported() = true
 
+    /**
+     * Checks if the ChipDna instance has been successfully initialized
+     * @return true if the ChipDna instance has been successfully initialized
+     */
     override suspend fun isInitialized(): Boolean {
         return ChipDnaMobile.isInitialized()
     }
 
+    /**
+     * Searches for available readers over BT, BLE, and USB. Then, parses out the available readers
+     * into a Stax usable form.
+     * @return A list of [MobileReader] devices
+     */
     override suspend fun searchForReaders(args: Map<String, Any>): List<MobileReader> {
-        val selectablePinPads = suspendCancellableCoroutine<List<SelectablePinPad>> { cont ->
+        val selectablePinPads = suspendCancellableCoroutine { cont ->
             ChipDnaMobile.getInstance().apply {
                 clearAllAvailablePinPadsListeners()
                 addAvailablePinPadsListener { params ->
@@ -200,6 +198,10 @@ class ChipDnaDriver :
         }
     }
 
+    /**
+     * Attempts to connect to a specified mobile reader
+     * @return the mobile reader object (if it is successfully connected to), or null
+     */
     override suspend fun connectReader(reader: MobileReader): MobileReader? {
         val connectionType: String = if (reader.getConnectionType() == ConnectionType.BT) {
             ParameterValues.BluetoothConnectionType
@@ -207,8 +209,8 @@ class ChipDnaDriver :
             ParameterValues.BluetoothLeConnectionType
         } else if (reader.getConnectionType() == ConnectionType.USB) {
             ParameterValues.UsbConnectionType
-        } else { // Default to BT
-            ParameterValues.BluetoothConnectionType
+        } else { // Default to BLE
+            ParameterValues.BluetoothLeConnectionType
         }
 
         // Set properties of reader to connect to here. Adding them as
@@ -220,7 +222,7 @@ class ChipDnaDriver :
             }
         )
 
-        return suspendCancellableCoroutine { cont ->
+        return suspendCancellableCoroutine { continuation ->
             val connectAndConfigureParams = ChipDnaMobile.getInstance().getStatus(null)
             ChipDnaMobile.getInstance().apply {
                 clearAllConnectAndConfigureFinishedListeners()
@@ -228,13 +230,13 @@ class ChipDnaDriver :
                     if (params[ParameterKeys.Result] == ParameterValues.TRUE) {
                         Companion.getConnectedReader()?.let { connectedReader ->
                             connectedReader.serialNumber()?.let { familiarSerialNumbers.add(it) }
-                            cont.resume(connectedReader)
+                            continuation.resume(connectedReader)
                         }
                         return@addConnectAndConfigureFinishedListener
                     }
 
                     val error = params[ParameterKeys.ErrorDescription]
-                    cont.resumeWithException(ConnectReaderException(error))
+                    continuation.resumeWithException(NmiConnectReaderException(error))
                 }
             }.connectAndConfigure(connectAndConfigureParams)
         }
@@ -251,9 +253,9 @@ class ChipDnaDriver :
         // ChipDna must be initialized
         if (!ChipDnaMobile.isInitialized()) {
             throw StaxGeneralException.uninitialized
-        } else {
-            return Companion.getConnectedReader()
         }
+
+        return Companion.getConnectedReader()
     }
 
     override suspend fun isReadyToTakePayment(): Boolean {

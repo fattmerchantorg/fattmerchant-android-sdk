@@ -1,5 +1,6 @@
 package com.staxpayments.sdk.usecase
 
+import com.staxpayments.exceptions.CapturePreAuthTransactionException
 import com.staxpayments.exceptions.StaxException
 import com.staxpayments.sdk.data.Amount
 import com.staxpayments.sdk.data.models.Transaction
@@ -8,9 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlin.coroutines.CoroutineContext
 
-class CapturePreauthTransactionException(detail: String) : StaxException("Could not get connected mobile reader", detail)
-
-class CapturePreauthTransaction(
+class CapturePreAuthTransaction(
     var transactionId: String,
     val staxApi: StaxApi,
     var captureAmount: Amount? = null,
@@ -24,7 +23,7 @@ class CapturePreauthTransaction(
         away with asking the Stax API to perform the capture for us
          */
         val transaction = staxApi.captureTransaction(transactionId, captureAmount) { error ->
-            failure(CapturePreauthTransactionException(error.message ?: "Could not capture funds"))
+            failure(CapturePreAuthTransactionException(error.message ?: "Could not capture funds"))
         }
 
         transaction

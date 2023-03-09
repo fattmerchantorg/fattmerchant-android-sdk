@@ -1,5 +1,6 @@
 package com.staxpayments.sdk.usecase
 
+import com.staxpayments.exceptions.GetConnectedMobileReaderException
 import com.staxpayments.exceptions.StaxException
 import com.staxpayments.exceptions.StaxGeneralException
 import com.staxpayments.sdk.data.MobileReader
@@ -7,12 +8,6 @@ import com.staxpayments.sdk.data.MobileReaderDriver
 import com.staxpayments.sdk.data.repository.MobileReaderDriverRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
-
-class GetConnectedMobileReaderException(detail: String) : StaxException("Could not get connected mobile reader", detail) {
-    companion object {
-        val noReaderAvailable = GetConnectedMobileReaderException("No mobile reader is available")
-    }
-}
 
 /**
  * Finds the connected mobile reader

@@ -105,7 +105,7 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
             mutatedArgs["nmi"] = nmiDetails
 
             staxApi.getMobileReaderSettings {
-                // error(StaxException("Could not get reader settings", it.message))
+                error(StaxException("Could not get reader settings", it.message))
             }?.let { mobileReaderDetails ->
                 mobileReaderDetails.nmi?.let {
                     mutatedArgs["nmi"] = it
@@ -398,7 +398,7 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
         error: (StaxException) -> Unit
     ) {
         coroutineScope.launch {
-            CapturePreauthTransaction(transactionId, staxApi, amount, coroutineContext).start {
+            CapturePreAuthTransaction(transactionId, staxApi, amount, coroutineContext).start {
                 error(it)
             }?.let { completion(it) }
         }

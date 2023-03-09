@@ -5,30 +5,30 @@ import org.xmlpull.v1.XmlPullParserFactory
 import java.io.StringReader
 
 /**
- * Parses information from a chipdna transaction formatted in XML
+ * Parses information from a ChipDna transaction formatted in XML
  */
 internal class ChipDnaXMLTransactionParser {
 
     companion object {
         /**
          * Parses the expiration date from the XML
-         *
          * @param transactionId the ID of the transaction with the payment method in question
          * @param transactionXml an xml-formatted Transaction from TransactionGateway
          */
         fun parseExpirationDate(transactionXml: String, transactionId: String): String? {
-            // Create the parser
             val factory = XmlPullParserFactory.newInstance()
             factory.isNamespaceAware = true
+
             val parser = factory.newPullParser()
             parser.setInput(StringReader(transactionXml))
+
             var eventType = parser.eventType
 
             // Tracks the name of the element we are currently parsing
             var currentElementName = ""
 
             // True when the object being parsed is the transaction that we care to grab the cc_exp from
-            var parsingTargetTransaction = false
+            var isParsingTargetTransaction = false
 
             // Loop over the document, looking for the cc_exp of the transaction
             while (eventType != XmlPullParser.END_DOCUMENT) {
@@ -43,12 +43,12 @@ internal class ChipDnaXMLTransactionParser {
                         when (currentElementName) {
                             "transaction_id" -> {
                                 if (parser.text == transactionId) {
-                                    parsingTargetTransaction = true
+                                    isParsingTargetTransaction = true
                                 }
                             }
 
                             "cc_exp" -> {
-                                if (parsingTargetTransaction) {
+                                if (isParsingTargetTransaction) {
                                     return text
                                 }
                             }

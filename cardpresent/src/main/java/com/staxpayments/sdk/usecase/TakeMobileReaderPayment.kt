@@ -1,6 +1,7 @@
 package com.staxpayments.sdk.usecase
 
 import com.staxpayments.android.chipdna.ChipDnaDriver
+import com.staxpayments.exceptions.PerformTransactionException
 import com.staxpayments.exceptions.StaxException
 import com.staxpayments.sdk.SignatureProviding
 import com.staxpayments.sdk.TransactionUpdateListener
@@ -123,7 +124,7 @@ internal class TakeMobileReaderPayment(
 
         try {
             result = reader.performTransaction(request, signatureProvider, transactionUpdateListener, userNotificationListener)
-        } catch (e: MobileReaderDriver.PerformTransactionException) {
+        } catch (e: PerformTransactionException) {
             onError(TakeMobileReaderPaymentException(e.detail))
             return@coroutineScope null
         } catch (e: Error) {

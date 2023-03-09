@@ -1,16 +1,11 @@
 package com.staxpayments.sdk.usecase
 
+import com.staxpayments.exceptions.DisconnectMobileReaderException
 import com.staxpayments.exceptions.StaxException
 import com.staxpayments.sdk.data.MobileReader
 import com.staxpayments.sdk.data.repository.MobileReaderDriverRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlin.coroutines.CoroutineContext
-
-class DisconnectMobileReaderException(detail: String) : StaxException("Could not disconnect mobile reader", detail) {
-    companion object {
-        val driverNotFound = DisconnectMobileReaderException("Driver not found")
-    }
-}
 
 /**
  * Disconnects the mobile reader
