@@ -7,6 +7,7 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -16,6 +17,7 @@ dependencyResolutionManagement {
         maven(url = "https://plugins.gradle.org/m2/")
     }
 }
+
 rootProject.name = "Stax Android SDK"
 include(":tokenization")
 include(":cardpresent")

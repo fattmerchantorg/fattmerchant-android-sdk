@@ -10,8 +10,8 @@ interface SignatureProviding {
     /**
      * Called when a transaction requires a signature
      *
-     * @param completion a block to run once the signature is complete. This should be given the
+     * @param onCompletion a block to run once the signature is complete. This should be given the
      * signature as a Base64 encoded string
      */
-    fun signatureRequired(completion: (String) -> Unit)
+    fun signatureRequired(onCompletion: (String) -> Unit)
 }

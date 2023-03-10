@@ -249,9 +249,9 @@ internal class AWCDriver : MobileReaderDriver {
 
     override fun voidTransaction(
         transactionResult: TransactionResult,
-        completion: (Boolean) -> Unit
+        onCompletion: (Boolean) -> Unit
     ) {
-        completion(false)
+        onCompletion(false)
     }
 
     override suspend fun refundTransaction(transaction: Transaction, refundAmount: Amount?): TransactionResult {
@@ -282,12 +282,12 @@ internal class AWCDriver : MobileReaderDriver {
         }
     }
 
-    override suspend fun cancelCurrentTransaction(error: ((StaxException) -> Unit)?): Boolean {
+    override suspend fun cancelCurrentTransaction(onError: ((StaxException) -> Unit)?): Boolean {
         currentTransaction?.let {
             it.cancel()
             return true
         }
-        error?.invoke(CancelCurrentTransactionException("Could not cancel current transaction"))
+        onError?.invoke(CancelCurrentTransactionException("Could not cancel current transaction"))
         return false
     }
 }
