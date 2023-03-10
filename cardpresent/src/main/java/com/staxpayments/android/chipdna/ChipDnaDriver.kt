@@ -1,5 +1,6 @@
 package com.staxpayments.android.chipdna
 
+import android.Manifest
 import android.content.Context
 import com.creditcall.chipdnamobile.*
 import com.staxpayments.exceptions.CancelCurrentTransactionException
@@ -94,6 +95,10 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
 
         if (apiKey.isBlank()) {
             throw InitializeMobileReaderDriverException("emvTerminalSecret not found")
+        }
+
+        if (!isAndroidPermissionGranted(appContext)) {
+            throw InitializeMobileReaderDriverException("Android permissions not granted")
         }
 
         val params = Parameters().apply {

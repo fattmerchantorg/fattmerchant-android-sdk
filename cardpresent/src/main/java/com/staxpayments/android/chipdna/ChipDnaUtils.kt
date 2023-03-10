@@ -1,5 +1,9 @@
 package com.staxpayments.android.chipdna
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import com.creditcall.chipdnamobile.ChipDnaMobile
 import com.creditcall.chipdnamobile.ChipDnaMobileSerializer
 import com.creditcall.chipdnamobile.DeviceStatus
@@ -198,4 +202,30 @@ internal fun getConnectedChipDnaReader(): MobileReader? {
         DeviceStatus.DeviceStatusEnum.DeviceStatusConnected -> mapDeviceStatusToMobileReader(deviceStatus)
         else -> null
     }
+}
+
+/**
+ * Returns true if Bluetooth and Location services are enabled. This is a helper function
+ * used in the ChipDna.initialize() code.
+ */
+internal fun isAndroidPermissionGranted(context: Context): Boolean {
+    // Build a list of required permissions
+    val permissions = mutableListOf<String>()
+    permissions.add(Manifest.permission.ACCESS_FINE_LOCATION)
+
+    // Add Bluetooth Permissions in Android S+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        permissions.add(Manifest.permission.BLUETOOTH_SCAN)
+        permissions.add(Manifest.permission.BLUETOOTH_CONNECT)
+    }
+
+    // Loop through permissions and return false if any of the permissions are denied
+    var isApproved = true
+    permissions.forEach { permission ->
+        if (context.checkSelfPermission(permission) == PackageManager.PERMISSION_DENIED) {
+            isApproved = false
+        }
+    }
+
+    return isApproved
 }
