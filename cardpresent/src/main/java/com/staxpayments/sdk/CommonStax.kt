@@ -56,7 +56,7 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
     internal open var initialized: Boolean = false
 
     /** True when Stax SDK is initialized. False otherwise */
-    public val isInitialized get() = initialized
+    val isInitialized get() = initialized
 
     /** Responsible for providing signatures for transactions, when required */
     open var signatureProvider: SignatureProviding? = null
@@ -189,7 +189,7 @@ open class CommonStax internal constructor(internal var staxApi: StaxApi) {
                     onFail("Could not connect to mobile reader")
                 }
             } catch (e: StaxException) {
-                onFail(e.detail ?: e.message ?: "Could not connect mobile reader")
+                onFail(e.detail ?: e.message)
             }
         }
     }

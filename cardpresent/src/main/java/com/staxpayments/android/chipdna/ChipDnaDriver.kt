@@ -17,7 +17,7 @@ import com.staxpayments.sdk.data.MobileReader
 import com.staxpayments.sdk.data.MobileReaderDriver
 import com.staxpayments.sdk.data.TransactionRequest
 import com.staxpayments.sdk.data.TransactionResult
-import com.staxpayments.api.models.MobileReaderConnectionStatus
+import com.staxpayments.sdk.MobileReaderConnectionStatus
 import com.staxpayments.api.models.MobileReaderDetails
 import com.staxpayments.api.models.Transaction
 import com.staxpayments.exceptions.ChipDnaConnectReaderException
@@ -225,7 +225,8 @@ class ChipDnaDriver : CoroutineScope, MobileReaderDriver {
 
     override suspend fun disconnect(reader: MobileReader, error: (StaxException) -> Unit): Boolean {
         ChipDnaMobile.dispose(null)
-        mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(MobileReaderConnectionStatus.DISCONNECTED)
+        mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(
+            MobileReaderConnectionStatus.DISCONNECTED)
         initialize(initArgs)
         return true
     }

@@ -1,7 +1,5 @@
 package com.staxpayments.sdk
 
-import com.staxpayments.api.models.MobileReaderConnectionStatus
-
 interface MobileReaderConnectionStatusListener {
 
     /**

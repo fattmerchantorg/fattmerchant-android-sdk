@@ -5,7 +5,7 @@ import com.creditcall.chipdnamobile.IConfigurationUpdateListener
 import com.creditcall.chipdnamobile.IDeviceUpdateListener
 import com.creditcall.chipdnamobile.ParameterKeys
 import com.creditcall.chipdnamobile.Parameters
-import com.staxpayments.api.models.MobileReaderConnectionStatus
+import com.staxpayments.sdk.MobileReaderConnectionStatus
 import com.staxpayments.sdk.MobileReaderConnectionStatusListener
 
 class ChipDnaDeviceListener(private val listener: MobileReaderConnectionStatusListener? = null) :

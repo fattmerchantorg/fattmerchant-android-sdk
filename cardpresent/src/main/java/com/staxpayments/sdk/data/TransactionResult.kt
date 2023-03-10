@@ -178,7 +178,7 @@ open class TransactionResult {
 
         return Transaction().apply {
             total = amount?.dollarsString()
-            success = this@TransactionResult.success
+            success = this@TransactionResult.success == true
             lastFour = cardLastFour()
             meta = transactionMeta
             type = "charge"

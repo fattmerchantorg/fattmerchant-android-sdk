@@ -88,7 +88,7 @@ internal class RefundMobileReaderTransaction(
         val refundedTransaction = Transaction().apply {
             total = result.amount?.dollarsString()
             paymentMethodId = transaction.paymentMethodId
-            success = result.success
+            success = result.success == true
             lastFour = transaction.lastFour
             type = "refund"
             source = transaction.source
