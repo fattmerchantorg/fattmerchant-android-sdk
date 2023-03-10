@@ -1,6 +1,6 @@
 package com.staxpayments.sample
 
-import com.fattmerchant.omni.SignatureProviding
+import com.staxpayments.sdk.SignatureProviding
 
 class SignatureProvider : SignatureProviding {
     override fun signatureRequired(completion: (String) -> Unit) {

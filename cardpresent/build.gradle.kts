@@ -80,7 +80,6 @@ dependencies {
 
     implementation("com.squareup.moshi:moshi-kotlin:1.12.0")
     implementation("com.jakewharton.timber:timber:4.7.1")
-    implementation("net.zetetic:android-database-sqlcipher:4.5.0@aar")
 
     // AnywhereCommerce
     compileOnly(project(":awc"))
