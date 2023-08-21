@@ -6,11 +6,12 @@ plugins {
 group = 'com.github.fattmerchantorg'
 
 android {
-    compileSdkVersion 33
+    namespace "com.fattmerchant"
+    compileSdk 34
 
     defaultConfig {
-        minSdkVersion 23
-        targetSdkVersion 33
+        minSdk 23
+        targetSdk 34
         versionCode 15
         versionName "2.5.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -35,8 +36,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     buildTypes {
@@ -94,9 +95,9 @@ dependencies {
     }
 
     // Ktor
-    implementation "io.ktor:ktor-client-core:$ktor_version"
-    implementation "io.ktor:ktor-client-okhttp:$ktor_version"
-    implementation "io.ktor:ktor-client-ios:$ktor_version"
-    implementation "io.ktor:ktor-client-json:$ktor_version"
-    implementation "io.ktor:ktor-client-gson:$ktor_version"
+    implementation "io.ktor:ktor-client-core:1.1.4"
+    implementation "io.ktor:ktor-client-okhttp:1.1.4"
+    implementation "io.ktor:ktor-client-ios:1.1.4"
+    implementation "io.ktor:ktor-client-json:1.1.4"
+    implementation "io.ktor:ktor-client-gson:1.1.4"
 }
