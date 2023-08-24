@@ -163,7 +163,6 @@ internal class TakeMobileReaderPayment(
                     voidAndFail(it)
                 } ?: return@coroutineScope null
             }
-
         }
 
         // Create a PaymentMethod
@@ -204,31 +203,7 @@ internal class TakeMobileReaderPayment(
             voidAndFail(it)
         } ?: return@coroutineScope null
 
-        // If we the transaction is preauth, we don't need to capture it
-        if (request.preauth) {
-            return@coroutineScope createdTransaction
-        }
-
-        // If the transaction is not an NMI one, then we don't need to do the auth capture step
-        if (!result.source.contains("NMI")) {
-            return@coroutineScope createdTransaction
-        }
-
-        val successfullyCaptured = reader.capture(createdTransaction)
-
-        if (successfullyCaptured) {
-            return@coroutineScope createdTransaction
-        } else {
-            // Mark Stax transaction as failed
-            createdTransaction.success = false
-            createdTransaction.message = "Error capturing the transaction"
-
-            // Fail the transaction in Stax
-            transactionRepository.update(createdTransaction) { }
-
-            voidAndFail(TakeMobileReaderPaymentException("Could not capture transaction"))
-            return@coroutineScope null
-        }
+        return@coroutineScope createdTransaction
     }
 
     /**
