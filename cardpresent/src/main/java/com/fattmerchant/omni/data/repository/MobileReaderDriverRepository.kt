@@ -32,10 +32,5 @@ internal interface MobileReaderDriverRepository {
      * @param mobileReader
      * @return
      */
-    suspend fun getDriverFor(mobileReader: MobileReader): MobileReaderDriver?
-
-    /**
-     * Returns the terminal driver that knows how to handle the given transaction
-     */
-    fun getTerminal(): PaymentTerminalDriver?
+    suspend fun getDriverFor(mobileReader: MobileReader?): MobileReaderDriver?
 }

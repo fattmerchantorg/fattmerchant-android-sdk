@@ -1,5 +1,7 @@
 package com.fattmerchant.android.chipdna
 
+import com.creditcall.chipdnamobile.ChipDnaMobile
+import com.creditcall.chipdnamobile.ChipDnaMobileSerializer
 import com.creditcall.chipdnamobile.DeviceStatus
 import com.creditcall.chipdnamobile.ParameterKeys
 import com.creditcall.chipdnamobile.ParameterValues
@@ -16,19 +18,62 @@ import java.util.Locale
 import com.creditcall.chipdnamobile.TransactionUpdate as ChipDnaTransactionUpdate
 import com.creditcall.chipdnamobile.UserNotification as ChipDnaUserNotification
 
+enum class ConnectionType {
+    BT,
+    BLE,
+    USB,
+    UNKNOWN;
+
+    companion object {
+        fun parse(str: String): ConnectionType {
+            val bt = ParameterValues.BluetoothConnectionType
+            val ble = ParameterValues.BluetoothLeConnectionType
+            val usb = ParameterValues.UsbConnectionType
+
+            return if (str.equals(bt, ignoreCase = true)) { BT }
+            else if (str.equals(ble, ignoreCase = true)) { BLE }
+            else if (str.equals(usb, ignoreCase = true)) { USB }
+            else { UNKNOWN }
+        }
+    }
+
+    fun toParameterValue(): String {
+        return if (this == BT) { ParameterValues.BluetoothConnectionType }
+        else if (this == BLE) { ParameterValues.BluetoothLeConnectionType }
+        else if (this == USB) { ParameterValues.UsbConnectionType }
+        else { ParameterValues.BluetoothLeConnectionType } // Default to BLE
+    }
+}
+
+/**
+ * Attempts to get the connected mobile reader.
+ * @return the connected [MobileReader], if found. Null otherwise
+ */
+internal fun getConnectedChipDnaReader(): MobileReader? {
+    val chipDnaMobileStatus = ChipDnaMobile.getInstance().getStatus(null)
+    val deviceStatusXml = chipDnaMobileStatus[ParameterKeys.DeviceStatus] ?: return null
+    val deviceStatus = ChipDnaMobileSerializer.deserializeDeviceStatus(deviceStatusXml)
+
+    return when (deviceStatus.status) {
+        DeviceStatus.DeviceStatusEnum.DeviceStatusConnected -> mapDeviceStatusToMobileReader(deviceStatus)
+        else -> null
+    }
+}
+
 /**
  * Makes an instance of [MobileReader] for the given [pinPad]
  *
  * @param pinPad a pin pad that can be connected
  * @return a [MobileReader]
  */
-internal fun mapPinPadToMobileReader(pinPad: ChipDnaDriver.SelectablePinPad): MobileReader {
+internal fun mapPinPadToMobileReader(pinPad: ChipDnaDriver.SelectablePinPad, connectionType: ConnectionType): MobileReader {
     return object : MobileReader {
         override fun getName() = pinPad.name
         override fun getFirmwareVersion(): String? = null
         override fun getMake(): String? = null
         override fun getModel(): String? = null
         override fun serialNumber(): String? = null
+        override fun getConnectionType(): ConnectionType = connectionType
     }
 }
 
@@ -45,6 +90,7 @@ internal fun mapDeviceStatusToMobileReader(deviceStatus: DeviceStatus): MobileRe
         override fun getMake(): String? = deviceStatus.make
         override fun getModel(): String? = deviceStatus.model
         override fun serialNumber(): String? = deviceStatus.serialNumber
+        override fun getConnectionType(): ConnectionType = ConnectionType.UNKNOWN
     }
 }
 

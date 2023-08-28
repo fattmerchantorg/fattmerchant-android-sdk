@@ -15,7 +15,7 @@ class VoidTransaction(
 
     suspend fun start(failure: (OmniException) -> Unit): Transaction? = coroutineScope {
         /*
-        As of 5/21/21, only NMI supports preauth and only NMI is offered to partners so we really
+        As of 5/21/21, only NMI supports pre-auth and only NMI is offered to partners so we really
         shouldn't be hitting this code for anything except NMI. With that assumption, we can get
         away with asking the Stax API to perform the capture for us
          */

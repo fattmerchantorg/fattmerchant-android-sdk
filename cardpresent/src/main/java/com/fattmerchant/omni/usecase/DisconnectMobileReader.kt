@@ -23,7 +23,7 @@ class DisconnectMobileReaderException(detail: String) : OmniException("Could not
 internal class DisconnectMobileReader(
     override val coroutineContext: CoroutineContext,
     private var mobileReaderDriverRepository: MobileReaderDriverRepository,
-    private var mobileReader: MobileReader
+    private var mobileReader: MobileReader?,
 ) : CoroutineScope {
 
     /**
