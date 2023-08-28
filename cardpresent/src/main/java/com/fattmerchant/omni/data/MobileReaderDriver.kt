@@ -86,7 +86,7 @@ internal interface MobileReaderDriver {
      * @param error a block to run if something goes wrong
      * @return true if the reader was disconnected
      */
-    suspend fun disconnect(reader: MobileReader, error: (OmniException) -> Unit): Boolean
+    suspend fun disconnect(reader: MobileReader?, error: (OmniException) -> Unit): Boolean
 
     /**
      * Gets the [MobileReader] that is currently connected and accessible via the receiver

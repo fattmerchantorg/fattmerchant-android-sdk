@@ -4,9 +4,7 @@ import android.content.Context
 import com.creditcall.chipdnamobile.ChipDnaMobile
 import com.creditcall.chipdnamobile.ChipDnaMobileSerializer
 import com.creditcall.chipdnamobile.DeviceStatus
-import com.creditcall.chipdnamobile.IAvailablePinPadsListener
 import com.creditcall.chipdnamobile.IConfigurationUpdateListener
-import com.creditcall.chipdnamobile.IConnectAndConfigureFinishedListener
 import com.creditcall.chipdnamobile.IDeviceUpdateListener
 import com.creditcall.chipdnamobile.ParameterKeys
 import com.creditcall.chipdnamobile.ParameterValues
@@ -32,6 +30,8 @@ import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.usecase.CancelCurrentTransactionException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
@@ -152,10 +152,23 @@ internal class ChipDnaDriver :
     }
 
     override suspend fun isInitialized(): Boolean {
-        return ChipDnaMobile.isInitialized()
+        val isInitialized = ChipDnaMobile.isInitialized()
+        if (!isInitialized && initArgs.isNotEmpty()) {
+            async { initialize(initArgs) }.await()
+            return ChipDnaMobile.isInitialized()
+        }
+        return isInitialized
     }
 
     override suspend fun searchForReaders(args: Map<String, Any>): List<MobileReader> {
+        if (!isInitialized()) {
+            if (initArgs.isNotEmpty()) {
+                async { initialize(initArgs) }.await()
+            } else {
+                throw OmniGeneralException.uninitialized
+            }
+        }
+
         val readers = suspendCancellableCoroutine { continuation ->
             ChipDnaMobile.getInstance().apply {
                 clearAllAvailablePinPadsListeners()
@@ -180,6 +193,14 @@ internal class ChipDnaDriver :
     }
 
     override suspend fun connectReader(reader: MobileReader): MobileReader? {
+        if (!isInitialized()) {
+            if (initArgs.isNotEmpty()) {
+                async { initialize(initArgs) }.await()
+            } else {
+                throw OmniGeneralException.uninitialized
+            }
+        }
+
         // Set properties of reader to connect to here. Adding them as
         // connectAndConfigure params causes it to never connect correctly
         ChipDnaMobile.getInstance().setProperties(
@@ -209,19 +230,37 @@ internal class ChipDnaDriver :
         }
     }
 
-    override suspend fun disconnect(reader: MobileReader, error: (OmniException) -> Unit): Boolean {
-        ChipDnaMobile.dispose(null)
-        mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(MobileReaderConnectionStatus.DISCONNECTED)
-        initialize(initArgs)
-        return true
+    override suspend fun disconnect(reader: MobileReader?, error: (OmniException) -> Unit): Boolean {
+        val retryLimit = 3
+        var retryCount = 0
+
+        do {
+            // Check the result. If the disconnect was successful, break out of the retry loop.
+            val result = ChipDnaMobile.dispose(null)
+            if (result[ParameterKeys.Result] == ParameterValues.TRUE) {
+                mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(MobileReaderConnectionStatus.DISCONNECTED)
+                return true
+            }
+
+            // Wait a beat and retry. The failure is due to another transaction in progress like canceling a transaction.
+            async { delay(500L) }.await()
+            retryCount++
+        } while (retryCount < retryLimit)
+
+        return false
     }
 
     override suspend fun getConnectedReader(): MobileReader? {
         // ChipDna must be initialized
-        if (!ChipDnaMobile.isInitialized()) {
-            throw OmniGeneralException.uninitialized
+        return if (!ChipDnaMobile.isInitialized()) {
+            if (initArgs.isNotEmpty()) {
+                async { initialize(initArgs) }.await()
+                Companion.getConnectedReader()
+            } else {
+                throw OmniGeneralException.uninitialized
+            }
         } else {
-            return Companion.getConnectedReader()
+            Companion.getConnectedReader()
         }
     }
 

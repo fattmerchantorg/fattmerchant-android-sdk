@@ -329,22 +329,13 @@ class StaxViewModel : ViewModel() {
          * function. In this example, we check if the reader is connected before trying to disconnect.
          */
         Omni.shared()?.apply {
-            getConnectedReader(
-                onReaderFound = { reader ->
-                    if (reader != null) {
-                        disconnectReader(
-                            mobileReader = reader,
-                            onDisconnected = { log("Reader disconnected") },
-                            onFail = { log(it.toString()) }
-                        )
-                    } else {
-                        log("There is no connected reader")
-                    }
+            disconnectReader(
+                mobileReader = null,
+                onDisconnected = {
+                    log("Reader disconnected")
+                    reader = null
                 },
-                // Failed to get connected reader...
-                onFail = {
-                    log(it.toString())
-                }
+                onFail = { log(it.toString()) }
             )
         }
     }
@@ -353,6 +344,16 @@ class StaxViewModel : ViewModel() {
         Omni.shared()?.cancelMobileReaderTransaction(
             completion = {
                 log("Successfully canceled the transaction")
+                Omni.shared()?.disconnectReader(
+                    mobileReader = null,
+                    onDisconnected = {
+                        log("Reader disconnected (from cancel)")
+                        reader = null
+                    },
+                    onFail = {
+                        log(it.toString())
+                    }
+                )
             },
             error = {
                 log(it.toString())

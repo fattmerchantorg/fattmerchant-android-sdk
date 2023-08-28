@@ -32,5 +32,5 @@ internal interface MobileReaderDriverRepository {
      * @param mobileReader
      * @return
      */
-    suspend fun getDriverFor(mobileReader: MobileReader): MobileReaderDriver?
+    suspend fun getDriverFor(mobileReader: MobileReader?): MobileReaderDriver?
 }
