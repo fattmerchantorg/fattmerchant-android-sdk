@@ -232,6 +232,7 @@ internal class ChipDnaDriver :
 
     override suspend fun disconnect(reader: MobileReader?, error: (OmniException) -> Unit): Boolean {
         val retryLimit = 3
+        val retryTimes = arrayOf(500L, 1000L, 2000L)
         var retryCount = 0
 
         do {
@@ -243,7 +244,7 @@ internal class ChipDnaDriver :
             }
 
             // Wait a beat and retry. The failure is due to another transaction in progress like canceling a transaction.
-            async { delay(500L) }.await()
+            async { delay(retryTimes[retryCount]) }.await()
             retryCount++
         } while (retryCount < retryLimit)
 

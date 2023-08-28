@@ -24,7 +24,6 @@ internal class DisconnectMobileReader(
     override val coroutineContext: CoroutineContext,
     private var mobileReaderDriverRepository: MobileReaderDriverRepository,
     private var mobileReader: MobileReader?,
-    private var delayInitializationTimeMillis: Long = 5000L
 ) : CoroutineScope {
 
     /**
@@ -35,7 +34,7 @@ internal class DisconnectMobileReader(
      */
     suspend fun start(onFail: (OmniException) -> Unit): Boolean {
         mobileReaderDriverRepository.getDriverFor(mobileReader)?.let {
-            return it.disconnect(mobileReader, onFail, delayInitializationTimeMillis)
+            return it.disconnect(mobileReader, onFail)
         } ?: onFail(DisconnectMobileReaderException.driverNotFound)
 
         return false
