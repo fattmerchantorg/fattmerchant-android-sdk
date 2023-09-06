@@ -55,7 +55,7 @@ android {
         }
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+        jvmTarget = JavaVersion.VERSION_11.toString()
     }
     buildFeatures {
         compose = true
@@ -68,7 +68,7 @@ android {
 
 dependencies {
     // Stax SDK
-    implementation("com.github.fattmerchantorg.fattmerchant-android-sdk:cardpresent:release~2.6.0-SNAPSHOT")
+    // implementation("com.github.fattmerchantorg.fattmerchant-android-sdk:cardpresent:release~2.6.0-SNAPSHOT")
     // implementation(project(":cardpresent"))
 
     // Dependencies
