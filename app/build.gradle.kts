@@ -31,8 +31,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     buildTypes {
@@ -55,7 +55,7 @@ android {
         }
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
     buildFeatures {
         compose = true
@@ -68,8 +68,7 @@ android {
 
 dependencies {
     // Stax SDK
-    // implementation("com.github.fattmerchantorg.fattmerchant-android-sdk:cardpresent:release~2.6.0-SNAPSHOT")
-    // implementation(project(":cardpresent"))
+    implementation(project(":cardpresent"))
 
     // Dependencies
     implementation("androidx.appcompat:appcompat:1.6.1")

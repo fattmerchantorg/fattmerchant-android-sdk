@@ -34,6 +34,7 @@ class OmniApi {
         LIVE -> "https://apiprod.fattlabs.com/"
         DEV -> "https://apidev.fattlabs.com/"
         is QA -> "https://api-qa-${(environment as QA).qaBuildHash}.qabuilds.fattpay.com/"
+        else -> ""
     }
 
     private val httpClient = HttpClient {
