@@ -4,9 +4,7 @@ import android.content.Context
 import com.creditcall.chipdnamobile.ChipDnaMobile
 import com.creditcall.chipdnamobile.ChipDnaMobileSerializer
 import com.creditcall.chipdnamobile.DeviceStatus
-import com.creditcall.chipdnamobile.IAvailablePinPadsListener
 import com.creditcall.chipdnamobile.IConfigurationUpdateListener
-import com.creditcall.chipdnamobile.IConnectAndConfigureFinishedListener
 import com.creditcall.chipdnamobile.IDeviceUpdateListener
 import com.creditcall.chipdnamobile.ParameterKeys
 import com.creditcall.chipdnamobile.ParameterValues
@@ -32,6 +30,8 @@ import com.fattmerchant.omni.data.models.Transaction
 import com.fattmerchant.omni.usecase.CancelCurrentTransactionException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
@@ -47,8 +47,7 @@ internal class ChipDnaDriver :
     IConfigurationUpdateListener,
     IDeviceUpdateListener {
 
-    class ConnectReaderException(message: String? = null) :
-        MobileReaderDriver.ConnectReaderException(mapDetailMessage(message)) {
+    class ConnectReaderException(message: String? = null) : MobileReaderDriver.ConnectReaderException(mapDetailMessage(message)) {
         companion object {
             fun mapDetailMessage(chipDnaMessage: String?): String? {
                 return when (chipDnaMessage) {
@@ -61,14 +60,6 @@ internal class ChipDnaDriver :
     }
 
     companion object {
-        /** The make of the pin pad */
-        internal final class PinPadManufacturer(val name: String) {
-            companion object {
-                val Miura = PinPadManufacturer("Miura")
-                val BBPOS = PinPadManufacturer("BBPOS")
-            }
-        }
-
         /**
          * Attempts to get the connected mobile reader.
          *
@@ -96,9 +87,9 @@ internal class ChipDnaDriver :
     override val source: String = "NMI"
     override var mobileReaderConnectionStatusListener: MobileReaderConnectionStatusListener? = null
 
-    val log = Logger.getLogger("ChipDNA")
+    private val logger = Logger.getLogger("ChipDNA")
     fun log(msg: String?) {
-        log.info("[${Thread.currentThread().name}] $msg")
+        logger.info("[${Thread.currentThread().name}] $msg")
     }
 
     /**
@@ -106,7 +97,7 @@ internal class ChipDnaDriver :
      * happens at runtime.
      *
      * For example, if the user wants to disconnect a reader, we have to use
-     * the ChipDnaMobile.dispose() method. This method uninitializes the SDK and we have to
+     * the ChipDnaMobile.dispose() method. This method un-initializes the SDK and we have to
      * initialize again if we want to reconnect a reader. When we want to reconnect, we use these
      * args
      * */
@@ -161,79 +152,116 @@ internal class ChipDnaDriver :
     }
 
     override suspend fun isInitialized(): Boolean {
-        return ChipDnaMobile.isInitialized()
+        val isInitialized = ChipDnaMobile.isInitialized()
+        if (!isInitialized && initArgs.isNotEmpty()) {
+            async { initialize(initArgs) }.await()
+            return ChipDnaMobile.isInitialized()
+        }
+        return isInitialized
     }
 
     override suspend fun searchForReaders(args: Map<String, Any>): List<MobileReader> {
-        val parameters = Parameters().apply {
-            add(ParameterKeys.SearchConnectionTypeBluetooth, ParameterValues.TRUE)
-            add(ParameterKeys.SearchConnectionTypeUsb, ParameterValues.TRUE)
-        }
-        ChipDnaMobile.getInstance().clearAllAvailablePinPadsListeners()
-
-        val pinPads = suspendCancellableCoroutine<List<SelectablePinPad>> { cont ->
-            val availablePinPadsListener: IAvailablePinPadsListener? = null
-            ChipDnaMobile.getInstance().addAvailablePinPadsListener { params ->
-                val availablePinPadsXml = params?.getValue(ParameterKeys.AvailablePinPads)
-                val pinPads = deserializePinPads(availablePinPadsXml!!)
-                availablePinPadsListener?.let { ChipDnaMobile.getInstance().removeAvailablePinPadsListener(it) }
-
-                cont.resume(pinPads)
+        if (!isInitialized()) {
+            if (initArgs.isNotEmpty()) {
+                async { initialize(initArgs) }.await()
+            } else {
+                throw OmniGeneralException.uninitialized
             }
-
-            ChipDnaMobile.getInstance().getAvailablePinPads(parameters)
         }
 
-        return pinPads.map {
-            mapPinPadToMobileReader(it)
+        val readers = suspendCancellableCoroutine { continuation ->
+            ChipDnaMobile.getInstance().apply {
+                clearAllAvailablePinPadsListeners()
+                addAvailablePinPadsListener { params ->
+                    val xml = params.getValue(ParameterKeys.AvailablePinPads)
+                    val pads = deserializePinPads(xml)
+                    continuation.resume(pads)
+                }
+            }.getAvailablePinPads(
+                Parameters().apply {
+                    add(ParameterKeys.SearchConnectionTypeBluetoothLe, ParameterValues.TRUE)
+                    add(ParameterKeys.SearchConnectionTypeBluetooth, ParameterValues.TRUE)
+                    add(ParameterKeys.SearchConnectionTypeUsb, ParameterValues.TRUE)
+                }
+            )
+        }
+
+        return readers.map { reader ->
+            val type = ConnectionType.parse(reader.connectionType)
+            mapPinPadToMobileReader(reader, type)
         }
     }
 
     override suspend fun connectReader(reader: MobileReader): MobileReader? {
-
-        val requestParams = Parameters()
-        requestParams.add(ParameterKeys.PinPadName, reader.getName())
-        requestParams.add(ParameterKeys.PinPadConnectionType, ParameterValues.BluetoothConnectionType)
-
-        ChipDnaMobile.getInstance().setProperties(requestParams)
-
-        return suspendCancellableCoroutine { cont ->
-            var connectAndConfigureListener: IConnectAndConfigureFinishedListener? = null
-            connectAndConfigureListener = IConnectAndConfigureFinishedListener { params ->
-                ChipDnaMobile.getInstance().removeConnectAndConfigureFinishedListener(connectAndConfigureListener)
-
-                if (params[ParameterKeys.Result] == ParameterValues.TRUE) {
-                    // Reader is connected. Add the serial number to the list of familiar ones
-                    // And return the hydrated mobile reader
-                    Companion.getConnectedReader()?.let { connectedReader ->
-                        connectedReader.serialNumber()?.let { familiarSerialNumbers.add(it) }
-                        cont.resume(connectedReader)
-                    }
-                    return@IConnectAndConfigureFinishedListener
-                }
-
-                val error = params[ParameterKeys.ErrorDescription]
-                cont.resumeWithException(ConnectReaderException(error))
+        if (!isInitialized()) {
+            if (initArgs.isNotEmpty()) {
+                async { initialize(initArgs) }.await()
+            } else {
+                throw OmniGeneralException.uninitialized
             }
+        }
 
-            ChipDnaMobile.getInstance().addConnectAndConfigureFinishedListener(connectAndConfigureListener)
-            ChipDnaMobile.getInstance().connectAndConfigure(requestParams)
+        // Set properties of reader to connect to here. Adding them as
+        // connectAndConfigure params causes it to never connect correctly
+        ChipDnaMobile.getInstance().setProperties(
+            Parameters().apply {
+                add(ParameterKeys.PinPadName, reader.getName())
+                add(ParameterKeys.PinPadConnectionType, reader.getConnectionType().toParameterValue())
+            }
+        )
+
+        return suspendCancellableCoroutine { continuation ->
+            val connectAndConfigureParams = ChipDnaMobile.getInstance().getStatus(null)
+            ChipDnaMobile.getInstance().apply {
+                clearAllConnectAndConfigureFinishedListeners()
+                addConnectAndConfigureFinishedListener { params ->
+                    if (params[ParameterKeys.Result] == ParameterValues.TRUE) {
+                        getConnectedChipDnaReader()?.let { connectedReader ->
+                            connectedReader.serialNumber()?.let { familiarSerialNumbers.add(it) }
+                            continuation.resume(connectedReader)
+                        }
+                        return@addConnectAndConfigureFinishedListener
+                    }
+
+                    val error = params[ParameterKeys.ErrorDescription]
+                    continuation.resumeWithException(ConnectReaderException(error))
+                }
+            }.connectAndConfigure(connectAndConfigureParams)
         }
     }
 
-    override suspend fun disconnect(reader: MobileReader, error: (OmniException) -> Unit): Boolean {
-        ChipDnaMobile.dispose(null)
-        mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(MobileReaderConnectionStatus.DISCONNECTED)
-        initialize(initArgs)
-        return true
+    override suspend fun disconnect(reader: MobileReader?, error: (OmniException) -> Unit): Boolean {
+        val retryLimit = 3
+        val retryTimes = arrayOf(500L, 1000L, 2000L)
+        var retryCount = 0
+
+        do {
+            // Check the result. If the disconnect was successful, break out of the retry loop.
+            val result = ChipDnaMobile.dispose(null)
+            if (result[ParameterKeys.Result] == ParameterValues.TRUE) {
+                mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(MobileReaderConnectionStatus.DISCONNECTED)
+                return true
+            }
+
+            // Wait a beat and retry. The failure is due to another transaction in progress like canceling a transaction.
+            async { delay(retryTimes[retryCount]) }.await()
+            retryCount++
+        } while (retryCount < retryLimit)
+
+        return false
     }
 
     override suspend fun getConnectedReader(): MobileReader? {
         // ChipDna must be initialized
-        if (!ChipDnaMobile.isInitialized()) {
-            throw OmniGeneralException.uninitialized
+        return if (!ChipDnaMobile.isInitialized()) {
+            if (initArgs.isNotEmpty()) {
+                async { initialize(initArgs) }.await()
+                Companion.getConnectedReader()
+            } else {
+                throw OmniGeneralException.uninitialized
+            }
         } else {
-            return Companion.getConnectedReader()
+            Companion.getConnectedReader()
         }
     }
 
@@ -269,37 +297,43 @@ internal class ChipDnaDriver :
     override suspend fun performTransaction(request: TransactionRequest, signatureProvider: SignatureProviding?, transactionUpdateListener: TransactionUpdateListener?, userNotificationListener: UserNotificationListener?): TransactionResult {
         val paymentRequestParams = withTransactionRequest(request)
 
-        val result = suspendCancellableCoroutine<Parameters> { cont ->
+        val result = suspendCancellableCoroutine { continuation ->
 
             val transactionListener = ChipDnaTransactionListener()
             transactionListener.onFinish = {
-                ChipDnaMobile.getInstance().removeTransactionUpdateListener(transactionListener)
-                ChipDnaMobile.getInstance().removeTransactionFinishedListener(transactionListener)
-                ChipDnaMobile.getInstance().removeDeferredAuthorizationListener(transactionListener)
-                ChipDnaMobile.getInstance().removeSignatureVerificationListener(transactionListener)
-                ChipDnaMobile.getInstance().removeVoiceReferralListener(transactionListener)
-                ChipDnaMobile.getInstance().removePartialApprovalListener(transactionListener)
-                ChipDnaMobile.getInstance().removeForceAcceptanceListener(transactionListener)
-                ChipDnaMobile.getInstance().removeVerifyIdListener(transactionListener)
-                cont.resume(it)
+                ChipDnaMobile.getInstance().apply {
+                    removeTransactionUpdateListener(transactionListener)
+                    removeTransactionFinishedListener(transactionListener)
+                    removeDeferredAuthorizationListener(transactionListener)
+                    removeSignatureVerificationListener(transactionListener)
+                    removeVoiceReferralListener(transactionListener)
+                    removePartialApprovalListener(transactionListener)
+                    removeForceAcceptanceListener(transactionListener)
+                    removeVerifyIdListener(transactionListener)
+                }
+                continuation.resume(it)
             }
 
             transactionListener.signatureProvider = signatureProvider
             transactionListener.transactionUpdateListener = transactionUpdateListener
             transactionListener.userNotificationListener = userNotificationListener
-            ChipDnaMobile.getInstance().addUserNotificationListener(transactionListener)
-            ChipDnaMobile.getInstance().addApplicationSelectionListener(transactionListener)
-            ChipDnaMobile.getInstance().addTransactionUpdateListener(transactionListener)
-            ChipDnaMobile.getInstance().addTransactionFinishedListener(transactionListener)
-            ChipDnaMobile.getInstance().addDeferredAuthorizationListener(transactionListener)
-            ChipDnaMobile.getInstance().addSignatureVerificationListener(transactionListener)
-            ChipDnaMobile.getInstance().addVoiceReferralListener(transactionListener)
-            ChipDnaMobile.getInstance().addPartialApprovalListener(transactionListener)
-            ChipDnaMobile.getInstance().addForceAcceptanceListener(transactionListener)
-            ChipDnaMobile.getInstance().addVerifyIdListener(transactionListener)
 
-            val response = ChipDnaMobile.getInstance().startTransaction(paymentRequestParams)
+            ChipDnaMobile.getInstance().apply {
+                addUserNotificationListener(transactionListener)
+                addApplicationSelectionListener(transactionListener)
+                addTransactionUpdateListener(transactionListener)
+                addTransactionFinishedListener(transactionListener)
+                addDeferredAuthorizationListener(transactionListener)
+                addSignatureVerificationListener(transactionListener)
+                addVoiceReferralListener(transactionListener)
+                addPartialApprovalListener(transactionListener)
+                addForceAcceptanceListener(transactionListener)
+                addVerifyIdListener(transactionListener)
+            }
+
             // TODO: Handle the case where ChipDnaMobile didn't actually start the transaction
+            // val response = ChipDnaMobile.getInstance().startTransaction(paymentRequestParams)
+            ChipDnaMobile.getInstance().startTransaction(paymentRequestParams)
         }
 
         // Check for errors
@@ -334,10 +368,10 @@ internal class ChipDnaDriver :
         // Build the TransactionResult and return
         val firstName = result[ParameterKeys.CardHolderFirstName]
         val lastName = result[ParameterKeys.CardHolderLastName]
-        val addressZip = result[ParameterKeys.BillingZipCode]
-        val address1 = result[ParameterKeys.BillingAddress1]
-        val address2 = result[ParameterKeys.BillingAddress2]
-        val addressState = result[ParameterKeys.BillingState]
+        // val addressZip = result[ParameterKeys.BillingZipCode]
+        // val address1 = result[ParameterKeys.BillingAddress1]
+        // val address2 = result[ParameterKeys.BillingAddress2]
+        // val addressState = result[ParameterKeys.BillingState]
         var ccExpiration: String? = null
 
         val receiptData = ChipDnaMobileSerializer.deserializeReceiptData(result[ParameterKeys.ReceiptData])
@@ -356,14 +390,12 @@ internal class ChipDnaDriver :
             externalId = result[ParameterKeys.TransactionId]
             cardHolderFirstName = firstName
             cardHolderLastName = lastName
-            cardType = result[ParameterKeys.CardSchemeId]?.toLowerCase(Locale.ROOT)
+            cardType = result[ParameterKeys.CardSchemeId]?.lowercase(Locale.ROOT)
             cardExpiration = ccExpiration
             amount = Amount(cents = result[ParameterKeys.Amount]?.toInt() ?: request.amount.cents)
-
             this.source = this@ChipDnaDriver.source
             success = result[ParameterKeys.TransactionResult] == ParameterValues.Approved
             transactionSource = receiptData[ReceiptFieldKey.TRANSACTION_SOURCE]?.value
-
             result[ParameterKeys.CustomerVaultId]?.let { token ->
                 paymentToken = "nmi_$token"
             }
@@ -388,16 +420,15 @@ internal class ChipDnaDriver :
             add(ParameterKeys.UserReference, ref)
         }
 
-        var response = ChipDnaMobile.getInstance().voidTransaction(voidRequestParams)
-
         // TODO: Handle errors
+        // val response = ChipDnaMobile.getInstance().voidTransaction(voidRequestParams)
+        ChipDnaMobile.getInstance().voidTransaction(voidRequestParams)
 
         return TransactionResult()
     }
 
     override fun voidTransaction(transactionResult: TransactionResult, completion: (Boolean) -> Unit) {
         val userRef = transactionResult.userReference ?: return completion(false)
-
         val params = Parameters().apply {
             add(ParameterKeys.UserReference, userRef)
         }
@@ -422,7 +453,7 @@ internal class ChipDnaDriver :
 
         return if (result[ParameterKeys.TransactionResult] == ParameterValues.Approved) {
             TransactionResult().apply {
-                this.request = request
+                // this.request = request
                 success = true
                 transactionType = "refund"
                 amount = Amount(cents = amountCents)
@@ -435,13 +466,11 @@ internal class ChipDnaDriver :
     override suspend fun cancelCurrentTransaction(error: ((OmniException) -> Unit)?): Boolean {
         val result = ChipDnaMobile.getInstance().terminateTransaction(null)
         result?.let {
-            val success = result[ParameterKeys.Result] == ParameterValues.TRUE
-            if (success) {
-                return success
+            if (result[ParameterKeys.Result] == ParameterValues.TRUE) {
+                return true
             } else {
                 val status = ChipDnaMobile.getInstance().getStatus(null)
-                val idle = status[ParameterKeys.ChipDnaStatus] == "IDLE"
-                if (idle) {
+                if (status[ParameterKeys.ChipDnaStatus] == "IDLE") {
                     error?.invoke(CancelCurrentTransactionException.NoTransactionToCancel)
                 } else {
                     error?.invoke(CancelCurrentTransactionException.Unknown)
@@ -465,13 +494,14 @@ internal class ChipDnaDriver :
             return listOf()
         }
 
-        val availablePinPadsList = ArrayList<SelectablePinPad>()
-
+        val pinPadsList = mutableListOf<SelectablePinPad>()
         try {
-            val availablePinPadsHashMap = ChipDnaMobileSerializer.deserializeAvailablePinPads(pinPadsXml)
-            for (connectionType in availablePinPadsHashMap.keys) {
-                for (pinPad in availablePinPadsHashMap[connectionType]!!) {
-                    availablePinPadsList.add(SelectablePinPad(pinPad, connectionType))
+            val pinPadsMap = ChipDnaMobileSerializer.deserializeAvailablePinPads(pinPadsXml)
+            for (connectionType in pinPadsMap.keys) {
+                pinPadsMap[connectionType]?.let { pinPads ->
+                    for (pinPad in pinPads) {
+                        pinPadsList.add(SelectablePinPad(pinPad, connectionType))
+                    }
                 }
             }
         } catch (e: XmlPullParserException) {
@@ -480,7 +510,7 @@ internal class ChipDnaDriver :
             e.printStackTrace()
         }
 
-        return availablePinPadsList
+        return pinPadsList
     }
 
     override fun onConfigurationUpdateListener(parameters: Parameters?) {

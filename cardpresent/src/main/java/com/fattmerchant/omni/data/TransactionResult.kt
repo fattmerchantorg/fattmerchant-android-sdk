@@ -1,7 +1,6 @@
 package com.fattmerchant.omni.data
 
 import com.fattmerchant.android.chipdna.ChipDnaDriver
-import com.fattmerchant.cpresent.BuildConfig
 import com.fattmerchant.omni.data.models.Customer
 import com.fattmerchant.omni.data.models.Invoice
 import com.fattmerchant.omni.data.models.PaymentMethod

@@ -33,11 +33,7 @@ internal class MobileReaderDriverRepository : MobileReaderDriverRepository {
         return null
     }
 
-    override suspend fun getDriverFor(mobileReader: MobileReader): MobileReaderDriver? {
-        mobileReader.serialNumber()?.let { serial ->
-            return getInitializedDrivers().firstOrNull {
-                it.familiarSerialNumbers.contains(serial)
-            }
-        } ?: return null
+    override suspend fun getDriverFor(mobileReader: MobileReader?): MobileReaderDriver? {
+        return getInitializedDrivers().firstOrNull()
     }
 }

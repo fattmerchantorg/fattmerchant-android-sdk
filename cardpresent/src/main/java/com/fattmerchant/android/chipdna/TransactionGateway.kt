@@ -11,7 +11,7 @@ import io.ktor.client.request.get
 internal class TransactionGateway {
     companion object {
         /** Transaction Gateway's baseUrl */
-        val baseUrl = "https://secure.nmi.com/api/query.php"
+        private const val baseUrl = "https://secure.nmi.com/api/query.php"
 
         /**
          * Fetches the expiration date of the card used to run the transaction with the given id

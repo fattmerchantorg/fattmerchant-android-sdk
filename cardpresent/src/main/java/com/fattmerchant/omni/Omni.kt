@@ -222,7 +222,7 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
      * @param onDisconnected a block to run once finished. It will receive true if the reader was disconencted
      * @param onFail a block to run if this operation fails. Receives an [OmniException]
      */
-    fun disconnectReader(mobileReader: MobileReader, onDisconnected: (Boolean) -> Unit, onFail: (OmniException) -> Unit) {
+    fun disconnectReader(mobileReader: MobileReader?, onDisconnected: (Boolean) -> Unit, onFail: (OmniException) -> Unit) {
         if (!initialized) {
             onFail(OmniGeneralException.uninitialized)
             return
@@ -234,7 +234,6 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
                 mobileReaderDriverRepository,
                 mobileReader
             )
-
             onDisconnected(job.start(onFail))
         }
     }
