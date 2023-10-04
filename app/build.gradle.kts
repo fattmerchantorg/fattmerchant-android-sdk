@@ -5,7 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
-val staxApiKey: String = gradleLocalProperties(rootDir).getProperty("staxApiKey")
+val staxApiKey: String = gradleLocalProperties(rootDir).getProperty("staxApiKey") ?: "NoApiKey"
 
 android {
     namespace = "com.staxpayments"
@@ -37,7 +37,7 @@ android {
 
     buildTypes {
         release {
-            buildConfigField("String", "STAX_API_KEY", staxApiKey)
+            buildConfigField("String", "STAX_API_KEY", "\"$staxApiKey\"")
             isMinifyEnabled = false
             proguardFiles(
                     getDefaultProguardFile("proguard-android.txt"),
@@ -47,7 +47,7 @@ android {
         debug {
             isDefault = true
             isDebuggable = true
-            buildConfigField("String", "STAX_API_KEY", staxApiKey)
+            buildConfigField("String", "STAX_API_KEY", "\"$staxApiKey\"")
             proguardFiles(
                     getDefaultProguardFile("proguard-android.txt"),
                     "proguard-rules.pro"

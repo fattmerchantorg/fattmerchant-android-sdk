@@ -48,21 +48,9 @@ out/
 # Android Studio Navigation editor temp files
 .navigation/
 
-# Android Studio captures folder
-captures/
-
 # Intellij
-*.iml
-.idea/
-misc.xml
-deploymentTargetDropDown.xml
 render.experimental.xml
 
-# Keystore files
-*.jks
-
-# Google Services (e.g. APIs or Firebase)
-google-services.json
 
 # Freeline
 freeline.py
