@@ -22,8 +22,8 @@ internal class TransactionGateway {
          */
         suspend fun getTransactionCcExpiration(securityKey: String, transactionId: String): String? {
             val client = HttpClient {}
-            val response = client.get<String>(urlString = "$baseUrl?security_key=$securityKey&transaction_id=$transactionId")
-            return ChipDnaXMLTransactionParser.parseExpirationDate(response, transactionId)
+            val response = client.get(urlString = "$baseUrl?security_key=$securityKey&transaction_id=$transactionId")
+            return ChipDnaXMLTransactionParser.parseExpirationDate(response.toString(), transactionId)
         }
     }
 }

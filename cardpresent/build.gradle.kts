@@ -99,9 +99,8 @@ dependencies {
     }
 
     // Ktor
-    implementation("io.ktor:ktor-client-core:1.1.4")
-    implementation("io.ktor:ktor-client-okhttp:1.1.4")
-    implementation("io.ktor:ktor-client-ios:1.1.4")
-    implementation("io.ktor:ktor-client-json:1.1.4")
-    implementation("io.ktor:ktor-client-gson:1.1.4")
+    implementation("io.ktor:ktor-client-core:2.3.5")
+    implementation("io.ktor:ktor-client-okhttp:2.3.5")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.5")
+    implementation("io.ktor:ktor-serialization-gson:2.3.5")
 }
