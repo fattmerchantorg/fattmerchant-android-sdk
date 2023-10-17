@@ -1,6 +1,7 @@
 package com.fattmerchant.android.chipdna
 
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.get
 
 /**
@@ -23,7 +24,7 @@ internal class TransactionGateway {
         suspend fun getTransactionCcExpiration(securityKey: String, transactionId: String): String? {
             val client = HttpClient {}
             val response = client.get(urlString = "$baseUrl?security_key=$securityKey&transaction_id=$transactionId")
-            return ChipDnaXMLTransactionParser.parseExpirationDate(response.toString(), transactionId)
+            return ChipDnaXMLTransactionParser.parseExpirationDate(response.body(), transactionId)
         }
     }
 }
