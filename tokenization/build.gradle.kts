@@ -48,4 +48,5 @@ android {
 
 dependencies {
     implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
+    implementation("com.squareup.okio:okio:3.6.0")
 }
