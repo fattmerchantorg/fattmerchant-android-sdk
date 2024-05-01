@@ -56,7 +56,8 @@ android {
 dependencies {
     // NMI Dependencies
     api(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-    implementation("net.zetetic:android-database-sqlcipher:4.0.1@aar")
+    implementation("net.zetetic:android-database-sqlcipher:4.5.0@aar")
+    implementation("androidx.sqlite:sqlite:2.2.0")
     implementation("com.jakewharton.timber:timber:4.7.1")
 
     // JSON Parsing
@@ -66,8 +67,8 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
 
     // Ktor
-    implementation("io.ktor:ktor-client-core:2.3.5")
-    implementation("io.ktor:ktor-client-okhttp:2.3.5")
-    implementation("io.ktor:ktor-client-content-negotiation:2.3.5")
-    implementation("io.ktor:ktor-serialization-gson:2.3.5")
+    implementation("io.ktor:ktor-client-core:2.3.6")
+    implementation("io.ktor:ktor-client-okhttp:2.3.6")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.6")
+    implementation("io.ktor:ktor-serialization-gson:2.3.6")
 }

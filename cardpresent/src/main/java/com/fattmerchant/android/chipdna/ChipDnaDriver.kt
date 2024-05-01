@@ -180,8 +180,8 @@ internal class ChipDnaDriver :
             }.getAvailablePinPads(
                 Parameters().apply {
                     add(ParameterKeys.SearchConnectionTypeBluetoothLe, ParameterValues.TRUE)
-                    add(ParameterKeys.SearchConnectionTypeBluetooth, ParameterValues.TRUE)
                     add(ParameterKeys.SearchConnectionTypeUsb, ParameterValues.TRUE)
+                    add(ParameterKeys.SearchConnectionTypeBluetooth, ParameterValues.TRUE)
                 }
             )
         }
@@ -483,7 +483,7 @@ internal class ChipDnaDriver :
     private fun setCredentials(appId: String, apiKey: String): Parameters {
         val params = Parameters().apply {
             add(ParameterKeys.ApiKey, apiKey)
-            add(ParameterKeys.Environment, ParameterValues.LiveEnvironment)
+            add(ParameterKeys.Environment, ParameterValues.TestEnvironment)
             add(ParameterKeys.ApplicationIdentifier, appId)
         }
         return ChipDnaMobile.getInstance().setProperties(params)

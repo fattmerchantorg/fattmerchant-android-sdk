@@ -123,6 +123,7 @@ fun MainScreen(
                     val context = LocalContext.current
 
                     WideButton(text = "Initialize") { staxViewModel.onInitialize() }
+                    WideButton(text = "Demo") { staxViewModel.rawConnect() }
                     WideButton(text = "Search & Connect to Reader") { staxViewModel.onSearchAndConnectToReaders(context) }
                     WideButton(text = "Perform Sale With Reader") { staxViewModel.onPerformSaleWithReader() }
                     WideButton(text = "Perform Auth With Reader") { staxViewModel.onPerformAuthWithReader() }
