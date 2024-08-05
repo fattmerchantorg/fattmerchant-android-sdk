@@ -12,7 +12,7 @@ afterEvaluate {
                 from(components["release"])
                 groupId = "com.github.fattmerchantorg"
                 artifactId = "cardpresent"
-                version = "2.6.1"
+                version = "2.7.0"
             }
         }
     }
@@ -57,7 +57,7 @@ dependencies {
     // NMI Dependencies
     api(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
     implementation("net.zetetic:android-database-sqlcipher:4.5.0@aar")
-    implementation("androidx.sqlite:sqlite:2.2.0")
+    implementation("androidx.sqlite:sqlite:2.4.0")
     implementation("com.jakewharton.timber:timber:4.7.1")
 
     // JSON Parsing

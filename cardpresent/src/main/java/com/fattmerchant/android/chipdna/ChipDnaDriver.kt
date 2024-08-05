@@ -483,7 +483,7 @@ internal class ChipDnaDriver :
     private fun setCredentials(appId: String, apiKey: String): Parameters {
         val params = Parameters().apply {
             add(ParameterKeys.ApiKey, apiKey)
-            add(ParameterKeys.Environment, ParameterValues.TestEnvironment)
+            add(ParameterKeys.Environment, ParameterValues.LiveEnvironment)
             add(ParameterKeys.ApplicationIdentifier, appId)
         }
         return ChipDnaMobile.getInstance().setProperties(params)
