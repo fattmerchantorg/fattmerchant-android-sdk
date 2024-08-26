@@ -181,7 +181,8 @@ internal class ChipDnaDriver :
                 Parameters().apply {
                     add(ParameterKeys.SearchConnectionTypeBluetoothLe, ParameterValues.TRUE)
                     add(ParameterKeys.SearchConnectionTypeUsb, ParameterValues.TRUE)
-                    add(ParameterKeys.SearchConnectionTypeBluetooth, ParameterValues.TRUE)
+                    // TODO: Further testing without legacy bluetooth
+                    // add(ParameterKeys.SearchConnectionTypeBluetooth, ParameterValues.TRUE)
                 }
             )
         }
