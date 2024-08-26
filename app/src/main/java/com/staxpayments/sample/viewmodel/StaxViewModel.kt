@@ -11,6 +11,7 @@ import com.creditcall.chipdnamobile.Parameters
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
 import com.fattmerchant.omni.TransactionUpdateListener
+import com.fattmerchant.omni.UsbAccessoryListener
 import com.fattmerchant.omni.UserNotificationListener
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.MobileReader
@@ -30,16 +31,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.newSingleThreadContext
-import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.coroutines.coroutineContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class StaxViewModel : ViewModel() {
+class StaxViewModel : ViewModel(), UsbAccessoryListener {
     // Set the api key value by setting `staxApiKey` in your `local.properties` file
     private val apiKey = BuildConfig.STAX_API_KEY
     private var reader: MobileReader? = null
@@ -86,64 +84,9 @@ class StaxViewModel : ViewModel() {
             error = { exception ->
                 log("There was an error initializing...")
                 log("${exception.message}. ${exception.detail}")
-            }
+            },
+            usbListener = this
         )
-    }
-
-    fun rawConnect() {
-        log("demo")
-        val scope = CoroutineScope(Dispatchers.IO)
-        scope.async {
-            getUsbPinPads()
-        }.start()
-    }
-
-    private suspend fun getUsbPinPads(): String? {
-        log("starting init...")
-        val init = Parameters().apply { add(ParameterKeys.Password, "password") }
-        ChipDnaMobile.initialize(MainApplication.context, init)
-        log("init!")
-
-        val s1 = ChipDnaMobile.getInstance().getStatus(null)
-        log(s1.toString())
-
-        val nmikey = "76RSwx842643PNnbmvqXAGDJ7k2r444A"
-        val appId = "appid"
-        val creds = Parameters().apply {
-            add(ParameterKeys.ApiKey, nmikey)
-            add(ParameterKeys.Environment, ParameterValues.TestEnvironment)
-            add(ParameterKeys.ApplicationIdentifier, appId)
-        }
-        ChipDnaMobile.getInstance().setProperties(creds)
-
-        val s2 = ChipDnaMobile.getInstance().getStatus(null)
-        log(s2.toString())
-
-        val search = Parameters().apply {
-            add(ParameterKeys.SearchConnectionTypeUsb, ParameterValues.TRUE)
-        }
-        return suspendCoroutine { continuation ->
-            // Search
-            log("starting search")
-            ChipDnaMobile.getInstance().apply {
-                clearAllAvailablePinPadsListeners()
-                addAvailablePinPadsListener { params ->
-                    val xml = params.getValue(ParameterKeys.AvailablePinPads)
-                    val pads = ChipDnaMobileSerializer.deserializeAvailablePinPads(xml)
-                    val device = pads[ParameterValues.UsbConnectionType]!![0]
-                    setProperties(Parameters().apply {
-                        add(ParameterKeys.PinPadName, device)
-                        add(ParameterKeys.PinPadConnectionType, ParameterValues.UsbConnectionType)
-                    })
-                    clearAllConnectAndConfigureFinishedListeners()
-                    addConnectAndConfigureFinishedListener { params2 ->
-                        log(params2.toString())
-                        continuation.resume(xml)
-                    }
-                    connectAndConfigure(getStatus(null))
-                }
-            }.getAvailablePinPads(search)
-        }
     }
 
     /**
@@ -428,5 +371,13 @@ class StaxViewModel : ViewModel() {
                 log(it.toString())
             }
         )
+    }
+
+    override fun onUsbAccessoryConnected() {
+        log("IDTech Accessory Connected!")
+    }
+
+    override fun onUsbAccessoryDisconnected() {
+        log("IDTech Accessory Disconnected!")
     }
 }
