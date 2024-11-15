@@ -3,9 +3,15 @@ package com.staxpayments.sample.viewmodel
 import android.app.AlertDialog
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import com.creditcall.chipdnamobile.ChipDnaMobile
+import com.creditcall.chipdnamobile.ChipDnaMobileSerializer
+import com.creditcall.chipdnamobile.ParameterKeys
+import com.creditcall.chipdnamobile.ParameterValues
+import com.creditcall.chipdnamobile.Parameters
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
 import com.fattmerchant.omni.TransactionUpdateListener
+import com.fattmerchant.omni.UsbAccessoryListener
 import com.fattmerchant.omni.UserNotificationListener
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.MobileReader
@@ -18,6 +24,9 @@ import com.staxpayments.BuildConfig
 import com.staxpayments.sample.MainApplication
 import com.staxpayments.sample.SignatureProvider
 import com.staxpayments.sample.state.StaxUiState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,8 +34,10 @@ import kotlinx.coroutines.flow.update
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
-class StaxViewModel : ViewModel() {
+class StaxViewModel : ViewModel(), UsbAccessoryListener {
     // Set the api key value by setting `staxApiKey` in your `local.properties` file
     private val apiKey = BuildConfig.STAX_API_KEY
     private var reader: MobileReader? = null
@@ -73,7 +84,8 @@ class StaxViewModel : ViewModel() {
             error = { exception ->
                 log("There was an error initializing...")
                 log("${exception.message}. ${exception.detail}")
-            }
+            },
+            usbListener = this
         )
     }
 
@@ -359,5 +371,13 @@ class StaxViewModel : ViewModel() {
                 log(it.toString())
             }
         )
+    }
+
+    override fun onUsbAccessoryConnected() {
+        log("IDTech Accessory Connected!")
+    }
+
+    override fun onUsbAccessoryDisconnected() {
+        log("IDTech Accessory Disconnected!")
     }
 }

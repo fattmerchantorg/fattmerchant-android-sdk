@@ -1,5 +1,6 @@
 package com.fattmerchant.omni
 
+import android.content.Context
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.TransactionRequest
@@ -81,6 +82,10 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
     internal var coroutineScope = MainScope()
     private var currentJob: CoroutineScope? = null
 
+    /** Receives system notifications for USB devices being attached */
+    internal var usbAccessoryListener: UsbAccessoryListener? = null
+    internal var accessoryHelper: AccessoryHelper? = null
+
     /**
      * Prepares the OmniService Client for taking payments
      *
@@ -109,6 +114,14 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
             val nmiDetails = MobileReaderDetails.NMIDetails()
             merchant.emvPassword()?.let { nmiDetails.securityKey = it }
             mutatedArgs["nmi"] = nmiDetails
+
+            // Setup USB Listener
+            usbAccessoryListener?.let { listener ->
+                val appContext = args["appContext"] as? Context
+                appContext?.let { context ->
+                    accessoryHelper = AccessoryHelper(context, listener)
+                }
+            }
 
             omniApi.getMobileReaderSettings {
                 // error(OmniException("Could not get reader settings", it.message))

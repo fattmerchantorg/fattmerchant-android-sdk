@@ -180,8 +180,9 @@ internal class ChipDnaDriver :
             }.getAvailablePinPads(
                 Parameters().apply {
                     add(ParameterKeys.SearchConnectionTypeBluetoothLe, ParameterValues.TRUE)
-                    add(ParameterKeys.SearchConnectionTypeBluetooth, ParameterValues.TRUE)
                     add(ParameterKeys.SearchConnectionTypeUsb, ParameterValues.TRUE)
+                    // TODO: Further testing without legacy bluetooth
+                    // add(ParameterKeys.SearchConnectionTypeBluetooth, ParameterValues.TRUE)
                 }
             )
         }
@@ -500,6 +501,7 @@ internal class ChipDnaDriver :
             for (connectionType in pinPadsMap.keys) {
                 pinPadsMap[connectionType]?.let { pinPads ->
                     for (pinPad in pinPads) {
+                        if (!isKnownPinPad(pinPad)) { continue }
                         pinPadsList.add(SelectablePinPad(pinPad, connectionType))
                     }
                 }
@@ -529,5 +531,16 @@ internal class ChipDnaDriver :
                 }
             }
         }
+    }
+
+    // Prevents other devices from connecting!
+    private fun isKnownPinPad(pad: String): Boolean {
+        val known = listOf("CHB", "IDTECH")
+        for (prefix in known) {
+            if (!pad.uppercase().startsWith(prefix)) {
+                return false
+            }
+        }
+        return true
     }
 }

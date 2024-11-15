@@ -16,16 +16,19 @@ import com.fattmerchant.omni.data.models.Transaction
 import com.google.gson.FieldNamingPolicy
 import io.ktor.client.HttpClient
 import io.ktor.client.call.NoTransformationFoundException
-import io.ktor.client.call.receive
-import io.ktor.client.features.json.GsonSerializer
-import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.call.body
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.headers
 import io.ktor.client.request.request
-import io.ktor.client.response.HttpResponse
-import io.ktor.client.response.readText
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
+import io.ktor.http.Url
 import io.ktor.http.content.TextContent
 import io.ktor.http.isSuccess
+import io.ktor.serialization.gson.gson
 import org.json.JSONObject
 
 class OmniApi {
@@ -38,8 +41,8 @@ class OmniApi {
     }
 
     private val httpClient = HttpClient {
-        install(JsonFeature) {
-            serializer = GsonSerializer {
+        install(ContentNegotiation) {
+            gson {
                 serializeNulls()
                 setFieldNamingStrategy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             }
@@ -223,7 +226,8 @@ class OmniApi {
         captureAmount: Amount?,
         error: ((Error) -> Unit)
     ): Transaction? {
-        val url = baseUrl() + "/transaction/$transactionId/capture"
+        val str = baseUrl() + "/transaction/$transactionId/capture"
+        val url = Url(str)
 
         var body: String? = null
 
@@ -237,20 +241,22 @@ class OmniApi {
         try {
 
             // Make the request and wait for the response
-            val response = httpClient.request<HttpResponse>(url) {
-                headers.append("Authorization", "Bearer $token")
+            val response = httpClient.request(url) {
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer $token")
+                }
                 this.method = HttpMethod.Post
                 body?.let {
-                    this.body = TextContent(it, ContentType.Application.Json)
+                    setBody(TextContent(it, ContentType.Application.Json))
                 }
             }
 
             // Attempt to get the object we're expecting
             if (response.status.isSuccess()) {
-                return response.receive()
+                return response.body<Transaction?>()
             }
 
-            val responseText = response.readText()
+            val responseText = response.bodyAsText()
 
             // Parse the transaction
             val transaction = JsonParser.gson.fromJson(responseText, Transaction::class.java)
@@ -263,9 +269,7 @@ class OmniApi {
 
             // Read the error text, if possible
             val errorText: String? = failedCaptureMessage ?: try {
-                (JsonParser.fromJson<Map<*, *>>(responseText)["error"] as? String)?.let {
-                    it
-                }
+                (JsonParser.fromJson<Map<*, *>>(responseText)["error"] as? String)
             } catch (e: Exception) {
                 null
             }
@@ -319,26 +323,24 @@ class OmniApi {
         try {
 
             // Make the request and wait for the response
-            val response = httpClient.request<HttpResponse>(url) {
+            val response = httpClient.request(url) {
                 headers.append("Authorization", "Bearer $token")
                 this.method = method
                 body?.let {
-                    this.body = TextContent(body, ContentType.Application.Json)
+                    setBody(TextContent(it, ContentType.Application.Json))
                 }
             }
 
             // Attempt to get the object we're expecting
             if (response.status.isSuccess()) {
-                return response.receive()
+                return response.body<T?>()
             }
 
-            val responseText = response.readText()
+            val responseText = response.bodyAsText()
 
             // Read the error text, if possible
             val errorText: String? = try {
-                (JsonParser.fromJson<Map<*, *>>(responseText)["error"] as? String)?.let {
-                    it
-                }
+                (JsonParser.fromJson<Map<*, *>>(responseText)["error"] as? String)
             } catch (e: Exception) {
                 null
             }
