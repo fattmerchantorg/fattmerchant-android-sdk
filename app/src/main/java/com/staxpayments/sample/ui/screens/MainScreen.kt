@@ -87,8 +87,8 @@ fun MainScreen(
         // Main Container
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = padding)
+                    .fillMaxWidth()
+                    .padding(horizontal = padding)
         ) {
             Spacer(modifier = Modifier.size(it.calculateTopPadding() + 16.dp))
 
@@ -97,17 +97,17 @@ fun MainScreen(
                 // Log View
                 Text(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(3f)
-                        .verticalScroll(rememberScrollState()),
+                            .fillMaxWidth()
+                            .weight(3f)
+                            .verticalScroll(rememberScrollState()),
                     text = staxUiState.logString
                 )
 
                 // Amount Text Input
                 OutlinedTextField(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = padding),
+                            .fillMaxWidth()
+                            .padding(vertical = padding),
                     value = "0.01",
                     onValueChange = {},
                     enabled = false,
@@ -117,10 +117,12 @@ fun MainScreen(
                 // Buttons
                 Column(
                     modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .weight(2f)
+                            .verticalScroll(rememberScrollState())
+                            .weight(2f)
                 ) {
                     val context = LocalContext.current
+
+                    WideButton(text = "Successware Bug") { staxViewModel.successware() }
 
                     WideButton(text = "Initialize") { staxViewModel.onInitialize() }
                     WideButton(text = "Search & Connect to Reader") { staxViewModel.onSearchAndConnectToReaders(context) }

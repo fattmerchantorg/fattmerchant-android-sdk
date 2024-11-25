@@ -3,6 +3,7 @@ package com.staxpayments.sample.viewmodel
 import android.app.AlertDialog
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.creditcall.chipdnamobile.ChipDnaMobile
 import com.creditcall.chipdnamobile.ChipDnaMobileSerializer
 import com.creditcall.chipdnamobile.ParameterKeys
@@ -31,6 +32,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -54,6 +62,59 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
         val msg = "$date | $str"
         _uiState.update { state ->
             state.copy(logString = state.logString + "$msg\n")
+        }
+    }
+
+    private suspend fun doEphemeral(): JSONObject {
+        return withContext(Dispatchers.IO) {
+            val url = URL("https://apiprod.fattlabs.com/ephemeral")
+            val connection = url.openConnection() as HttpURLConnection
+
+            connection.apply {
+                requestMethod = "GET"
+                setRequestProperty("Accept", "application/json")
+                setRequestProperty("Authorization", "Bearer $apiKey")
+                connectTimeout = 5000
+                readTimeout = 5000
+            }
+
+            try {
+                val response = StringBuilder()
+                BufferedReader(InputStreamReader(connection.inputStream)).use { reader ->
+                    var line: String?
+                    while (reader.readLine().also { line = it } != null) {
+                        response.append(line)
+                    }
+                }
+
+                return@withContext JSONObject(response.toString())
+            } finally {
+                connection.disconnect()
+            }
+        }
+    }
+
+    fun successware() {
+
+        viewModelScope.launch {
+            val ephemeral = doEphemeral().getString("token")
+
+            val params = InitParams(
+                    MainApplication.context,
+                    MainApplication.application,
+                    ephemeral
+            )
+            Omni.initialize(
+                    params = params,
+                    completion = {
+                        log("Initialized!")
+                        Omni.shared()?.signatureProvider = SignatureProvider()
+                    },
+                    error = { exception ->
+                        log("There was an error initializing...")
+                        log("${exception.message}. ${exception.detail}")
+                    },
+            )
         }
     }
 
