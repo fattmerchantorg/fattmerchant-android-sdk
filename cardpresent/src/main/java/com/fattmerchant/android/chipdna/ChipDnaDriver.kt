@@ -537,10 +537,10 @@ internal class ChipDnaDriver :
     private fun isKnownPinPad(pad: String): Boolean {
         val known = listOf("CHB", "IDTECH")
         for (prefix in known) {
-            if (!pad.uppercase().startsWith(prefix)) {
-                return false
+            if (pad.uppercase().startsWith(prefix)) {
+                return true
             }
         }
-        return true
+        return false
     }
 }
