@@ -3,9 +3,17 @@ package com.staxpayments.sample.viewmodel
 import android.app.AlertDialog
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.creditcall.chipdnamobile.ChipDnaMobile
+import com.creditcall.chipdnamobile.ChipDnaMobileSerializer
+import com.creditcall.chipdnamobile.ParameterKeys
+import com.creditcall.chipdnamobile.ParameterValues
+import com.creditcall.chipdnamobile.Parameters
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
 import com.fattmerchant.omni.TransactionUpdateListener
+import com.fattmerchant.omni.UsbAccessoryListener
 import com.fattmerchant.omni.UserNotificationListener
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.MobileReader
@@ -18,15 +26,27 @@ import com.staxpayments.BuildConfig
 import com.staxpayments.sample.MainApplication
 import com.staxpayments.sample.SignatureProvider
 import com.staxpayments.sample.state.StaxUiState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
-class StaxViewModel : ViewModel() {
+class StaxViewModel : ViewModel(), UsbAccessoryListener {
     // Set the api key value by setting `staxApiKey` in your `local.properties` file
     private val apiKey = BuildConfig.STAX_API_KEY
     private var reader: MobileReader? = null
@@ -43,6 +63,42 @@ class StaxViewModel : ViewModel() {
         val msg = "$date | $str"
         _uiState.update { state ->
             state.copy(logString = state.logString + "$msg\n")
+        }
+    }
+
+    /**
+     * Gets an Ephemeral Token from the Stax API
+     */
+    private suspend fun getToken(): JSONObject {
+        return withContext(Dispatchers.IO) {
+            // Build an HttpURLConnection for GET /ephemeral to get a temporary token
+            val url = URL("https://apiprod.fattlabs.com/ephemeral")
+            val connection = url.openConnection() as HttpURLConnection
+            connection.apply {
+                requestMethod = "GET"
+                setRequestProperty("Accept", "application/json")
+                setRequestProperty("Authorization", "Bearer $apiKey")
+                connectTimeout = 5000
+                readTimeout = 5000
+            }
+
+            /**
+             * Connect, read, and return the response. There is no error handling since
+             * this is just a simple example. However, you should display an error to
+             * the user if you cannot log in with an ephemeral token.
+             */
+            try {
+                val response = StringBuilder()
+                BufferedReader(InputStreamReader(connection.inputStream)).use { reader ->
+                    var line: String?
+                    while (reader.readLine().also { line = it } != null) {
+                        response.append(line)
+                    }
+                }
+                return@withContext JSONObject(response.toString())
+            } finally {
+                connection.disconnect()
+            }
         }
     }
 
@@ -73,8 +129,45 @@ class StaxViewModel : ViewModel() {
             error = { exception ->
                 log("There was an error initializing...")
                 log("${exception.message}. ${exception.detail}")
-            }
+            },
+            usbListener = this
         )
+    }
+
+    /**
+     * Runs Stax.initialize() with an ephemeral token
+     */
+    fun onEphemeralInitialize() {
+        log("Initializing with token...")
+
+        val listener = this
+        viewModelScope.launch {
+            val token = getToken().getString("token")
+            /**
+             * This init uses the same code as the others, but substitutes the
+             * ephemeral token instead of the API Key. You can think of the
+             * token as a temporary API key with the same properties as the
+             * key used to create it.
+             */
+            val params = InitParams(
+                MainApplication.context,
+                MainApplication.application,
+                token
+            )
+
+            Omni.initialize(
+                params = params,
+                completion = {
+                    log("Initialized with token!")
+                    Omni.shared()?.signatureProvider = SignatureProvider()
+                },
+                error = { exception ->
+                    log("There was an error initializing with token...")
+                    log("${exception.message}. ${exception.detail}")
+                },
+                usbListener = listener
+            )
+        }
     }
 
     /**
@@ -359,5 +452,13 @@ class StaxViewModel : ViewModel() {
                 log(it.toString())
             }
         )
+    }
+
+    override fun onUsbAccessoryConnected() {
+        log("IDTech Accessory Connected!")
+    }
+
+    override fun onUsbAccessoryDisconnected() {
+        log("IDTech Accessory Disconnected!")
     }
 }

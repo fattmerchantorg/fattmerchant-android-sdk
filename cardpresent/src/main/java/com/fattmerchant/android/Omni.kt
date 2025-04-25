@@ -1,6 +1,8 @@
 package com.fattmerchant.android
 
+import com.fattmerchant.omni.AccessoryHelper
 import com.fattmerchant.omni.Environment
+import com.fattmerchant.omni.UsbAccessoryListener
 import com.fattmerchant.omni.data.models.OmniException
 import com.fattmerchant.omni.networking.OmniApi
 import kotlinx.coroutines.launch
@@ -49,7 +51,12 @@ class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
          *
          * @throws InitializationError if you don't pass an apiKey
          */
-        fun initialize(params: InitParams, completion: () -> Unit, error: (OmniException) -> Unit) {
+        fun initialize(
+            params: InitParams,
+            completion: () -> Unit,
+            error: (OmniException) -> Unit,
+            usbListener: UsbAccessoryListener? = null
+        ) {
             val paramMap = mutableMapOf(
                 "apiKey" to params.apiKey,
                 "appContext" to params.appContext,
@@ -60,7 +67,13 @@ class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
                 paramMap["application"] = it
             }
 
-            initialize(paramMap, params.environment, completion, error)
+            initialize(
+                paramMap,
+                params.environment,
+                completion,
+                error,
+                usbListener
+            )
         }
 
         /**
@@ -71,7 +84,13 @@ class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
          *
          * @throws InitializationError if you don't pass an apiKey
          */
-        fun initialize(params: Map<String, Any>, environment: Environment, completion: () -> Unit, error: (OmniException) -> Unit) {
+        fun initialize(
+            params: Map<String, Any>,
+            environment: Environment,
+            completion: () -> Unit,
+            error: (OmniException) -> Unit,
+            usbListener: UsbAccessoryListener? = null
+        ) {
             // Init the API
             val omniApi = OmniApi()
 
@@ -81,6 +100,7 @@ class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
 
             // Create the shared Omni object
             val omni = Omni(omniApi)
+            omni.usbAccessoryListener = usbListener
             sharedInstance = omni
 
             // Init com.fattmerchant.omni
