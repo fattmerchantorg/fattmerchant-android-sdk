@@ -48,9 +48,9 @@ class StaxPaymentMethodTest {
                 "address_state": "FL",
                 "address_zip": "32801",
                 "address_country": "USA",
-                "purged_at": "2023-08-10T14:00:00Z",
-                "created_at": "2023-01-01T08:00:00Z",
-                "updated_at": "2024-04-01T09:00:00Z"
+                "purged_at": "2024-08-26 14:16:29",
+                "created_at": "2024-08-26 14:16:29",
+                "updated_at": "2024-08-26 14:16:29"
             }
         """.trimIndent()
 
@@ -111,8 +111,8 @@ class StaxPaymentMethodTest {
         assertTrue(jsonOutput.contains("\"address_state\":\"FL\""))
         assertTrue(jsonOutput.contains("\"address_zip\":\"32801\""))
         assertTrue(jsonOutput.contains("\"address_country\":\"USA\""))
-        assertTrue(jsonOutput.contains("\"purged_at\":\"2023-08-10T14:00:00Z\""))
-        assertTrue(jsonOutput.contains("\"created_at\":\"2023-01-01T08:00:00Z\""))
-        assertTrue(jsonOutput.contains("\"updated_at\":\"2024-04-01T09:00:00Z\""))
+        assertTrue(jsonOutput.contains("\"purged_at\":\"2024-08-26 14:16:29\""))
+        assertTrue(jsonOutput.contains("\"created_at\":\"2024-08-26 14:16:29\""))
+        assertTrue(jsonOutput.contains("\"updated_at\":\"2024-08-26 14:16:29\""))
     }
 }

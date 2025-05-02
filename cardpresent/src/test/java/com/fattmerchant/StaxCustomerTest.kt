@@ -44,8 +44,8 @@ class StaxCustomerTest {
                 "has_address": true,
                 "parent_merge": null,
                 "child_merges": ["child1", "child2"],
-                "created_at": "2023-05-01T10:00:00Z",
-                "updated_at": "2024-04-01T08:30:00Z"
+                "created_at": "2024-08-26 14:16:29",
+                "updated_at": "2024-08-26 14:16:29"
             }
         """.trimIndent()
 
@@ -98,7 +98,7 @@ class StaxCustomerTest {
         assertTrue(jsonOutput.contains("\"child_merges\":[\"child1\",\"child2\"]"))
 
         // Confirm UTC-formatted timestamps
-        assertTrue(jsonOutput.contains("\"created_at\":\"2023-05-01T10:00:00Z\""))
-        assertTrue(jsonOutput.contains("\"updated_at\":\"2024-04-01T08:30:00Z\""))
+        assertTrue(jsonOutput.contains("\"created_at\":\"2024-08-26 14:16:29\""))
+        assertTrue(jsonOutput.contains("\"updated_at\":\"2024-08-26 14:16:29\""))
     }
 }

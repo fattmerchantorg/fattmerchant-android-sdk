@@ -38,8 +38,8 @@ class StaxCatalogItemTest {
                 "price": 29.99,
                 "in_stock": 42,
                 "meta": {"color": "red", "size": "medium"},
-                "created_at": "2023-10-15T12:34:56Z",
-                "updated_at": "2024-01-01T09:00:00Z"
+                "created_at": "2024-08-26 14:16:29",
+                "updated_at": "2024-08-26 14:16:29"
             }
         """.trimIndent()
 
@@ -88,7 +88,7 @@ class StaxCatalogItemTest {
         assertTrue(jsonOutput.contains("\"meta\":{\"color\":\"red\",\"size\":\"medium\"}"))
 
         // Confirm UTC-formatted timestamps
-        assertTrue(jsonOutput.contains("\"created_at\":\"2023-10-15T12:34:56Z\""))
-        assertTrue(jsonOutput.contains("\"updated_at\":\"2024-01-01T09:00:00Z\""))
+        assertTrue(jsonOutput.contains("\"created_at\":\"2024-08-26 14:16:29\""))
+        assertTrue(jsonOutput.contains("\"updated_at\":\"2024-08-26 14:16:29\""))
     }
 }
