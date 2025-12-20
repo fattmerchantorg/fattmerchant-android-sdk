@@ -3,6 +3,7 @@ package com.fattmerchant.android
 import android.app.Application
 import android.content.Context
 import com.fattmerchant.omni.Environment
+import com.fattmerchant.omni.data.TapToPayConfiguration
 import com.fattmerchant.omni.networking.OmniApi
 
 /** Contains all the data necessary to initialize [Omni] */
@@ -20,5 +21,8 @@ data class InitParams(
     var environment: Environment = Environment.LIVE,
 
     /** An id for your application */
-    var appId: String = "appid"
+    var appId: String = "appid",
+
+    /** Configuration for Tap to Pay on Android functionality */
+    var tapToPayConfig: TapToPayConfiguration? = null
 )

@@ -22,6 +22,7 @@ enum class ConnectionType {
     BT,
     BLE,
     USB,
+    NFC,    // Added for Tap to Pay support
     UNKNOWN;
 
     companion object {
@@ -33,6 +34,7 @@ enum class ConnectionType {
             return if (str.equals(bt, ignoreCase = true)) { BT }
             else if (str.equals(ble, ignoreCase = true)) { BLE }
             else if (str.equals(usb, ignoreCase = true)) { USB }
+            else if (str.equals("NFC", ignoreCase = true)) { NFC }
             else { UNKNOWN }
         }
     }
@@ -109,6 +111,9 @@ fun mapTransactionUpdate(transactionUpdate: String): TransactionUpdate? {
         ChipDnaTransactionUpdate.SmartcardRemovePrompted.value -> TransactionUpdate.PromptRemoveCard
         ChipDnaTransactionUpdate.SmartcardRemoved.value -> TransactionUpdate.CardRemoved
         ChipDnaTransactionUpdate.OnlineAuthorisation.value -> TransactionUpdate.Authorizing
+        // NFC/Tap to Pay specific events
+        "ContactlessCardDetected" -> TransactionUpdate.CardTapped
+        "PresentCard" -> TransactionUpdate.PromptTapCard
         else -> null
     }
 }

@@ -5,16 +5,28 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.Build
+import androidx.activity.ComponentActivity
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -33,6 +45,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
+import com.staxpayments.sample.state.TapToPayMode
+import com.staxpayments.sample.ui.components.TapToPayPrompt
 import com.staxpayments.sample.ui.components.WideButton
 import com.staxpayments.sample.ui.theme.Gray50
 import com.staxpayments.sample.ui.theme.Purple500
@@ -54,6 +68,7 @@ val bluetoothPermissionsList = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun MainScreen(
+    activity: ComponentActivity? = null,
     staxViewModel: StaxViewModel = viewModel()
 ) {
     val topAppBarColor = if (isSystemInDarkTheme()) Purple800 else Purple500
@@ -70,6 +85,11 @@ fun MainScreen(
 
     LaunchedEffect(Unit) {
         bluetoothPermissionLauncher.launchMultiplePermissionRequest()
+    }
+    
+    // Set the activity in the ViewModel for NFC operations
+    LaunchedEffect(activity) {
+        staxViewModel.setActivity(activity)
     }
 
     Scaffold(
@@ -94,6 +114,61 @@ fun MainScreen(
 
             // Content
             Column {
+                // Tap to Pay Configuration Card
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(padding)) {
+                        Text(
+                            text = "Tap to Pay Configuration",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.size(8.dp))
+                        
+                        // Radio buttons for Tap to Pay modes
+                        TapToPayModeOption(
+                            text = "Disabled (External readers only)",
+                            selected = staxUiState.tapToPayMode == TapToPayMode.DISABLED,
+                            onClick = { staxViewModel.setTapToPayMode(TapToPayMode.DISABLED) }
+                        )
+                        TapToPayModeOption(
+                            text = "Tap to Pay Only (NFC)",
+                            selected = staxUiState.tapToPayMode == TapToPayMode.TAP_TO_PAY_ONLY,
+                            onClick = { staxViewModel.setTapToPayMode(TapToPayMode.TAP_TO_PAY_ONLY) }
+                        )
+                        TapToPayModeOption(
+                            text = "Hybrid (NFC + External)",
+                            selected = staxUiState.tapToPayMode == TapToPayMode.HYBRID,
+                            onClick = { staxViewModel.setTapToPayMode(TapToPayMode.HYBRID) }
+                        )
+                    }
+                }
+                
+                // Transaction Status
+                if (staxUiState.transactionStatus.isNotEmpty()) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        )
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(padding),
+                            text = staxUiState.transactionStatus,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+                
                 // Log View
                 Text(
                     modifier = Modifier
@@ -136,7 +211,48 @@ fun MainScreen(
                 }
                 Spacer(modifier = Modifier.size(padding))
             }
+            // Close the content Column
         }
+    }
+    
+    // Full-screen Tap to Pay Prompt Modal with animation
+    AnimatedVisibility(
+        visible = staxUiState.showTapToPayPrompt,
+        enter = fadeIn(animationSpec = tween(300)) + 
+                slideInVertically(animationSpec = tween(400), initialOffsetY = { it / 2 }),
+        exit = fadeOut(animationSpec = tween(250)) + 
+               slideOutVertically(animationSpec = tween(300), targetOffsetY = { it / 2 })
+    ) {
+        TapToPayPrompt(
+            amount = staxUiState.transactionAmount,
+            subtotal = staxUiState.transactionSubtotal,
+            tip = staxUiState.transactionTip,
+            onCancel = { staxViewModel.dismissTapToPayPrompt() }
+        )
+    }
+}
+
+@Composable
+private fun TapToPayModeOption(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+    ) {
+        RadioButton(
+            selected = selected,
+            onClick = onClick
+        )
+        Text(
+            text = text,
+            modifier = Modifier.padding(start = 8.dp),
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
 

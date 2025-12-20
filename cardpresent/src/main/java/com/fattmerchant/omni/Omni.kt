@@ -114,6 +114,11 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
             val nmiDetails = MobileReaderDetails.NMIDetails()
             merchant.emvPassword()?.let { nmiDetails.securityKey = it }
             mutatedArgs["nmi"] = nmiDetails
+            
+            // Tap to Pay Configuration (if provided)
+            args["tapToPayConfig"]?.let { config ->
+                mutatedArgs["tapToPayConfig"] = config
+            }
 
             // Setup USB Listener
             usbAccessoryListener?.let { listener ->
@@ -550,6 +555,31 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
         coroutineScope.launch {
             transactionRepository.get(error)
                 ?.let { completion(it) }
+        }
+    }
+    
+    /**
+     * Registers an Activity provider for Tap to Pay NFC operations.
+     * 
+     * This is required for Tap to Pay to function properly. The SDK needs access to the current
+     * Activity to display NFC prompts and handle NFC interactions.
+     * 
+     * @param activityProvider A function that returns the current Activity instance
+     * 
+     * Example usage:
+     * ```
+     * Omni.shared()?.registerTapToPayActivityProvider { currentActivity }
+     * ```
+     */
+    fun registerTapToPayActivityProvider(activityProvider: () -> android.app.Activity?) {
+        coroutineScope.launch {
+            val chipDnaDriver = mobileReaderDriverRepository.getDrivers()
+                .firstOrNull() as? com.fattmerchant.android.chipdna.ChipDnaDriver
+            
+            chipDnaDriver?.let {
+                val delegate = com.fattmerchant.android.chipdna.RequestActivityDelegate(activityProvider)
+                it.registerRequestActivityListener(delegate)
+            }
         }
     }
 }

@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             StaxAndroidSDKTheme {
-                MainScreen()
+                MainScreen(activity = this)
             }
         }
     }

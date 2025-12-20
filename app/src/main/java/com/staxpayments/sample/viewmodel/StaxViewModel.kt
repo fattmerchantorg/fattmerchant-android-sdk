@@ -13,6 +13,7 @@ import com.creditcall.chipdnamobile.Parameters
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
 import com.fattmerchant.omni.TransactionUpdateListener
+import com.fattmerchant.omni.data.TapToPayConfiguration
 import com.fattmerchant.omni.UsbAccessoryListener
 import com.fattmerchant.omni.UserNotificationListener
 import com.fattmerchant.omni.data.Amount
@@ -26,6 +27,7 @@ import com.staxpayments.BuildConfig
 import com.staxpayments.sample.MainApplication
 import com.staxpayments.sample.SignatureProvider
 import com.staxpayments.sample.state.StaxUiState
+import com.staxpayments.sample.state.TapToPayMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -51,6 +53,7 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
     private val apiKey = BuildConfig.STAX_API_KEY
     private var reader: MobileReader? = null
     private var lastTransaction: Transaction? = null
+    private var currentActivity: android.app.Activity? = null
 
     private val _uiState = MutableStateFlow(StaxUiState())
     val uiState: StateFlow<StaxUiState> = _uiState.asStateFlow()
@@ -64,6 +67,32 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
         _uiState.update { state ->
             state.copy(logString = state.logString + "$msg\n")
         }
+    }
+    
+    /**
+     * Updates the transaction status shown in the UI
+     */
+    private fun updateTransactionStatus(status: String) {
+        _uiState.update { state ->
+            state.copy(transactionStatus = status)
+        }
+    }
+    
+    /**
+     * Sets the Tap to Pay mode
+     */
+    fun setTapToPayMode(mode: TapToPayMode) {
+        _uiState.update { state ->
+            state.copy(tapToPayMode = mode)
+        }
+        log("Tap to Pay mode set to: $mode")
+    }
+    
+    /**
+     * Sets the current Activity for NFC operations
+     */
+    fun setActivity(activity: android.app.Activity?) {
+        currentActivity = activity
     }
 
     /**
@@ -120,11 +149,32 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
             MainApplication.application,
             apiKey
         )
+        
+        // Configure Tap to Pay based on UI state
+        params.tapToPayConfig = when (_uiState.value.tapToPayMode) {
+            TapToPayMode.TAP_TO_PAY_ONLY -> TapToPayConfiguration.tapToPayOnly(
+                certificateFingerprint = "dqWyBOJVho+5gumYDGPL1tYfQqiLVz++7gIgJRob/r0=", // Debug keystore SHA256
+                testMode = true,
+                mockMode = true  // Enable mock mode to test NFC prompt with Test Card Simulator
+            )
+            TapToPayMode.HYBRID -> TapToPayConfiguration.hybrid(
+                certificateFingerprint = "dqWyBOJVho+5gumYDGPL1tYfQqiLVz++7gIgJRob/r0=", // Debug keystore SHA256
+                testMode = true,
+                mockMode = true  // Enable mock mode to test NFC prompt with Test Card Simulator
+            )
+            TapToPayMode.DISABLED -> null
+        }
+        
         Omni.initialize(
             params = params,
             completion = {
                 log("Initialized!")
                 Omni.shared()?.signatureProvider = SignatureProvider()
+                
+                // Register Activity delegate for Tap to Pay NFC operations
+                if (params.tapToPayConfig?.enabled == true) {
+                    registerActivityDelegate()
+                }
             },
             error = { exception ->
                 log("There was an error initializing...")
@@ -154,12 +204,32 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
                 MainApplication.application,
                 token
             )
+            
+            // Configure Tap to Pay based on UI state
+            params.tapToPayConfig = when (_uiState.value.tapToPayMode) {
+                TapToPayMode.TAP_TO_PAY_ONLY -> TapToPayConfiguration.tapToPayOnly(
+                    certificateFingerprint = "dqWyBOJVho+5gumYDGPL1tYfQqiLVz++7gIgJRob/r0=", // Debug keystore SHA256
+                    testMode = true,
+                    mockMode = true  // Enable mock mode to test NFC prompt with Test Card Simulator
+                )
+                TapToPayMode.HYBRID -> TapToPayConfiguration.hybrid(
+                    certificateFingerprint = "dqWyBOJVho+5gumYDGPL1tYfQqiLVz++7gIgJRob/r0=", // Debug keystore SHA256
+                    testMode = true,
+                    mockMode = true  // Enable mock mode to test NFC prompt with Test Card Simulator
+                )
+                TapToPayMode.DISABLED -> null
+            }
 
             Omni.initialize(
                 params = params,
                 completion = {
                     log("Initialized with token!")
                     Omni.shared()?.signatureProvider = SignatureProvider()
+                    
+                    // Register Activity delegate for Tap to Pay NFC operations
+                    if (params.tapToPayConfig?.enabled == true) {
+                        registerActivityDelegate()
+                    }
                 },
                 error = { exception ->
                     log("There was an error initializing with token...")
@@ -221,11 +291,28 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
         val request = TransactionRequest(amount)
 
         log("Attempting to charge ${amount.dollarsString()}")
+        
+        // Show Tap to Pay prompt if in Tap to Pay mode
+        if (_uiState.value.tapToPayMode != TapToPayMode.DISABLED) {
+            _uiState.update { state ->
+                state.copy(
+                    showTapToPayPrompt = true,
+                    transactionAmount = amount.dollarsString().replace("$", ""),
+                    transactionSubtotal = amount.dollarsString().replace("$", ""),
+                    transactionTip = "0.00"
+                )
+            }
+        }
+        
         Omni.shared()?.apply {
             // Listen to transaction updates delivered by the Stax SDK
             transactionUpdateListener = object : TransactionUpdateListener {
                 override fun onTransactionUpdate(transactionUpdate: TransactionUpdate) {
                     log("${transactionUpdate.value} | ${transactionUpdate.userFriendlyMessage}")
+                    // Update UI with transaction status
+                    transactionUpdate.userFriendlyMessage?.let { msg ->
+                        updateTransactionStatus(msg)
+                    } ?: updateTransactionStatus(transactionUpdate.value)
                 }
             }
 
@@ -256,12 +343,26 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
                         log("Transaction declined")
                     }
                     lastTransaction = transaction
+                    
+                    // Hide Tap to Pay prompt
+                    _uiState.update { it.copy(showTapToPayPrompt = false) }
                 },
                 error = {
                     log("Couldn't perform sale: ${it.message}. ${it.detail}")
+                    
+                    // Hide Tap to Pay prompt on error
+                    _uiState.update { it.copy(showTapToPayPrompt = false) }
                 }
             )
         }
+    }
+    
+    /**
+     * Cancels the Tap to Pay prompt
+     */
+    fun dismissTapToPayPrompt() {
+        _uiState.update { it.copy(showTapToPayPrompt = false) }
+        onCancelTransaction()
     }
 
     /**
@@ -460,5 +561,13 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
 
     override fun onUsbAccessoryDisconnected() {
         log("IDTech Accessory Disconnected!")
+    }
+    
+    /**
+     * Registers the Activity delegate for Tap to Pay NFC operations.
+     */
+    private fun registerActivityDelegate() {
+        Omni.shared()?.registerTapToPayActivityProvider { currentActivity }
+        log("Registered Activity delegate for Tap to Pay")
     }
 }

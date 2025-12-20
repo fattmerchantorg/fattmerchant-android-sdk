@@ -21,6 +21,8 @@ import com.fattmerchant.omni.data.MobileReaderDriver
 import com.fattmerchant.omni.data.MobileReaderDriver.InitializeMobileReaderDriverException
 import com.fattmerchant.omni.data.MobileReaderDriver.PerformTransactionException
 import com.fattmerchant.omni.data.MobileReaderDriver.RefundTransactionException
+import com.fattmerchant.omni.data.TapToPayConfiguration
+import com.fattmerchant.omni.data.TapToPayReader
 import com.fattmerchant.omni.data.TransactionRequest
 import com.fattmerchant.omni.data.TransactionResult
 import com.fattmerchant.omni.data.models.MobileReaderConnectionStatus
@@ -65,10 +67,23 @@ internal class ChipDnaDriver :
          *
          * @param chipDnaMobileStatus the result of [ChipDnaMobile.getStatus]. If none is provided, this
          * method will retrieve it
+         * @param tapToPayConfig the Tap to Pay configuration to check for NFC mode
          * @return the connected [MobileReader], if found. Null otherwise
          */
-        internal fun getConnectedReader(chipDnaMobileStatus: Parameters? = ChipDnaMobile.getInstance().getStatus(null)): MobileReader? {
-            val deviceStatusXml = chipDnaMobileStatus[ParameterKeys.DeviceStatus] ?: return null
+        internal fun getConnectedReader(
+            chipDnaMobileStatus: Parameters? = ChipDnaMobile.getInstance().getStatus(null),
+            tapToPayConfig: TapToPayConfiguration? = null,
+            isTapToPayReaderConnected: Boolean = false
+        ): MobileReader? {
+            // If Tap to Pay reader is explicitly connected, return it
+            if (isTapToPayReaderConnected && tapToPayConfig?.enabled == true) {
+                if (ChipDnaMobile.isInitialized()) {
+                    return TapToPayReader()
+                }
+            }
+            
+            // Check for physical connected reader
+            val deviceStatusXml = chipDnaMobileStatus?.get(ParameterKeys.DeviceStatus) ?: return null
             val deviceStatus = ChipDnaMobileSerializer.deserializeDeviceStatus(deviceStatusXml)
 
             return when (deviceStatus.status) {
@@ -82,6 +97,18 @@ internal class ChipDnaDriver :
 
     /** A key used to communicate with TransactionGateway */
     private var securityKey: String = ""
+    
+    /** Tap to Pay configuration */
+    private var tapToPayConfig: TapToPayConfiguration? = null
+    
+    /** Activity delegate for NFC operations in Tap to Pay mode */
+    private var requestActivityDelegate: RequestActivityDelegate? = null
+    
+    /** Tracks whether the TapToPayReader is currently connected */
+    private var isTapToPayReaderConnected: Boolean = false
+    
+    /** Callback for when terminal configuration completes */
+    private var onTerminalReadyCallback: (() -> Unit)? = null
 
     override var familiarSerialNumbers: MutableList<String> = mutableListOf()
     override val source: String = "NMI"
@@ -122,9 +149,13 @@ internal class ChipDnaDriver :
         if (apiKey.isBlank()) {
             throw InitializeMobileReaderDriverException("emvTerminalSecret not found")
         }
+        
+        // Get Tap to Pay configuration if provided
+        tapToPayConfig = args["tapToPayConfig"] as? TapToPayConfiguration
 
         val params = Parameters().apply {
             add(ParameterKeys.Password, "password")
+            add(ParameterKeys.AutoConfirm, ParameterValues.TRUE)
         }
 
         // Init
@@ -140,8 +171,24 @@ internal class ChipDnaDriver :
 
         // Set credentials
         val result = setCredentials(appId, apiKey)
+        
+        // Log detailed result for debugging
+        log("setProperties result: ${result[ParameterKeys.Result]}")
+        result[ParameterKeys.ErrorDescription]?.let { log("Error: $it") }
+        result[ParameterKeys.Errors]?.let { log("Errors: $it") }
+        result["ErrorCode"]?.let { log("ErrorCode: $it") }
+        
+        // Check terminal status immediately after setProperties
+        val statusAfterSet = ChipDnaMobile.getInstance().getStatus(null)
+        val terminalStatusXml = statusAfterSet[ParameterKeys.TerminalStatus]
+        terminalStatusXml?.let {
+            val terminalStatus = ChipDnaMobileSerializer.deserializeTerminalStatus(it)
+            log("Terminal status after setProperties: isEnabled=${terminalStatus.isEnabled}")
+        }
+        
         if (result[ParameterKeys.Result] != ParameterValues.TRUE) {
-            throw InitializeMobileReaderDriverException("Invalid credentials for reader")
+            val errorMsg = result[ParameterKeys.ErrorDescription] ?: "Invalid credentials for reader"
+            throw InitializeMobileReaderDriverException(errorMsg)
         }
 
         return result[ParameterKeys.Result] == ParameterValues.TRUE
@@ -168,7 +215,29 @@ internal class ChipDnaDriver :
                 throw OmniGeneralException.uninitialized
             }
         }
-
+        
+        val readersList = mutableListOf<MobileReader>()
+        
+        // If Tap to Pay is enabled, add the virtual Tap to Pay reader
+        if (isTapToPayEnabled()) {
+            log("Adding Tap to Pay reader to available readers")
+            readersList.add(TapToPayReader())
+        }
+        
+        // If external readers are allowed or Tap to Pay is disabled, search for physical readers
+        if (tapToPayConfig?.allowExternalReaders != false || !isTapToPayEnabled()) {
+            val externalReaders = searchForExternalReaders()
+            readersList.addAll(externalReaders)
+        }
+        
+        return readersList
+    }
+    
+    /**
+     * Searches for external Bluetooth/USB readers.
+     * This is the original searchForReaders logic for physical devices.
+     */
+    private suspend fun searchForExternalReaders(): List<MobileReader> {
         val readers = suspendCancellableCoroutine { continuation ->
             ChipDnaMobile.getInstance().apply {
                 clearAllAvailablePinPadsListeners()
@@ -202,6 +271,84 @@ internal class ChipDnaDriver :
             }
         }
 
+        // Tap to Pay needs connectAndConfigure to activate NFC reader
+        if (reader is TapToPayReader) {
+            log("Tap to Pay reader selected - calling connectAndConfigure")
+            
+            return suspendCancellableCoroutine { continuation ->
+                // If mock mode is enabled, bypass terminal status check and simulate immediate success
+                if (tapToPayConfig?.mockMode == true) {
+                    log("MOCK MODE: Bypassing terminal.isEnabled check and simulating connection")
+                    log("MOCK MODE: This allows testing the NFC prompt with Test Card Simulator")
+                    log("MOCK MODE: Real transactions will still fail without NMI onboarding")
+                    doConnectAndConfigure(reader, continuation)
+                    return@suspendCancellableCoroutine
+                }
+                
+                // Check if terminal is already enabled
+                val status = ChipDnaMobile.getInstance().getStatus(null)
+                val terminalStatusXml = status[ParameterKeys.TerminalStatus]
+                val terminalStatus = terminalStatusXml?.let { 
+                    ChipDnaMobileSerializer.deserializeTerminalStatus(it) 
+                }
+                
+                log("Terminal status before connect: isEnabled=${terminalStatus?.isEnabled}")
+                
+                // If terminal is not enabled, wait for configuration to complete
+                if (terminalStatus?.isEnabled != true) {
+                    log("Terminal not enabled yet - waiting for configuration to complete...")
+                    
+                    // Set callback for when configuration completes
+                    onTerminalReadyCallback = {
+                        log("Terminal is ready via callback - now calling connectAndConfigure")
+                        doConnectAndConfigure(reader, continuation)
+                    }
+                    
+                    // Also poll terminal status every 2 seconds in case we miss the config event
+                    val startTime = System.currentTimeMillis()
+                    val pollJob = async {
+                        while (System.currentTimeMillis() - startTime < 30000) { // 30 second timeout
+                            delay(2000) // Poll every 2 seconds
+                            val currentStatus = ChipDnaMobile.getInstance().getStatus(null)
+                            val currentTerminalXml = currentStatus[ParameterKeys.TerminalStatus]
+                            val currentTerminal = currentTerminalXml?.let {
+                                ChipDnaMobileSerializer.deserializeTerminalStatus(it)
+                            }
+                            
+                            if (currentTerminal?.isEnabled == true) {
+                                log("Terminal is ready via polling - now calling connectAndConfigure")
+                                onTerminalReadyCallback = null // Clear callback
+                                doConnectAndConfigure(reader, continuation)
+                                return@async
+                            } else {
+                                log("Polling: Terminal still not enabled (isEnabled=${currentTerminal?.isEnabled})")
+                            }
+                        }
+                        // Timeout reached
+                        log("Timeout waiting for terminal to become enabled")
+                        onTerminalReadyCallback = null
+                        continuation.resumeWith(Result.failure(
+                            ConnectReaderException("Timeout waiting for terminal configuration to complete")
+                        ))
+                    }
+                    
+                    continuation.invokeOnCancellation {
+                        pollJob.cancel()
+                        onTerminalReadyCallback = null
+                    }
+                    
+                    return@suspendCancellableCoroutine
+                }
+                
+                // Terminal is already enabled, proceed immediately
+                log("Terminal already enabled - calling connectAndConfigure immediately")
+                doConnectAndConfigure(reader, continuation)
+            }
+        }
+        
+        // For physical readers below...
+
+
         // Set properties of reader to connect to here. Adding them as
         // connectAndConfigure params causes it to never connect correctly
         ChipDnaMobile.getInstance().setProperties(
@@ -231,6 +378,44 @@ internal class ChipDnaDriver :
         }
     }
 
+    private fun doConnectAndConfigure(
+        reader: TapToPayReader,
+        continuation: kotlin.coroutines.Continuation<MobileReader?>
+    ) {
+        // Get current status and add Tap to Pay parameters
+        val currentStatus = ChipDnaMobile.getInstance().getStatus(null)
+        currentStatus.apply {
+            add(ParameterKeys.TapToMobilePOI, ParameterValues.TRUE)
+            add(ParameterKeys.PaymentDevicePOI, ParameterValues.FALSE)
+            log("Added TapToMobilePOI: TRUE, PaymentDevicePOI: FALSE")
+        }
+        
+        ChipDnaMobile.getInstance().apply {
+            clearAllConnectAndConfigureFinishedListeners()
+            
+            addConnectAndConfigureFinishedListener { params ->
+                log("connectAndConfigure finished callback received")
+                log("Result: ${params[ParameterKeys.Result]}")
+                params[ParameterKeys.ErrorDescription]?.let { log("ErrorDescription: $it") }
+                
+                if (params[ParameterKeys.Result] == ParameterValues.TRUE) {
+                    log("Tap to Pay configuration completed successfully")
+                    isTapToPayReaderConnected = true
+                    mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(
+                        MobileReaderConnectionStatus.CONNECTED
+                    )
+                    continuation.resumeWith(Result.success(reader))
+                } else {
+                    val error = params[ParameterKeys.ErrorDescription] ?: "Unknown error"
+                    log("Tap to Pay configuration failed: $error")
+                    continuation.resumeWith(Result.failure(ConnectReaderException(error)))
+                }
+            }
+            
+            log("Calling connectAndConfigure...")
+        }.connectAndConfigure(currentStatus)
+    }
+    
     override suspend fun disconnect(reader: MobileReader?, error: (OmniException) -> Unit): Boolean {
         val retryLimit = 3
         val retryTimes = arrayOf(500L, 1000L, 2000L)
@@ -240,6 +425,7 @@ internal class ChipDnaDriver :
             // Check the result. If the disconnect was successful, break out of the retry loop.
             val result = ChipDnaMobile.dispose(null)
             if (result[ParameterKeys.Result] == ParameterValues.TRUE) {
+                isTapToPayReaderConnected = false
                 mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(MobileReaderConnectionStatus.DISCONNECTED)
                 return true
             }
@@ -253,29 +439,50 @@ internal class ChipDnaDriver :
     }
 
     override suspend fun getConnectedReader(): MobileReader? {
+        log("getConnectedReader called: isTapToPayReaderConnected=$isTapToPayReaderConnected")
         // ChipDna must be initialized
         return if (!ChipDnaMobile.isInitialized()) {
             if (initArgs.isNotEmpty()) {
                 async { initialize(initArgs) }.await()
-                Companion.getConnectedReader()
+                Companion.getConnectedReader(
+                    tapToPayConfig = tapToPayConfig,
+                    isTapToPayReaderConnected = isTapToPayReaderConnected
+                )
             } else {
                 throw OmniGeneralException.uninitialized
             }
         } else {
-            Companion.getConnectedReader()
+            val reader = Companion.getConnectedReader(
+                tapToPayConfig = tapToPayConfig,
+                isTapToPayReaderConnected = isTapToPayReaderConnected
+            )
+            log("getConnectedReader returning: ${reader?.getName() ?: "null"}")
+            reader
         }
     }
 
     override suspend fun isReadyToTakePayment(): Boolean {
+        log("isReadyToTakePayment called")
         // ChipDna must be initialized
         if (!ChipDnaMobile.isInitialized()) {
+            log("isReadyToTakePayment: ChipDNA not initialized")
             return false
         }
 
         try {
+            log("isReadyToTakePayment: isTapToPayEnabled=${isTapToPayEnabled()}, isTapToPayReaderConnected=$isTapToPayReaderConnected")
+            
+            // For Tap to Pay, we just need SDK initialized and reader connected
+            // Terminal status becomes enabled asynchronously, so we don't wait for it
+            if (isTapToPayEnabled() && isTapToPayReaderConnected) {
+                log("isReadyToTakePayment: Tap to Pay is ready (SDK initialized and reader connected)")
+                return true
+            }
+
+            // For external readers, check device and terminal status
             val status = ChipDnaMobile.getInstance().getStatus(null)
 
-            // Device must be connected
+            // For external readers, device must be connected
             val deviceStatusXml = status[ParameterKeys.DeviceStatus] ?: return false
             val deviceStatus = ChipDnaMobileSerializer.deserializeDeviceStatus(deviceStatusXml)
             if (deviceStatus.status != DeviceStatus.DeviceStatusEnum.DeviceStatusConnected) {
@@ -482,11 +689,22 @@ internal class ChipDnaDriver :
     }
 
     private fun setCredentials(appId: String, apiKey: String): Parameters {
+        // Use TEST environment when testMode is enabled, otherwise LIVE
+        val environment = if (tapToPayConfig?.testMode == true) {
+            log("Using TEST environment for Tap to Pay testing")
+            ParameterValues.TestEnvironment
+        } else {
+            log("Using LIVE environment for production")
+            ParameterValues.LiveEnvironment
+        }
+        
         val params = Parameters().apply {
             add(ParameterKeys.ApiKey, apiKey)
-            add(ParameterKeys.Environment, ParameterValues.LiveEnvironment)
+            add(ParameterKeys.Environment, environment)
             add(ParameterKeys.ApplicationIdentifier, appId)
         }
+        
+        log("Calling setProperties with ApiKey, Environment=$environment, ApplicationIdentifier")
         return ChipDnaMobile.getInstance().setProperties(params)
     }
 
@@ -516,9 +734,40 @@ internal class ChipDnaDriver :
     }
 
     override fun onConfigurationUpdateListener(parameters: Parameters?) {
-        parameters[ParameterKeys.ConfigurationUpdate]?.let {
-            MobileReaderConnectionStatus.from(it)?.let {
-                mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(it)
+        parameters?.let { params ->
+            // Log all configuration parameters for debugging
+            val configUpdate = params[ParameterKeys.ConfigurationUpdate]
+            val percentComplete = params["PercentageComplete"]
+            val currentStage = params["CurrentStage"]
+            val status = params["Status"]
+            val description = params["Description"]
+            
+            log("Configuration Update: $configUpdate")
+            percentComplete?.let { log("Progress: $it%") }
+            currentStage?.let { log("Stage: $it") }
+            status?.let { log("Status: $it") }
+            description?.let { log("Description: $it") }
+            
+            // Check if terminal is now enabled after configuration
+            if (configUpdate == "ConfigurationUpdateComplete") {
+                val terminalStatus = ChipDnaMobile.getInstance().getStatus(null)
+                val terminalStatusXml = terminalStatus[ParameterKeys.TerminalStatus]
+                terminalStatusXml?.let {
+                    val terminal = ChipDnaMobileSerializer.deserializeTerminalStatus(it)
+                    if (terminal.isEnabled) {
+                        log("Terminal is now enabled after configuration")
+                        onTerminalReadyCallback?.invoke()
+                        onTerminalReadyCallback = null
+                    }
+                }
+            }
+            
+            // Update connection status based on configuration update
+            configUpdate?.let {
+                MobileReaderConnectionStatus.from(it)?.let { status ->
+                    log("Configuration status changed to: $status")
+                    mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(status)
+                }
             }
         }
     }
@@ -542,5 +791,49 @@ internal class ChipDnaDriver :
             }
         }
         return false
+    }
+    
+    /**
+     * Registers a RequestActivityListener for Tap to Pay NFC operations.
+     * 
+     * This MUST be called when using Tap to Pay functionality. The ChipDNA SDK requires
+     * an activity context to display NFC prompts and handle contactless payments.
+     * 
+     * @param delegate The RequestActivityDelegate that provides the current Activity
+     */
+    fun registerRequestActivityListener(delegate: RequestActivityDelegate) {
+        if (!ChipDnaMobile.isInitialized()) {
+            log("Warning: ChipDNA not initialized. RequestActivityListener registration may fail.")
+            return
+        }
+        
+        requestActivityDelegate = delegate
+        ChipDnaMobile.getInstance().addRequestActivityListener(delegate)
+        log("RequestActivityListener registered for Tap to Pay")
+    }
+    
+    /**
+     * Unregisters the RequestActivityListener.
+     * Should be called when the activity is destroyed to prevent memory leaks.
+     */
+    fun unregisterRequestActivityListener() {
+        // Note: ChipDNA SDK doesn't provide a method to unregister listeners
+        // Setting to null prevents further callbacks
+        requestActivityDelegate = null
+        log("RequestActivityListener unregistered")
+    }
+    
+    /**
+     * Returns true if Tap to Pay is enabled in the current configuration.
+     */
+    fun isTapToPayEnabled(): Boolean {
+        return tapToPayConfig?.enabled == true
+    }
+    
+    /**
+     * Returns the current Tap to Pay configuration.
+     */
+    fun getTapToPayConfiguration(): TapToPayConfiguration? {
+        return tapToPayConfig
     }
 }

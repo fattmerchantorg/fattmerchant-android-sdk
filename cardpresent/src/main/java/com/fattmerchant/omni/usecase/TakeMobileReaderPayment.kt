@@ -212,8 +212,16 @@ internal class TakeMobileReaderPayment(
      * @param repo A [MobileReaderDriverRepository] to look for the readers in
      * @return a [MobileReaderDriver], if found
      */
-    private suspend fun getAvailableMobileReaderDriver(repo: MobileReaderDriverRepository): MobileReaderDriver? = repo
-        .getInitializedDrivers()
-        .firstOrNull { it.isReadyToTakePayment() }
+    private suspend fun getAvailableMobileReaderDriver(repo: MobileReaderDriverRepository): MobileReaderDriver? {
+        val drivers = repo.getInitializedDrivers()
+        println("TakeMobileReaderPayment: Found ${drivers.size} initialized drivers")
+        val ready = drivers.firstOrNull { 
+            val isReady = it.isReadyToTakePayment()
+            println("TakeMobileReaderPayment: Driver ${it.source} isReadyToTakePayment=$isReady")
+            isReady
+        }
+        println("TakeMobileReaderPayment: Selected driver: ${ready?.source ?: "null"}")
+        return ready
+    }
 
 }

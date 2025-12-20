@@ -21,11 +21,17 @@ open class TransactionUpdate(val value: String, val userFriendlyMessage: String?
         /** Request card be swiped */
         val PromptSwipeCard = TransactionUpdate("Prompt Swipe Card", "Please swipe card")
 
+        /** Request card or device be tapped for NFC payment (Tap to Pay) */
+        val PromptTapCard = TransactionUpdate("Prompt Tap Card", "Tap card or device to phone")
+
         /** Card was swiped */
         val CardSwiped = TransactionUpdate("Card Swiped")
 
         /** Card was inserted */
         val CardInserted = TransactionUpdate("Card Inserted")
+        
+        /** Card or device was tapped for NFC payment */
+        val CardTapped = TransactionUpdate("Card Tapped")
 
         /** Card Swipe error */
         val CardSwipeError = TransactionUpdate("Card Swipe Error", "Card swipe error. Please try again")

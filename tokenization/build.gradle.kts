@@ -2,21 +2,12 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     `maven-publish`
+    signing
 }
 
-group = "com.github.fattmerchantorg"
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("release") {
-                from(components["release"])
-                groupId = "com.github.fattmerchantorg"
-                artifactId = "tokenization"
-                version = "2.6.1"
-            }
-        }
-    }
-}
+apply(from = "${rootProject.projectDir}/gradle/publish-module.gradle.kts")
+
+group = "com.fattmerchant"
 
 android {
     namespace = "com.fattmerchant"
