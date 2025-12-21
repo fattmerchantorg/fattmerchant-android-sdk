@@ -4,8 +4,25 @@ import org.gradle.kotlin.dsl.`maven-publish`
 import org.gradle.kotlin.dsl.signing
 
 // Configure publishing metadata
-val publishGroupId = "com.fattmerchant"
-val publishVersion = project.findProperty("PUBLISH_VERSION") as String? ?: "2.7.0"
+// Support both JitPack (passes -Pgroup via command line) and Maven Central (uses PUBLISH_GROUP_ID from gradle.properties)
+// For JitPack: ./gradlew -Pgroup=com.github.user -Pversion=1.0 publishToMavenLocal
+// For Maven Central: Uses PUBLISH_GROUP_ID and PUBLISH_VERSION from gradle.properties
+val jitpackGroup = project.findProperty("group") as String?
+val mavenGroup = project.findProperty("PUBLISH_GROUP_ID") as String?
+val publishGroupId = when {
+    jitpackGroup != null && jitpackGroup != project.group.toString() -> jitpackGroup
+    mavenGroup != null -> mavenGroup
+    else -> "com.fattmerchant"
+}
+
+val jitpackVersion = project.findProperty("version") as String?
+val mavenVersion = project.findProperty("PUBLISH_VERSION") as String?
+val publishVersion = when {
+    jitpackVersion != null && jitpackVersion != project.version.toString() -> jitpackVersion
+    mavenVersion != null -> mavenVersion
+    else -> "2.7.0"
+}
+
 val publishArtifactId = project.name
 
 // Library metadata
@@ -36,6 +53,7 @@ afterEvaluate {
     configure<PublishingExtension> {
         publications {
             create<MavenPublication>("release") {
+                // Use explicit groupId for Maven publication (don't use project.group)
                 groupId = publishGroupId
                 artifactId = publishArtifactId
                 version = publishVersion

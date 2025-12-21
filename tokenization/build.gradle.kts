@@ -7,7 +7,8 @@ plugins {
 
 apply(from = "${rootProject.projectDir}/gradle/publish-module.gradle.kts")
 
-group = "com.fattmerchant"
+// Set group: JitPack passes -Pgroup, otherwise use default for Maven Central
+group = project.findProperty("group") as String? ?: "com.fattmerchant"
 
 android {
     namespace = "com.fattmerchant"
