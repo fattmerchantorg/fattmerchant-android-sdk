@@ -293,68 +293,82 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
         log("Attempting to charge ${amount.dollarsString()}")
         
         // Show Tap to Pay prompt if in Tap to Pay mode
+        // The TapToPayPrompt now handles all SDK callbacks automatically
         if (_uiState.value.tapToPayMode != TapToPayMode.DISABLED) {
             _uiState.update { state ->
                 state.copy(
                     showTapToPayPrompt = true,
                     transactionAmount = amount.dollarsString().replace("$", ""),
                     transactionSubtotal = amount.dollarsString().replace("$", ""),
-                    transactionTip = "0.00"
+                    transactionTip = "0.00",
+                    transactionRequest = request // Pass the request to TapToPayPrompt
+                )
+            }
+        } else {
+            // For non-Tap to Pay modes, handle transaction directly
+            Omni.shared()?.apply {
+                // Listen to transaction updates delivered by the Stax SDK
+                transactionUpdateListener = object : TransactionUpdateListener {
+                    override fun onTransactionUpdate(transactionUpdate: TransactionUpdate) {
+                        log("${transactionUpdate.value} | ${transactionUpdate.userFriendlyMessage}")
+                        // Update UI with transaction status
+                        transactionUpdate.userFriendlyMessage?.let { msg ->
+                            updateTransactionStatus(msg)
+                        } ?: updateTransactionStatus(transactionUpdate.value)
+                    }
+                }
+
+                // Listen to user-level notifications
+                userNotificationListener = object : UserNotificationListener {
+                    override fun onUserNotification(userNotification: UserNotification) {
+                        log("${userNotification.value} | ${userNotification.userFriendlyMessage}")
+                    }
+
+                    override fun onRawUserNotification(userNotification: String) {
+                        log(userNotification)
+                    }
+                }
+
+                /**
+                 * To run a charge, you call the `Stax.instance().takeMobileReaderTransaction()` function.
+                 * The function takes in a [TransactionRequest], a completion handler, and an error handler.
+                 * The completion handler is called if the transaction gets a response from the mobile
+                 * reader. If there is a problem with either the hardware or the api during the function,
+                 * the error handler is called.
+                 */
+                takeMobileReaderTransaction(
+                    request = request,
+                    completion = { transaction ->
+                        if (transaction.success == true) {
+                            log("Successfully executed transaction")
+                        } else {
+                            log("Transaction declined")
+                        }
+                        lastTransaction = transaction
+                    },
+                    error = {
+                        log("Couldn't perform sale: ${it.message}. ${it.detail}")
+                    }
                 )
             }
         }
-        
-        Omni.shared()?.apply {
-            // Listen to transaction updates delivered by the Stax SDK
-            transactionUpdateListener = object : TransactionUpdateListener {
-                override fun onTransactionUpdate(transactionUpdate: TransactionUpdate) {
-                    log("${transactionUpdate.value} | ${transactionUpdate.userFriendlyMessage}")
-                    // Update UI with transaction status
-                    transactionUpdate.userFriendlyMessage?.let { msg ->
-                        updateTransactionStatus(msg)
-                    } ?: updateTransactionStatus(transactionUpdate.value)
-                }
-            }
-
-            // Listen to user-level notifications
-            userNotificationListener = object : UserNotificationListener {
-                override fun onUserNotification(userNotification: UserNotification) {
-                    log("${userNotification.value} | ${userNotification.userFriendlyMessage}")
-                }
-
-                override fun onRawUserNotification(userNotification: String) {
-                    log(userNotification)
-                }
-            }
-
-            /**
-             * To run a charge, you call the `Stax.instance().takeMobileReaderTransaction()` function.
-             * The function takes in a [TransactionRequest], a completion handler, and an error handler.
-             * The completion handler is called if the transaction gets a response from the mobile
-             * reader. If there is a problem with either the hardware or the api during the function,
-             * the error handler is called.
-             */
-            takeMobileReaderTransaction(
-                request = request,
-                completion = { transaction ->
-                    if (transaction.success == true) {
-                        log("Successfully executed transaction")
-                    } else {
-                        log("Transaction declined")
-                    }
-                    lastTransaction = transaction
-                    
-                    // Hide Tap to Pay prompt
-                    _uiState.update { it.copy(showTapToPayPrompt = false) }
-                },
-                error = {
-                    log("Couldn't perform sale: ${it.message}. ${it.detail}")
-                    
-                    // Hide Tap to Pay prompt on error
-                    _uiState.update { it.copy(showTapToPayPrompt = false) }
-                }
-            )
-        }
+    }
+    
+    /**
+     * Handles successful transaction completion from TapToPayPrompt
+     */
+    fun onTransactionSuccess(transaction: Transaction) {
+        log("Successfully executed transaction")
+        lastTransaction = transaction
+        _uiState.update { it.copy(showTapToPayPrompt = false) }
+    }
+    
+    /**
+     * Handles transaction error from TapToPayPrompt
+     */
+    fun onTransactionError(errorMessage: String) {
+        log("Transaction error: $errorMessage")
+        _uiState.update { it.copy(showTapToPayPrompt = false) }
     }
     
     /**

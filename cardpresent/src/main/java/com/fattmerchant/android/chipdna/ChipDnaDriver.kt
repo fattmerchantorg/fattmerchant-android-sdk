@@ -382,12 +382,22 @@ internal class ChipDnaDriver :
         reader: TapToPayReader,
         continuation: kotlin.coroutines.Continuation<MobileReader?>
     ) {
-        // Get current status and add Tap to Pay parameters
+        // Get current status and add Tap to Pay parameters based on configuration
         val currentStatus = ChipDnaMobile.getInstance().getStatus(null)
+        
+        val tapToMobilePOI = tapToPayConfig?.getTapToMobilePOIValue() ?: ParameterValues.TRUE
+        val paymentDevicePOI = tapToPayConfig?.getPaymentDevicePOIValue() ?: ParameterValues.FALSE
+        
         currentStatus.apply {
-            add(ParameterKeys.TapToMobilePOI, ParameterValues.TRUE)
-            add(ParameterKeys.PaymentDevicePOI, ParameterValues.FALSE)
-            log("Added TapToMobilePOI: TRUE, PaymentDevicePOI: FALSE")
+            add(ParameterKeys.TapToMobilePOI, tapToMobilePOI)
+            add(ParameterKeys.PaymentDevicePOI, paymentDevicePOI)
+            log("Added TapToMobilePOI: $tapToMobilePOI, PaymentDevicePOI: $paymentDevicePOI")
+            
+            if (paymentDevicePOI == ParameterValues.TRUE) {
+                log("Hybrid mode: Both Tap to Pay and external readers enabled via connectAndConfigure")
+            } else {
+                log("Tap to Pay only mode: External readers disabled via connectAndConfigure")
+            }
         }
         
         ChipDnaMobile.getInstance().apply {
@@ -502,8 +512,58 @@ internal class ChipDnaDriver :
         return true
     }
 
-    override suspend fun performTransaction(request: TransactionRequest, signatureProvider: SignatureProviding?, transactionUpdateListener: TransactionUpdateListener?, userNotificationListener: UserNotificationListener?): TransactionResult {
+    override suspend fun performTransaction(request: TransactionRequest, readerType: com.fattmerchant.omni.data.ReaderType, signatureProvider: SignatureProviding?, transactionUpdateListener: TransactionUpdateListener?, userNotificationListener: UserNotificationListener?): TransactionResult {
         val paymentRequestParams = withTransactionRequest(request)
+
+        // Determine which reader to use based on readerType parameter
+        when (readerType) {
+            com.fattmerchant.omni.data.ReaderType.TAP_TO_PAY -> {
+                // Explicitly request Tap to Pay
+                log("Explicit TAP_TO_PAY selected: Setting TransactionPOI to TapToMobile")
+                paymentRequestParams.add(ParameterKeys.TransactionPOI, ParameterValues.TapToMobile)
+            }
+            com.fattmerchant.omni.data.ReaderType.EXTERNAL_READER -> {
+                // Explicitly request external reader (don't set TransactionPOI, uses default)
+                log("Explicit EXTERNAL_READER selected: Using default (external reader)")
+            }
+            com.fattmerchant.omni.data.ReaderType.AUTO -> {
+                // Auto mode: Check what's connected and make intelligent selection
+                if (isTapToPayEnabled() && tapToPayConfig?.allowExternalReaders == true) {
+                    // Hybrid mode: Check if external reader is connected
+                    try {
+                        val status = ChipDnaMobile.getInstance().getStatus(null)
+                        val deviceStatusXml = status[ParameterKeys.DeviceStatus]
+                        
+                        val isExternalReaderConnected = deviceStatusXml?.let { xml ->
+                            try {
+                                val deviceStatus = ChipDnaMobileSerializer.deserializeDeviceStatus(xml)
+                                deviceStatus.status == DeviceStatus.DeviceStatusEnum.DeviceStatusConnected
+                            } catch (e: Exception) {
+                                log("Error parsing device status: ${e.message}")
+                                false
+                            }
+                        } ?: false
+
+                        if (!isExternalReaderConnected) {
+                            // No external reader connected - use Tap to Pay
+                            log("AUTO mode (hybrid): No external reader connected, setting TransactionPOI to TapToMobile")
+                            paymentRequestParams.add(ParameterKeys.TransactionPOI, ParameterValues.TapToMobile)
+                        } else {
+                            log("AUTO mode (hybrid): External reader connected, using default (external reader)")
+                        }
+                    } catch (e: Exception) {
+                        // If we can't determine device status, default to Tap to Pay in hybrid mode
+                        log("Error checking device status, defaulting to Tap to Pay: ${e.message}")
+                        paymentRequestParams.add(ParameterKeys.TransactionPOI, ParameterValues.TapToMobile)
+                    }
+                } else if (isTapToPayEnabled()) {
+                    // Tap to Pay only mode - always use Tap to Pay
+                    log("AUTO mode (Tap only): Setting TransactionPOI to TapToMobile")
+                    paymentRequestParams.add(ParameterKeys.TransactionPOI, ParameterValues.TapToMobile)
+                }
+                // If Tap to Pay is disabled, use default (external reader)
+            }
+        }
 
         val result = suspendCancellableCoroutine { continuation ->
 
@@ -702,6 +762,17 @@ internal class ChipDnaDriver :
             add(ParameterKeys.ApiKey, apiKey)
             add(ParameterKeys.Environment, environment)
             add(ParameterKeys.ApplicationIdentifier, appId)
+            
+            // Add certificate fingerprint for Tap to Pay if enabled
+            if (tapToPayConfig?.enabled == true) {
+                val fingerprint = CertificateUtils.getCertificateFingerprint(appContext)
+                if (fingerprint != null) {
+                    add(ParameterKeys.CertificateFingerprint, fingerprint)
+                    log("Added CertificateFingerprint for Tap to Pay: ${fingerprint.take(20)}...")
+                } else {
+                    log("WARNING: Unable to extract certificate fingerprint for Tap to Pay")
+                }
+            }
         }
         
         log("Calling setProperties with ApiKey, Environment=$environment, ApplicationIdentifier")

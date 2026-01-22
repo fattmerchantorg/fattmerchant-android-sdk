@@ -5,6 +5,7 @@ import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.UserNotificationListener
 import com.fattmerchant.omni.data.MobileReaderDriver
+import com.fattmerchant.omni.data.ReaderType
 import com.fattmerchant.omni.data.TransactionRequest
 import com.fattmerchant.omni.data.TransactionResult
 import com.fattmerchant.omni.data.models.Customer
@@ -28,6 +29,7 @@ internal class TakeMobileReaderPayment(
     val paymentMethodRepository: PaymentMethodRepository,
     val transactionRepository: TransactionRepository,
     var request: TransactionRequest,
+    val readerType: ReaderType = ReaderType.AUTO,
     val signatureProvider: SignatureProviding? = null,
     val transactionUpdateListener: TransactionUpdateListener? = null,
     val userNotificationListener: UserNotificationListener? = null,
@@ -123,7 +125,7 @@ internal class TakeMobileReaderPayment(
         val result: TransactionResult
 
         try {
-            result = reader.performTransaction(request, signatureProvider, transactionUpdateListener, userNotificationListener)
+            result = reader.performTransaction(request, readerType, signatureProvider, transactionUpdateListener, userNotificationListener)
         } catch (e: MobileReaderDriver.PerformTransactionException) {
             onError(TakeMobileReaderPaymentException(e.detail))
             return@coroutineScope null

@@ -364,12 +364,16 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
      *
      * @param request a [TransactionRequest] object that includes all the information needed to
      * run this transaction including [TransactionRequest.amount] and [TransactionRequest.tokenize]
+     * @param readerType specifies which reader to use: [com.fattmerchant.omni.data.ReaderType.TAP_TO_PAY],
+     * [com.fattmerchant.omni.data.ReaderType.EXTERNAL_READER], or [com.fattmerchant.omni.data.ReaderType.AUTO]
+     * (default). When AUTO, the SDK will use the connected reader.
      * @param completion a block to run once the transaction is finished. Receives the completed
      * [Transaction]
      * @param error a block to run if an error is thrown. Receives an [OmniException]
      */
     fun takeMobileReaderTransaction(
         request: TransactionRequest,
+        readerType: com.fattmerchant.omni.data.ReaderType = com.fattmerchant.omni.data.ReaderType.AUTO,
         completion: (Transaction) -> Unit,
         error: (OmniException) -> Unit
     ) {
@@ -387,6 +391,7 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
                 paymentMethodRepository = paymentMethodRepository,
                 transactionRepository = transactionRepository,
                 request = request,
+                readerType = readerType,
                 signatureProvider = signatureProvider,
                 transactionUpdateListener = transactionUpdateListener,
                 userNotificationListener = userNotificationListener,

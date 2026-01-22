@@ -46,7 +46,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.staxpayments.sample.state.TapToPayMode
-import com.staxpayments.sample.ui.components.TapToPayPrompt
+// Import TapToPayPrompt from the SDK - this demonstrates proper SDK usage
+import com.fattmerchant.omni.ui.TapToPayPrompt
 import com.staxpayments.sample.ui.components.WideButton
 import com.staxpayments.sample.ui.theme.Gray50
 import com.staxpayments.sample.ui.theme.Purple500
@@ -216,6 +217,13 @@ fun MainScreen(
     }
     
     // Full-screen Tap to Pay Prompt Modal with animation
+    // 
+    // This demonstrates the recommended SDK usage pattern:
+    // 1. Import: com.fattmerchant.omni.ui.TapToPayPrompt
+    // 2. Show the component with transaction details
+    // 3. It automatically handles the entire transaction flow
+    // 4. You just provide success/error/cancel callbacks
+    //
     AnimatedVisibility(
         visible = staxUiState.showTapToPayPrompt,
         enter = fadeIn(animationSpec = tween(300)) + 
@@ -223,10 +231,14 @@ fun MainScreen(
         exit = fadeOut(animationSpec = tween(250)) + 
                slideOutVertically(animationSpec = tween(300), targetOffsetY = { it / 2 })
     ) {
+        // TapToPayPrompt from SDK - handles transaction automatically
         TapToPayPrompt(
             amount = staxUiState.transactionAmount,
             subtotal = staxUiState.transactionSubtotal,
             tip = staxUiState.transactionTip,
+            transactionRequest = staxUiState.transactionRequest,
+            onSuccess = { transaction -> staxViewModel.onTransactionSuccess(transaction) },
+            onError = { errorMessage -> staxViewModel.onTransactionError(errorMessage) },
             onCancel = { staxViewModel.dismissTapToPayPrompt() }
         )
     }

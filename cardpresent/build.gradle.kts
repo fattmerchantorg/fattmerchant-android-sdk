@@ -34,6 +34,15 @@ android {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
+    buildFeatures {
+        compose = true
+    }
+    
+    @Suppress("UnstableApiUsage")
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.3"
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -49,6 +58,17 @@ dependencies {
     // AndroidX AppCompat (Required by Cloud Commerce SDK themes)
     implementation("androidx.appcompat:appcompat:1.6.1")
     
+    // Jetpack Compose - For TapToPayPrompt UI
+    implementation("androidx.activity:activity-compose:1.9.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
+    implementation(platform("androidx.compose:compose-bom:2024.06.00"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.runtime:runtime:1.10.1")
+
     // NMI Cloud Commerce SDK - Tap to Pay Support
     // Using MTF (test) SDK for development - both SDKs contain duplicate classes and cannot be included together
     // Using compileOnly to avoid AAR bundling issues - app module must include this dependency

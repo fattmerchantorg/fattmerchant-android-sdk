@@ -100,6 +100,7 @@ internal interface MobileReaderDriver {
      *
      * @throws PerformTransactionException
      * @param request has all the information required to run a transaction
+     * @param readerType specifies which reader to use for the transaction
      * @param signatureProvider responsible for providing a signature should the transaction
      * require one
      * @param transactionUpdateListener gets notified of transaction updates
@@ -108,6 +109,7 @@ internal interface MobileReaderDriver {
     @Throws(PerformTransactionException::class)
     suspend fun performTransaction(
         request: TransactionRequest,
+        readerType: ReaderType = ReaderType.AUTO,
         signatureProvider: SignatureProviding?,
         transactionUpdateListener: TransactionUpdateListener?,
         userNotificationListener: UserNotificationListener?

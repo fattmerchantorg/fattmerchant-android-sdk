@@ -98,6 +98,9 @@ afterEvaluate {
         repositories {
             maven {
                 name = "sonatype"
+                // New Central Portal (2024+) requires the central-publishing Gradle plugin
+                // For now, publish to mavenLocal then manually upload the bundle
+                // See: https://central.sonatype.org/publish/publish-gradle/
                 url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
                 credentials {
                     username = project.findProperty("ossrhUsername") as String? ?: System.getenv("OSSRH_USERNAME")

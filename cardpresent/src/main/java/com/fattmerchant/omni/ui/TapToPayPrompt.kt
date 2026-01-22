@@ -1,6 +1,5 @@
-package com.staxpayments.sample.ui.components
+package com.fattmerchant.omni.ui
 
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -24,12 +23,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -42,32 +46,48 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.staxpayments.R
-import com.staxpayments.sample.ui.theme.Gray100
-import com.staxpayments.sample.ui.theme.Gray500
-import com.staxpayments.sample.ui.theme.Purple50
-import com.staxpayments.sample.ui.theme.Purple500
-import com.staxpayments.sample.ui.theme.Purple700
-import com.staxpayments.sample.ui.theme.StaxAndroidSDKTheme
-import com.staxpayments.sample.ui.theme.StaxBlack
+import com.fattmerchant.R
+import com.fattmerchant.android.Omni
+import com.fattmerchant.omni.TransactionUpdateListener
+import com.fattmerchant.omni.data.Amount
+import com.fattmerchant.omni.data.TransactionRequest
+import com.fattmerchant.omni.data.TransactionUpdate
+import com.fattmerchant.omni.data.models.Transaction
+import com.fattmerchant.omni.ui.theme.Gray100
+import com.fattmerchant.omni.ui.theme.Gray500
+import com.fattmerchant.omni.ui.theme.Purple50
+import com.fattmerchant.omni.ui.theme.Purple500
+import com.fattmerchant.omni.ui.theme.Purple700
+import com.fattmerchant.omni.ui.theme.StaxBlack
+import com.fattmerchant.omni.ui.theme.StaxPaymentTheme
+import java.lang.reflect.Modifier
 
 /**
- * Tap to Pay prompt screen that displays NFC payment instructions.
+ * Transaction state for the Tap to Pay prompt
+ */
+sealed class TapToPayState {
+    object Idle : TapToPayState()
+    data class Processing(val message: String) : TapToPayState()
+    data class Success(val transaction: Transaction) : TapToPayState()
+    data class Error(val message: String) : TapToPayState()
+}
+
+/**
+ * Tap to Pay prompt screen that displays NFC payment instructions and handles transaction flow.
  * 
- * This component shows:
- * - Optional status/error/guide message
- * - A circular "Tap on the back" prompt with NFC icon and breathing animation
- * - Accepted payment card logos (Visa, Mastercard, Discover, Amex, JCB)
- * - Total payment amount with breakdown
- * - Cancel button
+ * This component:
+ * - Automatically sets up transaction update listeners
+ * - Displays real-time transaction status updates
+ * - Shows appropriate UI for each transaction state
+ * - Handles success, error, and cancellation
  * 
- * Supports both Light and Dark themes matching the Figma design.
- *
  * @param amount The total payment amount (e.g., "28.00")
  * @param subtotal The subtotal before tip (e.g., "25.00")
  * @param tip The tip amount (e.g., "3.00")
- * @param statusMessage Optional status/error/guide message to display above the circle (e.g., "Hold for a little longer", "No Card Detected", "An error occurred, try again")
- * @param onCancel Callback when cancel button is clicked
+ * @param transactionRequest Optional pre-built transaction request, or builds one from amount
+ * @param onSuccess Callback when transaction completes successfully
+ * @param onError Callback when transaction fails
+ * @param onCancel Callback when user cancels
  * @param modifier Optional modifier for the component
  */
 @Composable
@@ -75,9 +95,128 @@ fun TapToPayPrompt(
     amount: String,
     subtotal: String,
     tip: String,
+    transactionRequest: TransactionRequest? = null,
+    onSuccess: (Transaction) -> Unit = {},
+    onError: (String) -> Unit = {},
     onCancel: () -> Unit,
-    modifier: Modifier = Modifier,
-    statusMessage: String? = null
+    modifier: Modifier = Modifier
+) {
+    var transactionState by remember { mutableStateOf<TapToPayState>(TapToPayState.Idle) }
+    var statusMessage by remember { mutableStateOf<String?>(null) }
+    
+    // Set up transaction update listener
+    DisposableEffect(Unit) {
+        val listener = object : TransactionUpdateListener {
+            override fun onTransactionUpdate(update: TransactionUpdate) {
+                statusMessage = update.userFriendlyMessage ?: formatTransactionUpdate(update.value)
+                
+                // Update state based on transaction progress
+                when (update.value) {
+                    "Transaction Started" -> {
+                        transactionState = TapToPayState.Processing("Starting transaction...")
+                    }
+                    "Prompt Insert Card", "Prompt Swipe Card" -> {
+                        transactionState = TapToPayState.Processing("Waiting for card...")
+                    }
+                    "Card Inserted", "Card Swiped" -> {
+                        transactionState = TapToPayState.Processing("Card detected")
+                    }
+                    "Reading Card" -> {
+                        transactionState = TapToPayState.Processing("Reading card...")
+                    }
+                    "Authorizing" -> {
+                        transactionState = TapToPayState.Processing("Authorizing payment...")
+                    }
+                    "Card Swipe Error", "Card Read Error" -> {
+                        statusMessage = "Card read failed. Please try again."
+                    }
+                }
+            }
+        }
+        
+        Omni.shared()?.transactionUpdateListener = listener
+        
+        onDispose {
+            // Clean up listener when component is removed
+            if (Omni.shared()?.transactionUpdateListener === listener) {
+                Omni.shared()?.transactionUpdateListener = null
+            }
+        }
+    }
+    
+    // Start transaction automatically when component appears
+    LaunchedEffect(Unit) {
+        val request = transactionRequest ?: TransactionRequest(
+            Amount(amount.toDoubleOrNull() ?: 0.0)
+        ).apply {
+            // Add any additional transaction metadata here
+            memo = "Tap to Pay transaction"
+        }
+        
+        Omni.shared()?.takeMobileReaderTransaction(
+            request = request,
+            completion = { transaction ->
+                if (transaction.success == true) {
+                    transactionState = TapToPayState.Success(transaction)
+                    statusMessage = "Payment approved!"
+                    onSuccess(transaction)
+                } else {
+                    val errorMsg = transaction.message ?: "Transaction declined"
+                    transactionState = TapToPayState.Error(errorMsg)
+                    statusMessage = errorMsg
+                    onError(errorMsg)
+                }
+            },
+            error = { exception ->
+                val errorMsg = exception.message ?: "Transaction failed"
+                transactionState = TapToPayState.Error(errorMsg)
+                statusMessage = errorMsg
+                onError(errorMsg)
+            }
+        )
+    }
+    
+    TapToPayPromptContent(
+        amount = amount,
+        subtotal = subtotal,
+        tip = tip,
+        transactionState = transactionState,
+        statusMessage = statusMessage,
+        onCancel = onCancel,
+        modifier = modifier
+    )
+}
+
+/**
+ * Formats transaction update values into user-friendly messages
+ */
+private fun formatTransactionUpdate(value: String): String {
+    return when (value) {
+        "Transaction Started" -> "Starting payment..."
+        "Prompt Insert Card", "Prompt Swipe Card" -> "Hold card near device"
+        "Card Inserted", "Card Swiped" -> "Card detected"
+        "Reading Card" -> "Reading card..."
+        "Authorizing" -> "Authorizing payment..."
+        "Authorized" -> "Payment approved!"
+        "Declined" -> "Payment declined"
+        "Card Swipe Error", "Card Read Error" -> "Card read failed"
+        "Transaction Error" -> "An error occurred"
+        else -> value
+    }
+}
+
+/**
+ * Content-only version of TapToPayPrompt for preview/testing
+ */
+@Composable
+private fun TapToPayPromptContent(
+    amount: String,
+    subtotal: String,
+    tip: String,
+    transactionState: TapToPayState,
+    statusMessage: String?,
+    onCancel: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val isDarkTheme = isSystemInDarkTheme()
     
@@ -88,6 +227,11 @@ fun TapToPayPrompt(
     val cancelButtonBg = if (isDarkTheme) StaxBlack else Gray100
     val cancelButtonBorder = if (isDarkTheme) Color.White else Color.Transparent
     val cancelIconColor = if (isDarkTheme) Color.White else Gray500
+    
+    // Determine if we should show processing indicator
+    val isProcessing = transactionState is TapToPayState.Processing
+    val isSuccess = transactionState is TapToPayState.Success
+    val isError = transactionState is TapToPayState.Error
     
     Box(
         modifier = modifier
@@ -119,7 +263,11 @@ fun TapToPayPrompt(
                             text = statusMessage,
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Normal,
-                            color = textColor,
+                            color = when {
+                                isSuccess -> Color(0xFF4CAF50)  // Green for success
+                                isError -> Color(0xFFE53935)    // Red for error
+                                else -> textColor
+                            },
                             textAlign = TextAlign.Center
                         )
                     }
@@ -131,12 +279,58 @@ fun TapToPayPrompt(
                     verticalArrangement = Arrangement.spacedBy(40.dp),
                     modifier = Modifier.padding(horizontal = 24.dp)
                 ) {
-                    // Circular NFC prompt with breathing animation
-                    PulsingCirclePrompt(
-                        isDarkTheme = isDarkTheme,
-                        circleColor = circleColor,
-                        textColor = textColor
-                    )
+                    // Show appropriate UI based on transaction state
+                    when (transactionState) {
+                        is TapToPayState.Success -> {
+                            // Show success icon
+                            Box(
+                                modifier = Modifier.size(194.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "✓",
+                                    fontSize = 80.sp,
+                                    color = Color(0xFF4CAF50),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                        is TapToPayState.Error -> {
+                            // Show error icon
+                            Box(
+                                modifier = Modifier.size(194.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "✗",
+                                    fontSize = 80.sp,
+                                    color = Color(0xFFE53935),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                        else -> {
+                            // Show normal NFC prompt with optional processing indicator
+                            Box(
+                                contentAlignment = Alignment.Center
+                            ) {
+                                PulsingCirclePrompt(
+                                    isDarkTheme = isDarkTheme,
+                                    circleColor = circleColor,
+                                    textColor = textColor
+                                )
+                                
+                                // Show spinner when processing
+                                if (isProcessing) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(240.dp),
+                                        color = Purple500,
+                                        strokeWidth = 3.dp
+                                    )
+                                }
+                            }
+                        }
+                    }
                     
                     // Payment card icons
                     PaymentCardIcons(isDarkTheme = isDarkTheme)
@@ -380,7 +574,7 @@ private fun CancelButton(
 @Preview(showBackground = true, name = "Light Mode")
 @Composable
 private fun TapToPayPromptLightPreview() {
-    StaxAndroidSDKTheme(darkTheme = false) {
+    StaxPaymentTheme(darkTheme = false) {
         TapToPayPrompt(
             amount = "28.00",
             subtotal = "25.00",
@@ -393,7 +587,7 @@ private fun TapToPayPromptLightPreview() {
 @Preview(showBackground = true, name = "Dark Mode")
 @Composable
 private fun TapToPayPromptDarkPreview() {
-    StaxAndroidSDKTheme(darkTheme = true) {
+    StaxPaymentTheme(darkTheme = true) {
         TapToPayPrompt(
             amount = "28.00",
             subtotal = "25.00",

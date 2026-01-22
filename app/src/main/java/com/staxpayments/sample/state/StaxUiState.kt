@@ -1,5 +1,7 @@
 package com.staxpayments.sample.state
 
+import com.fattmerchant.omni.data.TransactionRequest
+
 /**
  * Tap to Pay configuration modes
  */
@@ -20,5 +22,6 @@ data class StaxUiState(
     val showTapToPayPrompt: Boolean = false,
     val transactionAmount: String = "0.00",
     val transactionSubtotal: String = "0.00",
-    val transactionTip: String = "0.00"
+    val transactionTip: String = "0.00",
+    val transactionRequest: TransactionRequest? = null
 )
