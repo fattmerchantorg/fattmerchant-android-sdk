@@ -33,41 +33,6 @@ Omni.shared()?.takeMobileReaderTransaction(request,
 )
 ```
 
-### Pre-Authorization
-
-Authorize a payment without capturing funds immediately:
-
-```kotlin
-val request = TransactionRequest(Amount(100.00))
-request.preAuth = true // Pre-authorize only
-
-Omni.shared()?.takeMobileReaderTransaction(request,
-    completion = { transaction ->
-        // Save transaction ID for later capture
-        val authId = transaction.id
-    },
-    error = { /* handle */ }
-)
-```
-
-Later, capture the pre-authorized amount:
-
-```kotlin
-import com.fattmerchant.omni.usecase.CapturePreauthTransaction
-
-val captureUseCase = CapturePreauthTransaction(Omni.shared()!!)
-captureUseCase.capture(
-    transactionId = authId,
-    amount = Amount(75.00), // Can capture less than authorized amount
-    completion = {
-        println("Captured successfully")
-    },
-    error = { exception ->
-        println("Capture failed: ${exception.message}")
-    }
-)
-```
-
 ---
 
 ## Transaction Lifecycle
