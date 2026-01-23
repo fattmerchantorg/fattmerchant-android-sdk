@@ -53,9 +53,6 @@ Add the Stax SDK to your app's `build.gradle`:
 ```gradle
 dependencies {
     implementation 'com.fattmerchant:cardpresent:2.7.0'
-    
-    // Optional: If using tokenization features
-    implementation 'com.fattmerchant:tokenization:2.7.0'
 }
 ```
 
