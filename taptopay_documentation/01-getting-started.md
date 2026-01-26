@@ -53,9 +53,6 @@ Add the Stax SDK to your app's `build.gradle`:
 ```gradle
 dependencies {
     implementation 'com.fattmerchant:cardpresent:2.7.0'
-    
-    // Optional: If using tokenization features
-    implementation 'com.fattmerchant:tokenization:2.7.0'
 }
 ```
 
@@ -317,7 +314,7 @@ The SDK now includes **TapToPayPrompt**, a fully integrated Jetpack Compose UI c
 - ✅ **Theme Support** - Automatic Light/Dark mode adaptation
 - ✅ **Self-Contained** - No manual listener management needed
 
-#### Quick Start
+#### Initialize the tap to pay prompt screen
 
 ```kotlin
 import com.fattmerchant.omni.ui.TapToPayPrompt
@@ -355,14 +352,6 @@ fun PaymentScreen() {
 **No need to manually set up TransactionUpdateListener** - the component handles everything!
 
 For detailed documentation, see [TapToPayPrompt README](../cardpresent/src/main/java/com/fattmerchant/omni/ui/README_TAP_TO_PAY_UI.md).
-
-### Core SDK Functionality
-
-The SDK handles:
-- ✅ Card communication (NFC/Bluetooth)
-- ✅ Transaction processing
-- ✅ Communication with payment processor
-- ✅ Transaction status callbacks
 
 ### Building Your Own UI (Optional)
 

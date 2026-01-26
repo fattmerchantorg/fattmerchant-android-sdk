@@ -50,8 +50,8 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.fattmerchantorg:cardpresent:Tag'
-    implementation 'com.github.fattmerchantorg:tokenization:Tag'
+    implementation 'com.github.fattmerchantorg:cardpresent:2.7.0'
+    implementation 'com.github.fattmerchantorg:tokenization:2.7.0'
 }
 ```
 
