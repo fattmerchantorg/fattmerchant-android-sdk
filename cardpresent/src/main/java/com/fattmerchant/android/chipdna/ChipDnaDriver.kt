@@ -98,6 +98,9 @@ internal class ChipDnaDriver :
     /** A key used to communicate with TransactionGateway */
     private var securityKey: String = ""
     
+    /** Application context for SDK operations */
+    private var applicationContext: Context? = null
+    
     /** Tap to Pay configuration */
     private var tapToPayConfig: TapToPayConfiguration? = null
     
@@ -149,6 +152,9 @@ internal class ChipDnaDriver :
         if (apiKey.isBlank()) {
             throw InitializeMobileReaderDriverException("emvTerminalSecret not found")
         }
+        
+        // Store application context
+        applicationContext = appContext
         
         // Get Tap to Pay configuration if provided
         tapToPayConfig = args["tapToPayConfig"] as? TapToPayConfiguration
@@ -764,13 +770,18 @@ internal class ChipDnaDriver :
             add(ParameterKeys.ApplicationIdentifier, appId)
             
             // Add certificate fingerprint for Tap to Pay if enabled
-            if (tapToPayConfig?.enabled == true) {
-                val fingerprint = CertificateUtils.getCertificateFingerprint(appContext)
-                if (fingerprint != null) {
-                    add(ParameterKeys.CertificateFingerprint, fingerprint)
-                    log("Added CertificateFingerprint for Tap to Pay: ${fingerprint.take(20)}...")
-                } else {
-                    log("WARNING: Unable to extract certificate fingerprint for Tap to Pay")
+            tapToPayConfig?.let { config ->
+                if (config.enabled) {
+                    // Use provided fingerprint or auto-extract from signing certificate
+                    val fingerprint = config.certificateFingerprint
+                        ?: (applicationContext?.let { CertificateUtils.getCertificateFingerprint(it) })
+                    
+                    if (fingerprint != null) {
+                        add(ParameterKeys.CertificateFingerprint, fingerprint)
+                        log("Added CertificateFingerprint for Tap to Pay: ${fingerprint.take(20)}...")
+                    } else {
+                        log("WARNING: Unable to extract certificate fingerprint for Tap to Pay")
+                    }
                 }
             }
         }

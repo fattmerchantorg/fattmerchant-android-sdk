@@ -60,7 +60,6 @@ import com.fattmerchant.omni.ui.theme.Purple500
 import com.fattmerchant.omni.ui.theme.Purple700
 import com.fattmerchant.omni.ui.theme.StaxBlack
 import com.fattmerchant.omni.ui.theme.StaxPaymentTheme
-import java.lang.reflect.Modifier
 
 /**
  * Transaction state for the Tap to Pay prompt

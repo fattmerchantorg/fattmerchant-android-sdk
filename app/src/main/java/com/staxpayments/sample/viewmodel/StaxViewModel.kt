@@ -153,12 +153,14 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
         // Configure Tap to Pay based on UI state
         params.tapToPayConfig = when (_uiState.value.tapToPayMode) {
             TapToPayMode.TAP_TO_PAY_ONLY -> TapToPayConfiguration.tapToPayOnly(
-                certificateFingerprint = "dqWyBOJVho+5gumYDGPL1tYfQqiLVz++7gIgJRob/r0=", // Debug keystore SHA256
+                // Optional: provide your own certificate fingerprint
+                // certificateFingerprint = "YOUR_SHA256_FINGERPRINT_HERE",
                 testMode = true,
                 mockMode = true  // Enable mock mode to test NFC prompt with Test Card Simulator
             )
             TapToPayMode.HYBRID -> TapToPayConfiguration.hybrid(
-                certificateFingerprint = "dqWyBOJVho+5gumYDGPL1tYfQqiLVz++7gIgJRob/r0=", // Debug keystore SHA256
+                // Optional: provide your own certificate fingerprint
+                // certificateFingerprint = "YOUR_SHA256_FINGERPRINT_HERE",
                 testMode = true,
                 mockMode = true  // Enable mock mode to test NFC prompt with Test Card Simulator
             )
@@ -208,12 +210,14 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
             // Configure Tap to Pay based on UI state
             params.tapToPayConfig = when (_uiState.value.tapToPayMode) {
                 TapToPayMode.TAP_TO_PAY_ONLY -> TapToPayConfiguration.tapToPayOnly(
-                    certificateFingerprint = "dqWyBOJVho+5gumYDGPL1tYfQqiLVz++7gIgJRob/r0=", // Debug keystore SHA256
+                    // Optional: provide your own certificate fingerprint
+                    // certificateFingerprint = "YOUR_SHA256_FINGERPRINT_HERE",
                     testMode = true,
                     mockMode = true  // Enable mock mode to test NFC prompt with Test Card Simulator
                 )
                 TapToPayMode.HYBRID -> TapToPayConfiguration.hybrid(
-                    certificateFingerprint = "dqWyBOJVho+5gumYDGPL1tYfQqiLVz++7gIgJRob/r0=", // Debug keystore SHA256
+                    // Optional: provide your own certificate fingerprint
+                    // certificateFingerprint = "YOUR_SHA256_FINGERPRINT_HERE",
                     testMode = true,
                     mockMode = true  // Enable mock mode to test NFC prompt with Test Card Simulator
                 )

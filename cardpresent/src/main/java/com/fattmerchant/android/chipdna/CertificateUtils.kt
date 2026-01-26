@@ -2,7 +2,6 @@ package com.fattmerchant.android.chipdna
 
 import android.content.Context
 import android.content.pm.PackageManager
-import android.content.pm.Signatures
 import android.os.Build
 import android.util.Base64
 import java.security.MessageDigest

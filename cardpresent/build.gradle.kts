@@ -1,6 +1,6 @@
 plugins {
     id("com.android.library")
-    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
     `maven-publish`
     signing
 }
@@ -30,8 +30,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
     }
 
     buildFeatures {
@@ -47,22 +49,28 @@ android {
         release {
             isMinifyEnabled = false
             proguardFiles(
-                getDefaultProguardFile("proguard-android.txt"),
+                getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+    }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
         }
     }
 }
 
 dependencies {
     // AndroidX AppCompat (Required by Cloud Commerce SDK themes)
-    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.appcompat:appcompat:1.7.1")
     
     // Jetpack Compose - For TapToPayPrompt UI
-    implementation("androidx.activity:activity-compose:1.9.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
-    implementation(platform("androidx.compose:compose-bom:2024.06.00"))
+    implementation("androidx.activity:activity-compose:1.12.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
+    implementation(platform("androidx.compose:compose-bom:2026.01.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
@@ -77,36 +85,37 @@ dependencies {
     
     // NMI Legacy Dependencies
     api(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-    implementation("net.zetetic:android-database-sqlcipher:4.5.0@aar")
-    implementation("androidx.sqlite:sqlite:2.2.0")
-    implementation("com.jakewharton.timber:timber:4.7.1")
+    //noinspection Aligned16KB
+    implementation("net.zetetic:android-database-sqlcipher:4.5.4@aar")
+    implementation("androidx.sqlite:sqlite:2.6.2")
+    implementation("com.jakewharton.timber:timber:5.0.1")
 
     // Retrofit & OkHttp (Required by Cloud Commerce SDK)
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation("com.squareup.retrofit2:retrofit:3.0.0")
+    implementation("com.squareup.retrofit2:converter-moshi:3.0.0")
+    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
+    implementation("com.squareup.okhttp3:okhttp:5.3.2")
+    implementation("com.squareup.okhttp3:logging-interceptor:5.3.2")
     
     // Moshi & Gson (JSON Parsing)
-    implementation("com.squareup.moshi:moshi-kotlin:1.13.0")
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.2")
+    implementation("com.google.code.gson:gson:2.13.2")
     
     // RxJava (Required by Cloud Commerce SDK)
-    implementation("io.reactivex.rxjava3:rxjava:3.1.8")
+    implementation("io.reactivex.rxjava3:rxjava:3.1.12")
     implementation("io.reactivex.rxjava3:rxandroid:3.0.2")
     
     // Google Play Services - Location & Integrity (Required for Tap to Pay)
-    implementation("com.google.android.gms:play-services-location:21.0.1")
-    implementation("com.google.android.play:integrity:1.3.0")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("com.google.android.play:integrity:1.6.0")
     
     // Kotlin Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
     // Ktor
-    implementation("io.ktor:ktor-client-core:2.3.6")
-    implementation("io.ktor:ktor-client-okhttp:2.3.6")
-    implementation("io.ktor:ktor-client-content-negotiation:2.3.6")
-    implementation("io.ktor:ktor-serialization-gson:2.3.6")
+    implementation("io.ktor:ktor-client-core:3.4.0")
+    implementation("io.ktor:ktor-client-okhttp:3.4.0")
+    implementation("io.ktor:ktor-client-content-negotiation:3.4.0")
+    implementation("io.ktor:ktor-serialization-gson:3.4.0")
 }
