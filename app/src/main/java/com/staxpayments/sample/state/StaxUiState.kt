@@ -23,5 +23,6 @@ data class StaxUiState(
     val transactionAmount: String = "0.00",
     val transactionSubtotal: String = "0.00",
     val transactionTip: String = "0.00",
-    val transactionRequest: TransactionRequest? = null
+    val transactionRequest: TransactionRequest? = null,
+    val tapReaderConnected: Boolean = false
 )

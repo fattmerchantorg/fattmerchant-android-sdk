@@ -13,11 +13,12 @@ import com.creditcall.chipdnamobile.Parameters
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
 import com.fattmerchant.omni.TransactionUpdateListener
-import com.fattmerchant.omni.data.TapToPayConfiguration
 import com.fattmerchant.omni.UsbAccessoryListener
 import com.fattmerchant.omni.UserNotificationListener
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.MobileReader
+import com.fattmerchant.omni.data.ReaderType
+import com.fattmerchant.omni.data.TapToPayReader
 import com.fattmerchant.omni.data.TransactionRequest
 import com.fattmerchant.omni.data.TransactionUpdate
 import com.fattmerchant.omni.data.UserNotification
@@ -150,32 +151,15 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
             apiKey
         )
         
-        // Configure Tap to Pay based on UI state
-        params.tapToPayConfig = when (_uiState.value.tapToPayMode) {
-            TapToPayMode.TAP_TO_PAY_ONLY -> TapToPayConfiguration.tapToPayOnly(
-                // Optional: provide your own certificate fingerprint
-                // certificateFingerprint = "YOUR_SHA256_FINGERPRINT_HERE",
-                testMode = true,
-                mockMode = true  // Enable mock mode to test NFC prompt with Test Card Simulator
-            )
-            TapToPayMode.HYBRID -> TapToPayConfiguration.hybrid(
-                // Optional: provide your own certificate fingerprint
-                // certificateFingerprint = "YOUR_SHA256_FINGERPRINT_HERE",
-                testMode = true,
-                mockMode = true  // Enable mock mode to test NFC prompt with Test Card Simulator
-            )
-            TapToPayMode.DISABLED -> null
-        }
-        
         Omni.initialize(
             params = params,
             completion = {
                 log("Initialized!")
                 Omni.shared()?.signatureProvider = SignatureProvider()
                 
-                // Register Activity delegate for Tap to Pay NFC operations
-                if (params.tapToPayConfig?.enabled == true) {
-                    registerActivityDelegate()
+                // Auto-connect to Tap reader if Tap to Pay mode is enabled
+                if (_uiState.value.tapToPayMode != TapToPayMode.DISABLED) {
+                    connectToTapReader()
                 }
             },
             error = { exception ->
@@ -206,23 +190,6 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
                 MainApplication.application,
                 token
             )
-            
-            // Configure Tap to Pay based on UI state
-            params.tapToPayConfig = when (_uiState.value.tapToPayMode) {
-                TapToPayMode.TAP_TO_PAY_ONLY -> TapToPayConfiguration.tapToPayOnly(
-                    // Optional: provide your own certificate fingerprint
-                    // certificateFingerprint = "YOUR_SHA256_FINGERPRINT_HERE",
-                    testMode = true,
-                    mockMode = true  // Enable mock mode to test NFC prompt with Test Card Simulator
-                )
-                TapToPayMode.HYBRID -> TapToPayConfiguration.hybrid(
-                    // Optional: provide your own certificate fingerprint
-                    // certificateFingerprint = "YOUR_SHA256_FINGERPRINT_HERE",
-                    testMode = true,
-                    mockMode = true  // Enable mock mode to test NFC prompt with Test Card Simulator
-                )
-                TapToPayMode.DISABLED -> null
-            }
 
             Omni.initialize(
                 params = params,
@@ -230,9 +197,9 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
                     log("Initialized with token!")
                     Omni.shared()?.signatureProvider = SignatureProvider()
                     
-                    // Register Activity delegate for Tap to Pay NFC operations
-                    if (params.tapToPayConfig?.enabled == true) {
-                        registerActivityDelegate()
+                    // Auto-connect to Tap reader if Tap to Pay mode is enabled
+                    if (_uiState.value.tapToPayMode != TapToPayMode.DISABLED) {
+                        connectToTapReader()
                     }
                 },
                 error = { exception ->
@@ -242,6 +209,34 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
                 usbListener = listener
             )
         }
+    }
+
+    /**
+     * Connects to the Tap to Pay reader using the new simplified API
+     */
+    fun connectToTapReader() {
+        log("Connecting to Tap reader...")
+        
+        val tapReader = TapToPayReader(
+            testMode = true  // Use false for production
+        )
+        
+        Omni.shared()?.connectReader(
+            mobileReader = tapReader,
+            onConnected = { connectedReader ->
+                reader = connectedReader
+                log("Connected to Tap reader: ${connectedReader.getName()}")
+                _uiState.update { state ->
+                    state.copy(tapReaderConnected = true)
+                }
+            },
+            onFail = { errorMsg ->
+                log("Failed to connect to Tap reader: $errorMsg")
+                _uiState.update { state ->
+                    state.copy(tapReaderConnected = false)
+                }
+            }
+        )
     }
 
     /**
@@ -290,11 +285,28 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
      * TODO: Read value from text input
      */
     fun onPerformSaleWithReader() {
+        // Check if Tap reader should be connected but isn't
+        if (_uiState.value.tapToPayMode != TapToPayMode.DISABLED && !_uiState.value.tapReaderConnected) {
+            log("⚠ Tap reader not connected. Connecting now...")
+            connectToTapReader()
+            // Note: In production, you'd want to wait for connection before proceeding
+            // For this demo, we'll proceed anyway and let the SDK handle the error
+        }
+        
         // The Amount class is used for handling off-by-one errors, rounding, and more
         val amount = Amount(1)
         val request = TransactionRequest(amount)
 
         log("Attempting to charge ${amount.dollarsString()}")
+        
+        // Determine which reader type to use based on current mode
+        val readerType = when (_uiState.value.tapToPayMode) {
+            TapToPayMode.TAP_TO_PAY_ONLY -> ReaderType.TAP_TO_PAY
+            TapToPayMode.HYBRID -> ReaderType.AUTO  // Auto-select based on connected reader
+            TapToPayMode.DISABLED -> ReaderType.EXTERNAL_READER
+        }
+        
+        log("Using reader type: $readerType")
         
         // Show Tap to Pay prompt if in Tap to Pay mode
         // The TapToPayPrompt now handles all SDK callbacks automatically
@@ -334,14 +346,12 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
                 }
 
                 /**
-                 * To run a charge, you call the `Stax.instance().takeMobileReaderTransaction()` function.
-                 * The function takes in a [TransactionRequest], a completion handler, and an error handler.
-                 * The completion handler is called if the transaction gets a response from the mobile
-                 * reader. If there is a problem with either the hardware or the api during the function,
-                 * the error handler is called.
+                 * To run a charge, you call the `Stax.instance().takeMobileReaderTransaction()` function
+                 * with explicit readerType parameter.
                  */
                 takeMobileReaderTransaction(
                     request = request,
+                    readerType = readerType,
                     completion = { transaction ->
                         if (transaction.success == true) {
                             log("Successfully executed transaction")

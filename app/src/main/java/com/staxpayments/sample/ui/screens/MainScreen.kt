@@ -151,6 +151,31 @@ fun MainScreen(
                     }
                 }
                 
+                // Tap Reader Connection Status
+                if (staxUiState.tapToPayMode != TapToPayMode.DISABLED) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (staxUiState.tapReaderConnected) 
+                                MaterialTheme.colorScheme.tertiaryContainer 
+                            else 
+                                MaterialTheme.colorScheme.errorContainer
+                        )
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(padding),
+                            text = if (staxUiState.tapReaderConnected) 
+                                "✓ Tap Reader Connected" 
+                            else 
+                                "⚠ Tap Reader Not Connected",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+                
                 // Transaction Status
                 if (staxUiState.transactionStatus.isNotEmpty()) {
                     Card(
@@ -200,6 +225,15 @@ fun MainScreen(
 
                     WideButton(text = "Initialize") { staxViewModel.onInitialize() }
                     WideButton(text = "Initialize w/Ephemeral Token") { staxViewModel.onEphemeralInitialize() }
+                    
+                    // Tap to Pay Connection Button
+                    if (staxUiState.tapToPayMode != TapToPayMode.DISABLED) {
+                        WideButton(
+                            text = if (staxUiState.tapReaderConnected) "Reconnect to Tap Reader" else "Connect to Tap Reader",
+                            onClick = { staxViewModel.connectToTapReader() }
+                        )
+                    }
+                    
                     WideButton(text = "Search & Connect to Reader") { staxViewModel.onSearchAndConnectToReaders(context) }
                     WideButton(text = "Perform Sale With Reader") { staxViewModel.onPerformSaleWithReader() }
                     WideButton(text = "Perform Auth With Reader") { staxViewModel.onPerformAuthWithReader() }
