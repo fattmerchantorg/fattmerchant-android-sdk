@@ -22,11 +22,6 @@ android {
         consumerProguardFiles("proguard-rules.pro")
     }
 
-    packaging {
-        resources {
-            excludes += "META-INF/*.kotlin_module"
-        }
-    }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -120,4 +115,12 @@ dependencies {
     implementation("io.ktor:ktor-client-okhttp:3.4.0")
     implementation("io.ktor:ktor-client-content-negotiation:3.4.0")
     implementation("io.ktor:ktor-serialization-gson:3.4.0")
+}
+
+// Ensure Kotlin metadata is properly generated for top-level functions
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    compilerOptions {
+        // Explicitly set module name to ensure .kotlin_module generation
+        freeCompilerArgs.add("-module-name=cardpresent")
+    }
 }
