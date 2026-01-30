@@ -29,10 +29,6 @@
 -keep public interface com.fattmerchant.** { *; }
 -keep public enum com.fattmerchant.** { *; }
 
-# Keep all Compose @Composable functions (especially TapToPayPrompt)
--keep @androidx.compose.runtime.Composable public class com.fattmerchant.omni.ui.** { *; }
--keep @androidx.compose.runtime.Composable public fun com.fattmerchant.omni.ui.** 
-
 # Keep Compose function names to prevent "Unresolved reference" errors
 -keepclassmembers class com.fattmerchant.omni.ui.** {
     @androidx.compose.runtime.Composable public <methods>;

@@ -94,11 +94,11 @@ fun TapToPayPrompt(
     amount: String,
     subtotal: String,
     tip: String,
+    modifier: Modifier = Modifier,
     transactionRequest: TransactionRequest? = null,
     onSuccess: (Transaction) -> Unit = {},
     onError: (String) -> Unit = {},
     onCancel: () -> Unit,
-    modifier: Modifier = Modifier
 ) {
     var transactionState by remember { mutableStateOf<TapToPayState>(TapToPayState.Idle) }
     var statusMessage by remember { mutableStateOf<String?>(null) }
@@ -106,11 +106,11 @@ fun TapToPayPrompt(
     // Set up transaction update listener
     DisposableEffect(Unit) {
         val listener = object : TransactionUpdateListener {
-            override fun onTransactionUpdate(update: TransactionUpdate) {
-                statusMessage = update.userFriendlyMessage ?: formatTransactionUpdate(update.value)
+            override fun onTransactionUpdate(transactionUpdate: TransactionUpdate) {
+                statusMessage = transactionUpdate.userFriendlyMessage ?: formatTransactionUpdate(transactionUpdate.value)
                 
                 // Update state based on transaction progress
-                when (update.value) {
+                when (transactionUpdate.value) {
                     "Transaction Started" -> {
                         transactionState = TapToPayState.Processing("Starting transaction...")
                     }
@@ -167,7 +167,7 @@ fun TapToPayPrompt(
                 }
             },
             error = { exception ->
-                val errorMsg = exception.message ?: "Transaction failed"
+                val errorMsg = exception.message
                 transactionState = TapToPayState.Error(errorMsg)
                 statusMessage = errorMsg
                 onError(errorMsg)
@@ -332,7 +332,7 @@ private fun TapToPayPromptContent(
                     }
                     
                     // Payment card icons
-                    PaymentCardIcons(isDarkTheme = isDarkTheme)
+                    PaymentCardIcons()
                     
                     // Amount display with breakdown
                     Column(
@@ -488,7 +488,6 @@ private fun NFCIcon(
 
 @Composable
 private fun PaymentCardIcons(
-    isDarkTheme: Boolean,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -496,22 +495,21 @@ private fun PaymentCardIcons(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         // Visa
-        PaymentCardIcon(iconRes = R.drawable.ic_visa, isDarkTheme = isDarkTheme)
+        PaymentCardIcon(iconRes = R.drawable.ic_visa)
         // Mastercard
-        PaymentCardIcon(iconRes = R.drawable.ic_mastercard, isDarkTheme = isDarkTheme)
+        PaymentCardIcon(iconRes = R.drawable.ic_mastercard)
         // Discover
-        PaymentCardIcon(iconRes = R.drawable.ic_discover, isDarkTheme = isDarkTheme)
+        PaymentCardIcon(iconRes = R.drawable.ic_discover)
         // Amex
-        PaymentCardIcon(iconRes = R.drawable.ic_amex, isDarkTheme = isDarkTheme)
+        PaymentCardIcon(iconRes = R.drawable.ic_amex)
         // JCB
-        PaymentCardIcon(iconRes = R.drawable.ic_jcb, isDarkTheme = isDarkTheme)
+        PaymentCardIcon(iconRes = R.drawable.ic_jcb)
     }
 }
 
 @Composable
 private fun PaymentCardIcon(
     iconRes: Int,
-    isDarkTheme: Boolean,
     modifier: Modifier = Modifier
 ) {
     Box(
