@@ -17,6 +17,9 @@ android {
     defaultConfig {
         minSdk = 30
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        
+        // Export ProGuard rules to consuming apps
+        consumerProguardFiles("proguard-rules.pro")
     }
 
     packaging {
