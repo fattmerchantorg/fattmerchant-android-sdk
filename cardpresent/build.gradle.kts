@@ -60,6 +60,18 @@ android {
     }
 }
 
+// Configure Compose Compiler for better stability and R8/ProGuard compatibility
+composeCompiler {
+    // Enable strong skipping mode for better performance
+    enableStrongSkippingMode = true
+    
+    // Generate Compose compiler reports (helpful for debugging)
+    reportsDestination = layout.buildDirectory.dir("compose_compiler")
+    
+    // Include source information for better debugging
+    includeSourceInformation = true
+}
+
 dependencies {
     // AndroidX AppCompat (Required by Cloud Commerce SDK themes)
     implementation("androidx.appcompat:appcompat:1.7.1")
@@ -67,13 +79,13 @@ dependencies {
     // Jetpack Compose - For TapToPayPrompt UI
     implementation("androidx.activity:activity-compose:1.12.3")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
-    implementation(platform("androidx.compose:compose-bom:2026.01.01"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling")
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.runtime:runtime:1.10.2")
+    api("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
+    api(platform("androidx.compose:compose-bom:2026.01.01"))
+    api("androidx.compose.ui:ui")
+    api("androidx.compose.ui:ui-graphics")
+    api("androidx.compose.ui:ui-tooling-preview")
+    api("androidx.compose.material3:material3")
+    api("androidx.compose.runtime:runtime:1.10.2")
 
     // NMI Cloud Commerce SDK - Tap to Pay Support
     // Using MTF (test) SDK for development - both SDKs contain duplicate classes and cannot be included together
