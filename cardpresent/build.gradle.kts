@@ -56,20 +56,13 @@ android {
     publishing {
         singleVariant("release") {
             withSourcesJar()
+            withJavadocJar()
         }
     }
-}
 
-// Configure Compose Compiler for better stability and R8/ProGuard compatibility
-composeCompiler {
-    // Enable strong skipping mode for better performance
-    enableStrongSkippingMode = true
-    
-    // Generate Compose compiler reports (helpful for debugging)
-    reportsDestination = layout.buildDirectory.dir("compose_compiler")
-    
-    // Include source information for better debugging
-    includeSourceInformation = true
+    composeOptions {
+        kotlinCompilerExtensionVersion = "2.3.0"
+    }
 }
 
 dependencies {
