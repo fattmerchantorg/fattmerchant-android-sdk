@@ -110,8 +110,18 @@ internal class ChipDnaDriver :
     /** Tracks whether the TapToPayReader is currently connected */
     private var isTapToPayReaderConnected: Boolean = false
     
-    /** Callback for when terminal configuration completes */
-    private var onTerminalReadyCallback: (() -> Unit)? = null
+    /** Tracks Tap to Pay connection status */
+    private var tapToPayConnectionStatus: TapToPayConnectionStatus = TapToPayConnectionStatus.DISCONNECTED
+    
+    /** Enum for detailed Tap to Pay connection status */
+    private enum class TapToPayConnectionStatus {
+        DISCONNECTED,
+        CONNECTING,         // Initial connection attempt
+        CHECKING_CONFIG,    // CheckingTapToMobileConfig event
+        UPDATING_CONFIG,    // UpdatingTapToMobileConfig event
+        CONNECTED,
+        ERROR
+    }
 
     override var familiarSerialNumbers: MutableList<String> = mutableListOf()
     override val source: String = "NMI"
@@ -119,7 +129,9 @@ internal class ChipDnaDriver :
 
     private val logger = Logger.getLogger("ChipDNA")
     fun log(msg: String?) {
-        logger.info("[${Thread.currentThread().name}] $msg")
+        // Add context prefix for Tap to Pay vs external reader
+        val prefix = if (isTapToPayReaderConnected || tapToPayConfig?.enabled == true) "[TTM]" else "[ChipDNA]"
+        logger.info("$prefix [${Thread.currentThread().name}] $msg")
     }
 
     /**
@@ -279,10 +291,16 @@ internal class ChipDnaDriver :
 
         // Tap to Pay needs connectAndConfigure to activate NFC reader
         if (reader is TapToPayReader) {
-            log("Tap to Pay reader selected - credentials already set during initialize()")
+            log("🎯 Connecting Tap to Pay reader...")
+            log("Test mode: ${reader.testMode}")
+            
             return suspendCancellableCoroutine { continuation ->
-                // Terminal is already enabled, proceed immediately
-                log("Connecting to Tap to Pay reader")
+                // No polling needed - rely on connectAndConfigure and configuration events
+                log("Initiating connectAndConfigure (no polling - event-driven)...")
+                tapToPayConnectionStatus = TapToPayConnectionStatus.CONNECTING
+                mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(
+                    MobileReaderConnectionStatus.CONNECTING
+                )
                 doConnectAndConfigure(reader, continuation)
             }
         }
@@ -332,12 +350,12 @@ internal class ChipDnaDriver :
         currentStatus.apply {
             add(ParameterKeys.TapToMobilePOI, tapToMobilePOI)
             add(ParameterKeys.PaymentDevicePOI, paymentDevicePOI)
-            log("Added TapToMobilePOI: $tapToMobilePOI, PaymentDevicePOI: $paymentDevicePOI")
+            log("Configuration: TapToMobilePOI=$tapToMobilePOI, PaymentDevicePOI=$paymentDevicePOI")
             
             if (paymentDevicePOI == ParameterValues.TRUE) {
-                log("Hybrid mode: Both Tap to Pay and external readers enabled via connectAndConfigure")
+                log("📱 Hybrid mode: Both Tap to Pay and external readers enabled")
             } else {
-                log("Tap to Pay only mode: External readers disabled via connectAndConfigure")
+                log("📱 Tap to Pay only mode: External readers disabled")
             }
         }
         
@@ -345,21 +363,33 @@ internal class ChipDnaDriver :
             clearAllConnectAndConfigureFinishedListeners()
             
             addConnectAndConfigureFinishedListener { params ->
-                log("connectAndConfigure finished callback received")
-                log("Result: ${params[ParameterKeys.Result]}")
-                params[ParameterKeys.ErrorDescription]?.let { log("ErrorDescription: $it") }
+                val result = params[ParameterKeys.Result]
+                val errorCode = params["ErrorCode"]
+                val errorDescription = params[ParameterKeys.ErrorDescription]
                 
-                if (params[ParameterKeys.Result] == ParameterValues.TRUE) {
-                    log("Tap to Pay configuration completed successfully")
+                log("connectAndConfigure finished")
+                log("Result: $result")
+                
+                if (result == ParameterValues.TRUE) {
+                    log("✅ Configuration successful")
+                    
+                    // Log POI identifiers for troubleshooting
+                    logDeviceIdentifiers()
+                    
                     isTapToPayReaderConnected = true
+                    tapToPayConnectionStatus = TapToPayConnectionStatus.CONNECTED
                     mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(
                         MobileReaderConnectionStatus.CONNECTED
                     )
                     continuation.resumeWith(Result.success(reader))
                 } else {
-                    val error = params[ParameterKeys.ErrorDescription] ?: "Unknown error"
-                    log("Tap to Pay configuration failed: $error")
-                    continuation.resumeWith(Result.failure(ConnectReaderException(error)))
+                    val userMessage = mapChipDnaErrorToUserMessage(errorCode, errorDescription)
+                    log("❌ Configuration failed: $userMessage")
+                    log("Error code: $errorCode")
+                    log("Error description: $errorDescription")
+                    
+                    tapToPayConnectionStatus = TapToPayConnectionStatus.ERROR
+                    continuation.resumeWith(Result.failure(ConnectReaderException(userMessage)))
                 }
             }
             
@@ -752,37 +782,43 @@ internal class ChipDnaDriver :
 
     override fun onConfigurationUpdateListener(parameters: Parameters?) {
         parameters?.let { params ->
-            // Log all configuration parameters for debugging
             val configUpdate = params[ParameterKeys.ConfigurationUpdate]
-            val percentComplete = params["PercentageComplete"]
-            val currentStage = params["CurrentStage"]
-            val status = params["Status"]
-            val description = params["Description"]
             
-            log("Configuration Update: $configUpdate")
-            percentComplete?.let { log("Progress: $it%") }
-            currentStage?.let { log("Stage: $it") }
-            status?.let { log("Status: $it") }
-            description?.let { log("Description: $it") }
-            
-            // Check if terminal is now enabled after configuration
-            if (configUpdate == "ConfigurationUpdateComplete") {
-                val terminalStatus = ChipDnaMobile.getInstance().getStatus(null)
-                val terminalStatusXml = terminalStatus[ParameterKeys.TerminalStatus]
-                terminalStatusXml?.let {
-                    val terminal = ChipDnaMobileSerializer.deserializeTerminalStatus(it)
-                    if (terminal.isEnabled) {
-                        log("Terminal is now enabled after configuration")
-                        onTerminalReadyCallback?.invoke()
-                        onTerminalReadyCallback = null
+            // Handle Tap to Pay specific configuration events
+            when (configUpdate) {
+                "CheckingTapToMobileConfig" -> {
+                    log("🔍 Checking Tap to Pay configuration...")
+                    tapToPayConnectionStatus = TapToPayConnectionStatus.CHECKING_CONFIG
+                    mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(
+                        MobileReaderConnectionStatus.CONNECTING
+                    )
+                }
+                "UpdatingTapToMobileConfig" -> {
+                    log("⚙️ Updating Tap to Pay configuration...")
+                    tapToPayConnectionStatus = TapToPayConnectionStatus.UPDATING_CONFIG
+                    val percentComplete = params["PercentageComplete"]
+                    percentComplete?.let { log("Progress: $it%") }
+                }
+                "ConfigurationUpdateComplete" -> {
+                    log("✅ Configuration update complete")
+                    if (isTapToPayReaderConnected) {
+                        tapToPayConnectionStatus = TapToPayConnectionStatus.CONNECTED
                     }
                 }
+                else -> {
+                    log("Configuration Update: $configUpdate")
+                }
             }
+            
+            // Log additional details
+            params["PercentageComplete"]?.let { log("Progress: $it%") }
+            params["CurrentStage"]?.let { log("Stage: $it") }
+            params["Status"]?.let { log("Status: $it") }
+            params["Description"]?.let { log("Description: $it") }
             
             // Update connection status based on configuration update
             configUpdate?.let {
                 MobileReaderConnectionStatus.from(it)?.let { status ->
-                    log("Configuration status changed to: $status")
                     mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(status)
                 }
             }
@@ -796,6 +832,70 @@ internal class ChipDnaDriver :
                     mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(it)
                 }
             }
+        }
+    }
+    
+    /**
+     * Logs device identifiers for troubleshooting.
+     * Per NMI documentation, these identifiers should be accessible to users.
+     */
+    private fun logDeviceIdentifiers() {
+        val status = ChipDnaMobile.getInstance().getStatus(null)
+        
+        status[ParameterKeys.POSGUID]?.let {
+            log("📱 POS GUID: $it")
+        }
+        
+        status[ParameterKeys.TapToMobilePOIIdentifier]?.let {
+            log("📱 Tap to Pay POI Identifier: $it")
+            log("ℹ️ Save this identifier for troubleshooting")
+        }
+    }
+    
+    /**
+     * Maps ChipDNA error codes to user-friendly messages.
+     * Based on NMI Tap to Pay documentation error codes.
+     */
+    private fun mapChipDnaErrorToUserMessage(errorCode: String?, errorDescription: String?): String {
+        return when (errorCode) {
+            // Tap to Pay Specific Errors - Connect And Configure
+            "TapToMobileNotSupported" -> "This device does not support Tap to Pay"
+            "NoPoiSelected" -> "No payment method was selected for configuration"
+            "LocationPermissionsNotGranted" -> "Location permissions are required for Tap to Pay"
+            "ApplicationUpdateRequired" -> "SDK update required. Please update the app"
+            "CountryCodeInvalid" -> "Invalid country code for Tap to Pay"
+            "AttestationFailed" -> "Security attestation failed. Cannot use Tap to Pay"
+            "CurrentCountryNotAllowed" -> "Tap to Pay is not available in your current location"
+            "NoLocationFound" -> "Unable to determine location. Check location permissions"
+            "DeveloperOptionsEnabled" -> "Developer options must be disabled for Tap to Pay"
+            "USBCableConnectedOrBluetoothEnabled" -> "Disconnect USB and disable Bluetooth for Tap to Pay"
+            "CustomROMDetected" -> "Custom ROM detected. Tap to Pay requires stock ROM"
+            "EmulatorFound" -> "Tap to Pay cannot run on an emulator"
+            "ShowTouchesEnabled" -> "Disable 'Show touches' in Developer options"
+            
+            // Transaction Errors - Start Transaction
+            "TransactionPOINotConnected" -> "Payment method not connected"
+            "TransactionPOIInvalid" -> "Invalid payment method selected"
+            "AutoConfirmRequired" -> "Transaction must be auto-confirmed for Tap to Pay"
+            "TipAmountInvalid" -> "Invalid tip amount format"
+            "TipAmountNotAllowed" -> "Tipping not supported for this payment method"
+            "MerchantTippingNotSupported" -> "Merchant tipping not supported"
+            "RequestActivityListenerRequired" -> "Activity listener required for Tap to Pay"
+            "InvalidActivity" -> "Activity is invalid, finishing, or destroyed"
+            
+            // Transaction Finished Errors
+            "MerchantTerminatedTransaction" -> "Transaction was cancelled"
+            "TapToMobileSessionClosed" -> "Tap to Pay session is no longer available"
+            "NfcDisabled" -> "NFC must be enabled for Tap to Pay"
+            "NoPatternOrPinSet" -> "Device lock screen (PIN/pattern) must be set"
+            "CameraUsed" -> "Camera is in use by another app"
+            "MicrophoneUsed" -> "Microphone is in use by another app"
+            
+            // Connection Errors
+            "ConnectionClosed" -> "Connection closed"
+            "BluetoothNotEnabled" -> "Bluetooth not enabled"
+            
+            else -> errorDescription ?: "Unknown error: $errorCode"
         }
     }
 

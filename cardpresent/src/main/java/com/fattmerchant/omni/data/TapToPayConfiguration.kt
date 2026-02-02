@@ -39,18 +39,12 @@ package com.fattmerchant.omni.data
  * @property certificateFingerprint Optional SHA-256 certificate fingerprint. If null, SDK will automatically extract it.
  * @property testMode Whether to use test mode (sandbox) or production.
  *                    Test mode connects to sandbox environment and works with the Test Card Simulator app.
- * @property mockMode When true, bypasses connection checks to allow UI testing during development.
- *                    Use this to test the NFC prompt and UI flow during development.
- *                    Does NOT bypass actual transaction processing.
- *                    
- *                    **IMPORTANT: Only use mockMode for UI/UX testing during development.**
  */
 data class TapToPayConfiguration(
     val enabled: Boolean = false,
     val allowExternalReaders: Boolean = true,
     val certificateFingerprint: String? = null,
-    val testMode: Boolean = false,
-    val mockMode: Boolean = false
+    val testMode: Boolean = false
 ) {
     /**
      * Returns the ChipDNA parameter value for TapToMobilePOI based on configuration.
@@ -72,19 +66,16 @@ data class TapToPayConfiguration(
          * 
          * @param certificateFingerprint Optional SHA-256 certificate fingerprint. If null, SDK will automatically extract it.
          * @param testMode Whether to use test mode (sandbox) or production.
-         * @param mockMode When true, bypasses connection checks for UI testing.
          */
         fun tapToPayOnly(
             certificateFingerprint: String? = null,
-            testMode: Boolean = false,
-            mockMode: Boolean = false
+            testMode: Boolean = false
         ): TapToPayConfiguration {
             return TapToPayConfiguration(
                 enabled = true,
                 allowExternalReaders = false,
                 certificateFingerprint = certificateFingerprint,
-                testMode = testMode,
-                mockMode = mockMode
+                testMode = testMode
             )
         }
 
@@ -93,19 +84,16 @@ data class TapToPayConfiguration(
          * 
          * @param certificateFingerprint Optional SHA-256 certificate fingerprint. If null, SDK will automatically extract it.
          * @param testMode Whether to use test mode (sandbox) or production.
-         * @param mockMode When true, bypasses connection checks for UI testing.
          */
         fun hybrid(
             certificateFingerprint: String? = null,
-            testMode: Boolean = false,
-            mockMode: Boolean = false
+            testMode: Boolean = false
         ): TapToPayConfiguration {
             return TapToPayConfiguration(
                 enabled = true,
                 allowExternalReaders = true,
                 certificateFingerprint = certificateFingerprint,
-                testMode = testMode,
-                mockMode = mockMode
+                testMode = testMode
             )
         }
 

@@ -171,8 +171,7 @@ class MyApplication : Application() {
         
         // REQUIRED: Configure Tap to Pay
         val tapToPayConfig = TapToPayConfiguration.hybrid(
-            testMode = true,  // false for production
-            mockMode = false  // true only for UI testing during development
+            testMode = true  // false for production
         )
         
         // Initialize Stax SDK

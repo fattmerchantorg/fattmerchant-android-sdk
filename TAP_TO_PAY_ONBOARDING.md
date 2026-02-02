@@ -164,26 +164,6 @@ Handled by `TransactionUpdateListener`:
 - [ ] Follow EMVCo branding guidelines
 - [ ] Follow Google Play Policies for payment apps
 
-## Mock Mode for Testing
-
-While waiting for NMI onboarding approval, you can enable **Mock Mode** to test the UI/UX flow:
-
-```kotlin
-TapToPayConfiguration.tapToPayOnly(
-    testMode = true,
-    mockMode = true,  // Bypasses terminal.isEnabled check
-    certificateFingerprint = "dqWyBOJVho+5gumYDGPL1tYfQqiLVz++7gIgJRob/r0="
-)
-```
-
-**Mock Mode allows:**
-- ✅ Testing NFC prompt screen
-- ✅ Testing with NMI Test Card Simulator app
-- ✅ UI/UX flow validation
-- ❌ Real transaction processing (will fail without onboarding)
-
-**Important:** Disable `mockMode` before production deployment!
-
 ## Current Status
 
 ### Completed ✅
