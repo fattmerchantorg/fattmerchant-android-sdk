@@ -290,7 +290,7 @@ internal class ChipDnaDriver :
                 } ?: log("WARNING: No ApiKey found in initArgs")
 
                 // Application Identifier from initialization (e.g., "fattpayandroid")
-                (initArgs["applicationIdentifier"] as? String)?.let { appId ->
+                (initArgs["appId"] as? String)?.let { appId ->
                     add(ParameterKeys.ApplicationIdentifier, appId)
                     log("Setting ApplicationIdentifier: $appId")
                 } ?: log("WARNING: No ApplicationIdentifier found in initArgs")
