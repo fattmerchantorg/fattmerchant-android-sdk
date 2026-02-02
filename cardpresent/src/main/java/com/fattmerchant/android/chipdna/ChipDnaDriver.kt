@@ -348,6 +348,7 @@ internal class ChipDnaDriver :
         val paymentDevicePOI = tapToPayConfig?.getPaymentDevicePOIValue() ?: ParameterValues.FALSE
         
         currentStatus.apply {
+            add(ParameterKeys.PinPadName, "Android")
             add(ParameterKeys.TapToMobilePOI, tapToMobilePOI)
             add(ParameterKeys.PaymentDevicePOI, paymentDevicePOI)
             log("Configuration: TapToMobilePOI=$tapToMobilePOI, PaymentDevicePOI=$paymentDevicePOI")
