@@ -279,49 +279,10 @@ internal class ChipDnaDriver :
 
         // Tap to Pay needs connectAndConfigure to activate NFC reader
         if (reader is TapToPayReader) {
-            log("Tap to Pay reader selected - setting properties and calling connectAndConfigure")
+            log("Tap to Pay reader selected - credentials already set during initialize()")
+            // NOTE: setProperties was already called successfully during initialize()
+            // Calling it again causes "ApiKey" error from ChipDNA SDK
 
-            // Set Tap to Pay properties BEFORE connectAndConfigure
-            val tapProperties = Parameters().apply {
-                // API Key from initialization
-                (initArgs["apiKey"] as? String)?.let { apiKey ->
-                    add(ParameterKeys.ApiKey, apiKey)
-                    log("Setting ApiKey for Tap to Pay")
-                } ?: log("WARNING: No ApiKey found in initArgs")
-
-                // Application Identifier from initialization (e.g., "fattpayandroid")
-                (initArgs["appId"] as? String)?.let { appId ->
-                    add(ParameterKeys.ApplicationIdentifier, appId)
-                    log("Setting ApplicationIdentifier: $appId")
-                } ?: log("WARNING: No ApplicationIdentifier found in initArgs")
-
-                // Environment (test vs production)
-                val environment = if (tapToPayConfig?.testMode == true) {
-                    ParameterValues.TestEnvironment
-                } else {
-                    ParameterValues.LiveEnvironment
-                }
-                add(ParameterKeys.Environment, environment)
-                log("Setting Environment: $environment (testMode=${tapToPayConfig?.testMode})")
-
-                // Certificate Fingerprint (Base64 format)
-                tapToPayConfig?.certificateFingerprint?.let { cert ->
-                    add(ParameterKeys.CertificateFingerprint, cert)
-                    log("Setting CertificateFingerprint: ${cert.take(20)}...")
-                } ?: log("WARNING: No certificate fingerprint configured")
-            }
-
-            val setPropertiesResult = ChipDnaMobile.getInstance().setProperties(tapProperties)
-            log("setProperties result: ${setPropertiesResult[ParameterKeys.Result]}")
-            setPropertiesResult[ParameterKeys.Errors]?.let { log("setProperties Errors: $it") }
-            setPropertiesResult["ErrorCode"]?.let { log("setProperties ErrorCode: $it") }
-            setPropertiesResult[ParameterKeys.ErrorDescription]?.let { log("setProperties error: $it") }
-            
-
-            if (setPropertiesResult[ParameterKeys.Result] != ParameterValues.TRUE) {
-                log("ERROR: setProperties returned false - check logs for details")
-                // Continue anyway to see the actual error from connectAndConfigure
-            }
 
             return suspendCancellableCoroutine { continuation ->
                 // If mock mode is enabled, bypass terminal status check and simulate immediate success
