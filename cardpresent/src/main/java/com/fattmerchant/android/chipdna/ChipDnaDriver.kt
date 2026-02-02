@@ -280,77 +280,9 @@ internal class ChipDnaDriver :
         // Tap to Pay needs connectAndConfigure to activate NFC reader
         if (reader is TapToPayReader) {
             log("Tap to Pay reader selected - credentials already set during initialize()")
-            // NOTE: setProperties was already called successfully during initialize()
-            // Calling it again causes "ApiKey" error from ChipDNA SDK
-
-
             return suspendCancellableCoroutine { continuation ->
-                // If mock mode is enabled, bypass terminal status check and simulate immediate success
-                if (tapToPayConfig?.mockMode == true) {
-                    log("MOCK MODE: Bypassing terminal.isEnabled check and simulating connection")
-                    log("MOCK MODE: This allows testing the NFC prompt with Test Card Simulator")
-                    log("MOCK MODE: Real transactions will still fail without NMI onboarding")
-                    doConnectAndConfigure(reader, continuation)
-                    return@suspendCancellableCoroutine
-                }
-                
-                // Check if terminal is already enabled
-                val status = ChipDnaMobile.getInstance().getStatus(null)
-                val terminalStatusXml = status[ParameterKeys.TerminalStatus]
-                val terminalStatus = terminalStatusXml?.let { 
-                    ChipDnaMobileSerializer.deserializeTerminalStatus(it) 
-                }
-                
-                log("Terminal status before connect: isEnabled=${terminalStatus?.isEnabled}")
-                
-                // If terminal is not enabled, wait for configuration to complete
-                if (terminalStatus?.isEnabled != true) {
-                    log("Terminal not enabled yet - waiting for configuration to complete...")
-                    
-                    // Set callback for when configuration completes
-                    onTerminalReadyCallback = {
-                        log("Terminal is ready via callback - now calling connectAndConfigure")
-                        doConnectAndConfigure(reader, continuation)
-                    }
-                    
-                    // Also poll terminal status every 2 seconds in case we miss the config event
-                    val startTime = System.currentTimeMillis()
-                    val pollJob = async {
-                        while (System.currentTimeMillis() - startTime < 30000) { // 30 second timeout
-                            delay(2000) // Poll every 2 seconds
-                            val currentStatus = ChipDnaMobile.getInstance().getStatus(null)
-                            val currentTerminalXml = currentStatus[ParameterKeys.TerminalStatus]
-                            val currentTerminal = currentTerminalXml?.let {
-                                ChipDnaMobileSerializer.deserializeTerminalStatus(it)
-                            }
-                            
-                            if (currentTerminal?.isEnabled == true) {
-                                log("Terminal is ready via polling - now calling connectAndConfigure")
-                                onTerminalReadyCallback = null // Clear callback
-                                doConnectAndConfigure(reader, continuation)
-                                return@async
-                            } else {
-                                log("Polling: Terminal still not enabled (isEnabled=${currentTerminal?.isEnabled})")
-                            }
-                        }
-                        // Timeout reached
-                        log("Timeout waiting for terminal to become enabled")
-                        onTerminalReadyCallback = null
-                        continuation.resumeWith(Result.failure(
-                            ConnectReaderException("Timeout waiting for terminal configuration to complete")
-                        ))
-                    }
-                    
-                    continuation.invokeOnCancellation {
-                        pollJob.cancel()
-                        onTerminalReadyCallback = null
-                    }
-                    
-                    return@suspendCancellableCoroutine
-                }
-                
                 // Terminal is already enabled, proceed immediately
-                log("Terminal already enabled - calling connectAndConfigure immediately")
+                log("Connecting to Tap to Pay reader")
                 doConnectAndConfigure(reader, continuation)
             }
         }
