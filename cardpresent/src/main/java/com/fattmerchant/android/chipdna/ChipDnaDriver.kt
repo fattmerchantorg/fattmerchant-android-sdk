@@ -313,6 +313,8 @@ internal class ChipDnaDriver :
 
             val setPropertiesResult = ChipDnaMobile.getInstance().setProperties(tapProperties)
             log("setProperties result: ${setPropertiesResult[ParameterKeys.Result]}")
+            setPropertiesResult[ParameterKeys.Errors]?.let { log("setProperties Errors: $it") }
+            setPropertiesResult["ErrorCode"]?.let { log("setProperties ErrorCode: $it") }
             setPropertiesResult[ParameterKeys.ErrorDescription]?.let { log("setProperties error: $it") }
             
 
