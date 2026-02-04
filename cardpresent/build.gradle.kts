@@ -62,6 +62,7 @@ android {
 dependencies {
     // AndroidX AppCompat (Required by Cloud Commerce SDK themes)
     implementation("androidx.appcompat:appcompat:1.7.1")
+    implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     
     // Jetpack Compose - For TapToPayPrompt UI
     implementation("androidx.activity:activity-compose:1.12.3")
@@ -75,10 +76,9 @@ dependencies {
     api("androidx.compose.runtime:runtime:1.10.2")
 
     // NMI Cloud Commerce SDK - Tap to Pay Support
-    // Using MTF (test) SDK for development - both SDKs contain duplicate classes and cannot be included together
-    // Using compileOnly to avoid AAR bundling issues - app module must include this dependency
-    compileOnly(files("libs/cloud-commerce-sdk-mtf-5.3.0.aar"))
-    // compileOnly(files("libs/cloud-commerce-sdk-5.3.0.aar")) // Use production SDK for release builds
+    // Using cloudcommerce module which properly exposes the AAR per NMI documentation
+    // Using api() instead of implementation() so it's transitively available to consumers
+    api(project(":cloudcommerce"))
     
     // NMI Legacy Dependencies
     api(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
@@ -91,7 +91,9 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
     implementation("com.squareup.retrofit2:converter-moshi:3.0.0")
     implementation("com.squareup.retrofit2:converter-gson:3.0.0")
+    implementation("com.squareup.retrofit2:converter-scalars:3.0.0")
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
+    implementation("com.squareup.okhttp3:okhttp-urlconnection:5.0.0-alpha.2")
     implementation("com.squareup.okhttp3:logging-interceptor:5.3.2")
     
     // Moshi & Gson (JSON Parsing)
@@ -101,10 +103,21 @@ dependencies {
     // RxJava (Required by Cloud Commerce SDK)
     implementation("io.reactivex.rxjava3:rxjava:3.1.12")
     implementation("io.reactivex.rxjava3:rxandroid:3.0.2")
+    implementation("com.squareup.retrofit2:adapter-rxjava3:3.0.0")
     
-    // Google Play Services - Location & Integrity (Required for Tap to Pay)
+    // Google Play Services - Location, Integrity & SafetyNet (Required for Tap to Pay)
     implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("com.google.android.play:integrity:1.6.0")
+    implementation("com.google.android.gms:play-services-safetynet:18.1.0")
+    
+    // Security (Required by Cloud Commerce SDK)
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    
+    // Apache Commons (Required by Cloud Commerce SDK)
+    implementation("commons-codec:commons-codec:1.11")
+    
+    // SLF4J (Required by Cloud Commerce SDK)
+    implementation("org.slf4j:slf4j-api:1.7.30")
     
     // Kotlin Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")

@@ -20,3 +20,5 @@ rootProject.name = "Stax Android SDK"
 include(":tokenization")
 include(":cardpresent")
 include(":app")
+include(":cloudcommerce")
+project(":cloudcommerce").projectDir = file("cloudcommerce")
