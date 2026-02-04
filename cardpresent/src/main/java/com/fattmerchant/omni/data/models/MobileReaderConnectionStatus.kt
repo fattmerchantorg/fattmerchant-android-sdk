@@ -11,6 +11,12 @@ enum class MobileReaderConnectionStatus(val status: String) {
     /** The reader is disconnected */
     DISCONNECTED("disconnected"),
 
+    /** Tap to Pay: Checking current Tap to Mobile configuration */
+    CHECKING_TAP_TO_MOBILE_CONFIG("CheckingTapToMobileConfig"),
+
+    /** Tap to Pay: Updating Tap to Mobile configuration */
+    UPDATING_TAP_TO_MOBILE_CONFIG("UpdatingTapToMobileConfig"),
+
     /** The reader is performing an update
      * - Note: This includes TMS and Config updates
      */
