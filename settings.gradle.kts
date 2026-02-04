@@ -19,4 +19,5 @@ dependencyResolutionManagement {
 rootProject.name = "Stax Android SDK"
 include(":tokenization")
 include(":cardpresent")
+include(":cloudcommerce")
 include(":app")

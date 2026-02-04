@@ -9,7 +9,7 @@ plugins {
 val staxApiKey: String = gradleLocalProperties(rootDir, providers).getProperty("staxApiKey") ?: "NoApiKey"
 
 android {
-    namespace = "com.staxpayments"
+    namespace = "com.staxpayments.sample"
     compileSdk = 36
 
     defaultConfig {
@@ -63,11 +63,7 @@ android {
 }
 
 dependencies {
-    // NMI Cloud Commerce SDK - Required for Tap to Pay (matches cardpresent module)
-    // Using MTF (test) version for development
-    implementation(files("../cardpresent/libs/cloud-commerce-sdk-mtf-5.3.0.aar"))
-    
-    // Stax SDK
+    // Stax SDK (includes Cloud Commerce SDK transitively)
     implementation(project(":cardpresent"))
 
     // Dependencies

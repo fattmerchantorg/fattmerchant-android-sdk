@@ -1,7 +1,11 @@
 package com.staxpayments.sample.viewmodel
 
+import android.Manifest
 import android.app.AlertDialog
 import android.content.Context
+import android.content.pm.PackageManager
+import android.util.Log
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -12,19 +16,21 @@ import com.creditcall.chipdnamobile.ParameterValues
 import com.creditcall.chipdnamobile.Parameters
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
+import com.fattmerchant.omni.Environment
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.UsbAccessoryListener
 import com.fattmerchant.omni.UserNotificationListener
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.ReaderType
+import com.fattmerchant.omni.data.TapToPayConfiguration
 import com.fattmerchant.omni.data.TapToPayReader
 import com.fattmerchant.omni.data.TransactionRequest
 import com.fattmerchant.omni.data.TransactionUpdate
 import com.fattmerchant.omni.data.UserNotification
 import com.fattmerchant.omni.data.models.CreditCard
 import com.fattmerchant.omni.data.models.Transaction
-import com.staxpayments.BuildConfig
+import com.staxpayments.sample.BuildConfig
 import com.staxpayments.sample.MainApplication
 import com.staxpayments.sample.SignatureProvider
 import com.staxpayments.sample.state.StaxUiState
@@ -148,7 +154,14 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
         val params = InitParams(
             MainApplication.context,
             MainApplication.application,
-            apiKey
+            apiKey,
+            environment = Environment.LIVE,
+            appId = "fattmerchantsample",
+            tapToPayConfig = TapToPayConfiguration(
+                enabled = true,
+                allowExternalReaders = true,
+                testMode = true  // Use TEST environment with MTF SDK
+            )
         )
         
         Omni.initialize(
@@ -188,7 +201,12 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
             val params = InitParams(
                 MainApplication.context,
                 MainApplication.application,
-                token
+                token,
+                tapToPayConfig = TapToPayConfiguration(
+                    enabled = true,
+                    allowExternalReaders = true,
+                    testMode = true  // Use TEST environment with MTF SDK
+                )
             )
 
             Omni.initialize(
@@ -216,6 +234,56 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
      */
     fun connectToTapReader() {
         log("Connecting to Tap reader...")
+        
+        // Check location permissions - REQUIRED by NMI for Tap to Pay
+        val context = MainApplication.context
+        val fineLocationGranted = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        
+        val coarseLocationGranted = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        
+        // Log to logcat for debugging
+        Log.d("StaxViewModel", "📍 Location Permissions Check:")
+        Log.d("StaxViewModel", "   ACCESS_FINE_LOCATION: ${if (fineLocationGranted) "✅ GRANTED" else "❌ DENIED"}")
+        Log.d("StaxViewModel", "   ACCESS_COARSE_LOCATION: ${if (coarseLocationGranted) "✅ GRANTED" else "❌ DENIED"}")
+        
+        log("📍 Location Permissions Check:")
+        log("   ACCESS_FINE_LOCATION: ${if (fineLocationGranted) "✅ GRANTED" else "❌ DENIED"}")
+        log("   ACCESS_COARSE_LOCATION: ${if (coarseLocationGranted) "✅ GRANTED" else "❌ DENIED"}")
+        
+        if (!fineLocationGranted || !coarseLocationGranted) {
+            Log.e("StaxViewModel", "⚠️ WARNING: Location permissions not granted - NMI SDK will fail attestation")
+            Log.e("StaxViewModel", "⚠️ Please grant location permissions and try again")
+            log("⚠️ WARNING: Location permissions not granted - NMI SDK will fail attestation")
+            log("⚠️ Please grant location permissions and try again")
+            _uiState.update { state ->
+                state.copy(tapReaderConnected = false)
+            }
+            return
+        }
+        
+        Log.d("StaxViewModel", "✅ Location permissions granted, proceeding with connection")
+        
+        // CRITICAL: Register RequestActivityListener BEFORE connecting to Tap to Pay
+        // This is required for NFC attestation and operations
+        currentActivity?.let { activity ->
+            Log.d("StaxViewModel", "🔑 Registering RequestActivityListener for Tap to Pay attestation")
+            log("🔑 Registering RequestActivityListener for NFC operations...")
+            Omni.shared()?.registerTapToPayActivityProvider { activity }
+        } ?: run {
+            Log.e("StaxViewModel", "⚠️ WARNING: No Activity set - Tap to Pay requires Activity for NFC operations")
+            log("⚠️ WARNING: No Activity set - Tap to Pay requires Activity for NFC operations")
+            log("⚠️ Call setActivity() before connecting to Tap reader")
+            _uiState.update { state ->
+                state.copy(tapReaderConnected = false)
+            }
+            return
+        }
         
         val tapReader = TapToPayReader(
             testMode = true  // Use false for production

@@ -4,18 +4,19 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.util.Log
-import com.creditcall.chipdnamobile.ChipDnaMobile
-import com.creditcall.chipdnamobile.ParameterKeys
-import com.creditcall.chipdnamobile.Parameters
+import android.widget.Toast
+import com.creditcall.chipdnamobile.ChipDnaApplication
 
 /**
- * Main application class.
+ * Main application class extending ChipDnaApplication as required by NMI.
  * 
- * Note: According to NMI documentation, we should extend ChipDnaApplication.
- * However, that causes crashes due to Cloud Commerce SDK initialization issues.
- * As a workaround, we're manually initializing ChipDnaMobile here.
+ * Per NMI documentation: "To initialize the Payment Device SDK to allow Tap To Pay,
+ * it is required that the integrating application must contain an application class
+ * that extends ChipDnaApplication. This is due to MPoC requirements for the Tap To Pay solution."
+ * 
+ * Reference: https://docs.nmi.com/docs/preparing-for-development-android
  */
-class MainApplication : Application() {
+class MainApplication : ChipDnaApplication() {
 
     /**
      * Generally, we shouldn't store context like this. However, because it's a small example,
@@ -36,19 +37,27 @@ class MainApplication : Application() {
         context = applicationContext
         application = this
         
-        // Manually initialize ChipDnaMobile SDK
-        // This is normally handled by ChipDnaApplication, but we're doing it manually
-        // to avoid the CposApplication.onCreate() crash
-        try {
-            val params = Parameters().apply {
-                add(ParameterKeys.Password, "password")
-            }
-            ChipDnaMobile.initialize(applicationContext, params)
-            Log.d(TAG, "ChipDnaMobile initialized successfully")
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to initialize ChipDnaMobile: ${e.message}", e)
-        }
-        
-        Log.d(TAG, "MainApplication initialized")
+        Log.d(TAG, "MainApplication initialized - waiting for Cloud Commerce SDK initialization")
+    }
+
+    /**
+     * Called when the Cloud Commerce SDK initializes successfully.
+     * This is required to be implemented and must call super.
+     */
+    override fun onSDKInitializationSuccess() {
+        // Required to call super per NMI documentation
+        super.onSDKInitializationSuccess()
+        Log.d(TAG, "✅ Cloud Commerce SDK Initialization Success")
+    }
+
+    /**
+     * Called when the Cloud Commerce SDK fails to initialize.
+     * This is required to be implemented and must call super.
+     */
+    override fun onSDKInitializationFailed(errorMessage: String?) {
+        // Required to call super per NMI documentation
+        super.onSDKInitializationFailed(errorMessage)
+        Log.e(TAG, "❌ Cloud Commerce SDK Initialization Failed: $errorMessage")
+        Toast.makeText(this, "SDK Init Failed: $errorMessage", Toast.LENGTH_LONG).show()
     }
 }
