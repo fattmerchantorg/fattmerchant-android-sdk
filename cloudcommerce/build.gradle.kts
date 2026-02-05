@@ -16,7 +16,7 @@ plugins {
 }
 
 group = findProperty("PUBLISH_GROUP_ID")?.toString() ?: "com.fattmerchant"
-version = findProperty("PUBLISH_VERSION")?.toString() ?: "1.0.0"
+version = "5.3.0"
 
 // Create a default configuration that will be consumed by cardpresent module
 configurations.maybeCreate("default")
@@ -35,7 +35,7 @@ publishing {
         create<MavenPublication>("release") {
             groupId = findProperty("PUBLISH_GROUP_ID")?.toString() ?: "com.fattmerchant"
             artifactId = "cloudcommerce"
-            version = findProperty("PUBLISH_VERSION")?.toString() ?: "1.0.0"
+            version = "5.3.0"
             
             // Publish the AAR file as the main artifact
             artifact(aarFile)
