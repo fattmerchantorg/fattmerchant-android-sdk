@@ -160,16 +160,11 @@ internal class ChipDnaDriver :
 
         val result = setCredentials(appId, apiKey)
         
-        log("setProperties result: ${result[ParameterKeys.Result]}")
-        result[ParameterKeys.ErrorDescription]?.let { log("Error: $it") }
-        result[ParameterKeys.Errors]?.let { log("Errors: $it") }
-        result["ErrorCode"]?.let { log("ErrorCode: $it") }
-        
-        val statusAfterSet = ChipDnaMobile.getInstance().getStatus(null)
-        val terminalStatusXml = statusAfterSet[ParameterKeys.TerminalStatus]
-        terminalStatusXml?.let {
-            val terminalStatus = ChipDnaMobileSerializer.deserializeTerminalStatus(it)
-            log("Terminal status after setProperties: isEnabled=${terminalStatus.isEnabled}")
+        if (result[ParameterKeys.Result] != ParameterValues.TRUE) {
+            log("❌ setProperties failed: ${result[ParameterKeys.ErrorDescription]}")
+            result[ParameterKeys.Errors]?.let { log("   Errors: $it") }
+        } else {
+            log("✅ Credentials configured successfully")
         }
         
         if (result[ParameterKeys.Result] != ParameterValues.TRUE) {
@@ -670,11 +665,10 @@ internal class ChipDnaDriver :
     }
 
     private fun setCredentials(appId: String, apiKey: String): Parameters {
+        val envMode = if (tapToPayConfig?.testMode == true) "TEST" else "LIVE"
         val environment = if (tapToPayConfig?.testMode == true) {
-            log("Using TEST environment")
             ParameterValues.TestEnvironment
         } else {
-            log("Using LIVE environment")
             ParameterValues.LiveEnvironment
         }
         
@@ -690,15 +684,14 @@ internal class ChipDnaDriver :
                     
                     if (fingerprint != null) {
                         add(ParameterKeys.CertificateFingerprint, fingerprint)
-                        log("CertificateFingerprint: ${fingerprint.take(20)}...")
                     } else {
-                        log("WARNING: Unable to extract certificate fingerprint")
+                        log("⚠️ Unable to extract certificate fingerprint")
                     }
                 }
             }
         }
         
-        log("setProperties: Environment=$environment")
+        log("🔐 Setting credentials (Environment: $envMode)")
         return ChipDnaMobile.getInstance().setProperties(params)
     }
 
@@ -728,36 +721,20 @@ internal class ChipDnaDriver :
     }
 
     override fun onConfigurationUpdateListener(parameters: Parameters?) {
-        log("🔔 onConfigurationUpdateListener")
         parameters?.let { params ->
             val configUpdate = params[ParameterKeys.ConfigurationUpdate]
-            log("ConfigurationUpdate: $configUpdate")
-            
-            val debugKeys = listOf(
-                ParameterKeys.Errors,
-                ParameterKeys.Result,
-                "ErrorCode",
-                ParameterKeys.ErrorDescription,
-                "PercentageComplete"
-            )
-            debugKeys.forEach { key ->
-                params[key]?.let { value ->
-                    log("  $key: $value")
-                }
-            }
             
             // Handle Tap to Pay specific configuration events
             when (configUpdate) {
                 "CheckingTapToMobileConfig" -> {
-                    log("🔍 Checking Tap to Pay configuration...")
+                    log("🔍 Checking Tap to Pay configuration")
                     mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(
                         MobileReaderConnectionStatus.CHECKING_TAP_TO_MOBILE_CONFIG
                     )
                 }
                 "UpdatingTapToMobileConfig" -> {
-                    log("⚙️ Updating Tap to Pay configuration...")
                     val percentComplete = params["PercentageComplete"]
-                    percentComplete?.let { log("Progress: $it%") }
+                    log("⚙️ Updating Tap to Pay configuration ${percentComplete?.let { "($it%)" } ?: ""}")
                     mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(
                         MobileReaderConnectionStatus.UPDATING_TAP_TO_MOBILE_CONFIG
                     )
@@ -765,15 +742,22 @@ internal class ChipDnaDriver :
                 "ConfigurationUpdateComplete" -> {
                     log("✅ Configuration update complete")
                 }
+                "CONNECT_AND_CONFIGURE_STARTED",
+                "REGISTERING" -> {
+                    // Log these common events only once without emoji
+                    log("Configuration: $configUpdate")
+                }
                 else -> {
-                    log("Configuration Update: $configUpdate")
+                    // Log other updates with any error details
+                    val errors = params[ParameterKeys.Errors]
+                    val errorDesc = params[ParameterKeys.ErrorDescription]
+                    if (errors != null || errorDesc != null) {
+                        log("Configuration: $configUpdate [Errors: $errors, Desc: $errorDesc]")
+                    } else {
+                        log("Configuration: $configUpdate")
+                    }
                 }
             }
-            
-            params["PercentageComplete"]?.let { log("Progress: $it%") }
-            params["CurrentStage"]?.let { log("Stage: $it") }
-            params["Status"]?.let { log("Status: $it") }
-            params["Description"]?.let { log("Description: $it") }
             
             configUpdate?.let {
                 MobileReaderConnectionStatus.from(it)?.let { status ->
