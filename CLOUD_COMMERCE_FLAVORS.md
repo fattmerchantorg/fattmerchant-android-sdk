@@ -2,6 +2,15 @@
 
 The Fattmerchant Android SDK now supports two build flavors to serve different versions of the NMI Cloud Commerce SDK based on your environment needs.
 
+## ⚠️ Important: JitPack Compatibility Note
+
+Due to Gradle's limitation on "AAR-in-AAR" dependencies, the flavor-based approach currently requires local building and publishing. We're working on making this fully JitPack-compatible in a future release.
+
+**Current Workaround:**
+1. Clone the repository
+2. Build locally: `./gradlew :cardpresent:publishToMavenLocal`
+3. Use from Maven Local in your project
+
 ## Available Flavors
 
 ### Production Flavor
@@ -16,35 +25,58 @@ The Fattmerchant Android SDK now supports two build flavors to serve different v
 
 ## Installation
 
-### Using JitPack
+### Option 1: Local Build (Recommended for now)
 
-Add the JitPack repository to your project's `settings.gradle.kts` or root `build.gradle`:
+1. Clone the SDK repository:
+```bash
+git clone https://github.com/fattmerchantorg/fattmerchant-android-sdk.git
+cd fattmerchant-android-sdk
+```
 
+2. Build and publish to Maven Local:
+```bash
+# For production variant
+./gradlew :cardpresent:publishProductionReleasePublicationToMavenLocal :cloudcommerce:publishProductionReleasePublicationToMavenLocal
+
+# For MTF variant
+./gradlew :cardpresent:publishMtfReleasePublicationToMavenLocal :cloudcommerce:publishMtfReleasePublicationToMavenLocal
+```
+
+3. Add Maven Local to your project's repositories:
 ```kotlin
-dependencyResolutionManagement {
-    repositories {
-        maven { url = uri("https://jitpack.io") }
-    }
+repositories {
+    mavenLocal()
+    google()
+    mavenCentral()
 }
 ```
 
-### For Production Environment
-
-Add the production flavor dependency to your app's `build.gradle.kts`:
-
+4. Add the dependency:
 ```kotlin
 dependencies {
-    implementation("com.github.fattmerchantorg.fattmerchant-android-sdk:cardpresent-production:1.3.0")
+    // For production
+    implementation("com.fattmerchant:cardpresent-production:2.7.0")
+    
+    // Or for MTF (testing)
+    implementation("com.fattmerchant:cardpresent-mtf:2.7.0")
 }
 ```
 
-### For Testing Environment (MTF)
+### Option 2: Using JitPack (When Available)
 
-Add the MTF flavor dependency to your app's `build.gradle.kts`:
+Once JitPack compatibility is resolved, you'll be able to use:
 
 ```kotlin
+repositories {
+    maven { url = uri("https://jitpack.io") }
+}
+
 dependencies {
-    implementation("com.github.fattmerchantorg.fattmerchant-android-sdk:cardpresent-mtf:1.3.0")
+    // For production
+    implementation("com.github.fattmerchantorg.fattmerchant-android-sdk:cardpresent-production:VERSION")
+    
+    // For testing (MTF)
+    implementation("com.github.fattmerchantorg.fattmerchant-android-sdk:cardpresent-mtf:VERSION")
 }
 ```
 
