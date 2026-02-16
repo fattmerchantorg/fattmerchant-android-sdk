@@ -23,12 +23,10 @@ configurations.maybeCreate("default")
 
 // Add the AAR artifact to the default configuration
 // Use MTF (test) AAR by default for development
-val aarFile = file("../cardpresent/libs/cloud-commerce-sdk-mtf-5.3.0.aar")
-artifacts.add("default", aarFile)
-
+// val aarFile = file("../cardpresent/libs/cloud-commerce-sdk-mtf-5.3.0.aar")
 // For production builds, uncomment this line and comment the MTF line above:
-// val aarFile = file("../cardpresent/libs/cloud-commerce-sdk-5.3.0.aar")
-
+val aarFile = file("../cardpresent/libs/cloud-commerce-sdk-5.3.0.aar")
+artifacts.add("default", aarFile)
 // Maven publishing configuration for JitPack
 publishing {
     publications {
