@@ -9,6 +9,7 @@ The Fattmerchant Android SDK provides a simple way to accept a payment on your A
 * [Getting Started](#getting-started)
 * [Testing](#testing)
 * [Taking a payment with a mobile reader](https://fattmerchantorg.github.io/fattmerchant-android-sdk/cardpresent/)
+* [Cloud Commerce SDK Flavors](#cloud-commerce-sdk-flavors)
 
 ![Tokenization Info](https://raw.githubusercontent.com/fattmerchantorg/Fattmerchant-iOS-SDK/master/assets/images/tokenization-info.png)
 
@@ -223,3 +224,41 @@ Or you can create the `CreditCard` or `BankAccount` object with the following te
 * Account: 9876543210
 
 To test failing bank accounts, use the given routing number and any other account number
+
+## <a name="cloud-commerce-sdk-flavors">Cloud Commerce SDK Flavors</a>
+
+The **cardpresent** module now supports two build flavors for the NMI Cloud Commerce SDK:
+
+### Production Flavor
+Use the production flavor for live applications processing real payments:
+```gradle
+implementation 'com.github.fattmerchantorg.fattmerchant-android-sdk:cardpresent-production:VERSION'
+```
+
+### MTF Flavor (Testing)
+Use the MTF (Merchant Test Framework) flavor for development, testing, and QA environments:
+```gradle
+implementation 'com.github.fattmerchantorg.fattmerchant-android-sdk:cardpresent-mtf:VERSION'
+```
+
+### Automatic Flavor Selection
+You can automatically switch between flavors based on your app's build type:
+```kotlin
+android {
+    buildTypes {
+        debug {
+            matchingFallbacks += listOf("mtf")
+        }
+        release {
+            matchingFallbacks += listOf("production")
+        }
+    }
+}
+
+dependencies {
+    debugImplementation("com.github.fattmerchantorg.fattmerchant-android-sdk:cardpresent-mtf:VERSION")
+    releaseImplementation("com.github.fattmerchantorg.fattmerchant-android-sdk:cardpresent-production:VERSION")
+}
+```
+
+For more details, see [CLOUD_COMMERCE_FLAVORS.md](CLOUD_COMMERCE_FLAVORS.md).

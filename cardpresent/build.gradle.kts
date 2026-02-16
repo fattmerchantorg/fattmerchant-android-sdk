@@ -5,8 +5,6 @@ plugins {
     signing
 }
 
-apply(from = "${rootProject.projectDir}/gradle/publish-module.gradle.kts")
-
 // Set group: JitPack passes -Pgroup, otherwise use default for Maven Central
 group = project.findProperty("group") as String? ?: "com.fattmerchant"
 
@@ -38,6 +36,20 @@ android {
         compose = true
     }
 
+    // Define product flavors to match cloudcommerce module
+    // This allows SDK users to choose between production and MTF (testing) environments
+    flavorDimensions += "environment"
+    productFlavors {
+        create("production") {
+            dimension = "environment"
+            // Production flavor uses the standard Cloud Commerce SDK
+        }
+        create("mtf") {
+            dimension = "environment"
+            // MTF flavor uses the Merchant Test Framework version for testing
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -49,7 +61,10 @@ android {
     }
 
     publishing {
-        singleVariant("release") {
+        singleVariant("productionRelease") {
+            withSourcesJar()
+        }
+        singleVariant("mtfRelease") {
             withSourcesJar()
         }
     }
@@ -76,10 +91,9 @@ dependencies {
     api("androidx.compose.runtime:runtime:1.10.2")
 
     // NMI Cloud Commerce SDK - Tap to Pay Support
-    // Using cloudcommerce wrapper module to expose the AAR
-    // This avoids Gradle's "Direct local .aar file dependencies are not supported when building an AAR" limitation
-    // Using api() so it's transitively available to consumers
-    api(project(":cloudcommerce"))
+    // Flavor-specific dependencies to use the appropriate AAR
+    add("productionApi", project(path = ":cloudcommerce", configuration = "productionDefault"))
+    add("mtfApi", project(path = ":cloudcommerce", configuration = "mtfDefault"))
     
     // NMI Legacy Dependencies
     api(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
@@ -136,5 +150,81 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     compilerOptions {
         // Explicitly set module name to ensure .kotlin_module generation
         freeCompilerArgs.add("-module-name=cardpresent")
+    }
+}
+// Publishing configuration for product flavors
+afterEvaluate {
+    publishing {
+        publications {
+            // Production variant publication
+            create<MavenPublication>("productionRelease") {
+                from(components["productionRelease"])
+                groupId = project.group.toString()
+                artifactId = "cardpresent-production"
+                version = findProperty("PUBLISH_VERSION") as String? ?: "2.7.0"
+                
+                pom {
+                    name.set("Fattmerchant Android SDK - Card Present (Production)")
+                    description.set("Accept payments on Android using card readers and NFC Tap to Pay - Production version")
+                    url.set("https://github.com/fattmerchantorg/fattmerchant-android-sdk")
+                    
+                    licenses {
+                        license {
+                            name.set("MIT License")
+                            url.set("https://opensource.org/licenses/MIT")
+                        }
+                    }
+                    
+                    developers {
+                        developer {
+                            id.set("fattmerchant")
+                            name.set("Fattmerchant")
+                            email.set("support@fattmerchant.com")
+                        }
+                    }
+                    
+                    scm {
+                        connection.set("scm:git:git://github.com/fattmerchantorg/fattmerchant-android-sdk.git")
+                        developerConnection.set("scm:git:ssh://git@github.com:fattmerchantorg/fattmerchant-android-sdk.git")
+                        url.set("https://github.com/fattmerchantorg/fattmerchant-android-sdk")
+                    }
+                }
+            }
+            
+            // MTF (testing) variant publication
+            create<MavenPublication>("mtfRelease") {
+                from(components["mtfRelease"])
+                groupId = project.group.toString()
+                artifactId = "cardpresent-mtf"
+                version = findProperty("PUBLISH_VERSION") as String? ?: "2.7.0"
+                
+                pom {
+                    name.set("Fattmerchant Android SDK - Card Present (MTF)")
+                    description.set("Accept payments on Android using card readers and NFC Tap to Pay - MTF testing version")
+                    url.set("https://github.com/fattmerchantorg/fattmerchant-android-sdk")
+                    
+                    licenses {
+                        license {
+                            name.set("MIT License")
+                            url.set("https://opensource.org/licenses/MIT")
+                        }
+                    }
+                    
+                    developers {
+                        developer {
+                            id.set("fattmerchant")
+                            name.set("Fattmerchant")
+                            email.set("support@fattmerchant.com")
+                        }
+                    }
+                    
+                    scm {
+                        connection.set("scm:git:git://github.com/fattmerchantorg/fattmerchant-android-sdk.git")
+                        developerConnection.set("scm:git:ssh://git@github.com:fattmerchantorg/fattmerchant-android-sdk.git")
+                        url.set("https://github.com/fattmerchantorg/fattmerchant-android-sdk")
+                    }
+                }
+            }
+        }
     }
 }

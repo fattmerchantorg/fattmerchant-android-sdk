@@ -36,6 +36,18 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    // Define product flavors to match cardpresent module
+    flavorDimensions += "environment"
+    productFlavors {
+        create("production") {
+            dimension = "environment"
+        }
+        create("mtf") {
+            dimension = "environment"
+            applicationIdSuffix = ".mtf"
+        }
+    }
+
     buildTypes {
         release {
             buildConfigField("String", "STAX_API_KEY", "\"$staxApiKey\"")
