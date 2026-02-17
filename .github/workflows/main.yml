@@ -30,7 +30,7 @@ jobs:
         run: ./gradlew :cardpresent:testDebugUnitTest
 
       - name: Upload Test Reports Folder
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v2
         if: ${{ always() }} # IMPORTANT: Upload reports regardless of status
         with:
           name: reports
