@@ -81,15 +81,15 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     
     // Jetpack Compose - For TapToPayPrompt UI
-    implementation("androidx.activity:activity-compose:1.12.3")
+    implementation("androidx.activity:activity-compose:1.12.4")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
     api("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
-    api(platform("androidx.compose:compose-bom:2026.01.01"))
+    api(platform("androidx.compose:compose-bom:2026.02.00"))
     api("androidx.compose.ui:ui")
     api("androidx.compose.ui:ui-graphics")
     api("androidx.compose.ui:ui-tooling-preview")
     api("androidx.compose.material3:material3")
-    api("androidx.compose.runtime:runtime:1.10.2")
+    api("androidx.compose.runtime:runtime:1.10.3")
 
     // NMI Cloud Commerce SDK - Tap to Pay Support
     // Uses separate cloudcommerce modules for each flavor - JitPack will publish all modules

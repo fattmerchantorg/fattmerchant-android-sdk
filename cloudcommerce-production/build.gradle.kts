@@ -9,10 +9,10 @@ plugins {
 }
 
 group = findProperty("PUBLISH_GROUP_ID")?.toString() ?: (findProperty("group") as String? ?: "com.fattmerchant")
-val publishVersion = "5.3.0"
+val publishVersion = "5.3.1"
 
 // Production AAR artifact
-val productionAarFile = file("../cardpresent/libs/cloud-commerce-sdk-5.3.0.aar")
+val productionAarFile = file("../cardpresent/libs/cloud-commerce-sdk-5.3.1.aar")
 configurations {
     create("default")
 }
