@@ -39,6 +39,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import org.xmlpull.v1.XmlPullParserException
 import java.io.IOException
 import java.util.Locale
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.Logger
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
@@ -110,6 +111,9 @@ internal class ChipDnaDriver :
     
     /** Tracks whether the TapToPayReader is currently connected */
     private var isTapToPayReaderConnected: Boolean = false
+
+    /** Guards against duplicate connectAndConfigure calls */
+    private val isConnectAndConfigureInProgress = AtomicBoolean(false)
 
     override var familiarSerialNumbers: MutableList<String> = mutableListOf()
     override val source: String = "NMI"
@@ -247,7 +251,12 @@ internal class ChipDnaDriver :
         if (reader is TapToPayReader) {
             log("🎯 Connecting Tap to Pay reader...")
             log("Test mode: ${reader.testMode}")
-            
+
+            if (!isConnectAndConfigureInProgress.compareAndSet(false, true)) {
+                log("⚠️ connectAndConfigure already in progress, skipping duplicate call")
+                throw ConnectReaderException("Connection already in progress")
+            }
+
             return suspendCancellableCoroutine { continuation ->
                 log("Initiating connectAndConfigure...")
                 mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(
@@ -297,6 +306,7 @@ internal class ChipDnaDriver :
         val timeoutJob = launch {
             delay(120000)
             log("⏱️ Connection timeout after 2 minutes")
+            isConnectAndConfigureInProgress.set(false)
             continuation.resumeWith(Result.failure(
                 ConnectReaderException("Connection timeout: ChipDNA Mobile did not respond within 2 minutes")
             ))
@@ -305,6 +315,7 @@ internal class ChipDnaDriver :
         if (!ChipDnaMobile.isInitialized()) {
             log("❌ ChipDNA Mobile is not initialized")
             timeoutJob.cancel()
+            isConnectAndConfigureInProgress.set(false)
             continuation.resumeWith(Result.failure(
                 ConnectReaderException("ChipDNA Mobile SDK not initialized")
             ))
@@ -312,7 +323,7 @@ internal class ChipDnaDriver :
         }
         
         val preConnectStatus = ChipDnaMobile.getInstance().getStatus(null)
-        log("📊 SDK Status: ${preConnectStatus[ParameterKeys.Result]}")
+        log("📊 SDK Status: ${preConnectStatus[ParameterKeys.Result]}, POSGUID: ${preConnectStatus[ParameterKeys.POSGUID]}, TAPPOIIDENTIFIER: ${preConnectStatus[ParameterKeys.TapToMobilePOIIdentifier]}")
         preConnectStatus[ParameterKeys.Errors]?.let { log("   Errors: $it") }
         
         ChipDnaMobile.getInstance().apply {
@@ -360,6 +371,7 @@ internal class ChipDnaDriver :
                     logDeviceIdentifiers()
                     
                     isTapToPayReaderConnected = true
+                    isConnectAndConfigureInProgress.set(false)
                     mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(
                         MobileReaderConnectionStatus.CONNECTED
                     )
@@ -370,7 +382,8 @@ internal class ChipDnaDriver :
                     log("Error code: $errorCode")
                     log("Error description: $errorDescription")
                     
-                    continuation.resumeWith(Result.failure(ConnectReaderException(userMessage)))
+                    isConnectAndConfigureInProgress.set(false)
+                    continuation.resumeWith(Result.failure(ConnectReaderException(userMessage + "📊 SDK Status: ${preConnectStatus[ParameterKeys.Result]}, POSGUID: ${preConnectStatus[ParameterKeys.POSGUID]}, TAPPOIIDENTIFIER: ${preConnectStatus[ParameterKeys.TapToMobilePOIIdentifier]}")))
                 }
             }
         }.connectAndConfigure(connectParams)
@@ -385,6 +398,7 @@ internal class ChipDnaDriver :
             val result = ChipDnaMobile.dispose(null)
             if (result[ParameterKeys.Result] == ParameterValues.TRUE) {
                 isTapToPayReaderConnected = false
+                isConnectAndConfigureInProgress.set(false)
                 mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(MobileReaderConnectionStatus.DISCONNECTED)
                 return true
             }
