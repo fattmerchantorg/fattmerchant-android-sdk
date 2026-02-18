@@ -105,12 +105,15 @@ dependencies {
 
     // Retrofit & OkHttp (Required by Cloud Commerce SDK)
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.4.0")
     implementation("com.squareup.okhttp3:okhttp-urlconnection:4.4.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.4.0")
     
-    // Gson (JSON Parsing)
+    // Moshi & Gson (JSON Parsing)
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.2")
     implementation("com.google.code.gson:gson:2.8.6")
     
     // RxJava (Required by Cloud Commerce SDK)
@@ -139,6 +142,12 @@ dependencies {
     // Kotlin Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+
+    // Ktor
+    implementation("io.ktor:ktor-client-core:3.4.0")
+    implementation("io.ktor:ktor-client-okhttp:3.4.0")
+    implementation("io.ktor:ktor-client-content-negotiation:3.4.0")
+    implementation("io.ktor:ktor-serialization-gson:3.4.0")
 }
 
 // Ensure Kotlin metadata is properly generated for top-level functions
