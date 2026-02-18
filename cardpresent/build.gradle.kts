@@ -99,27 +99,24 @@ dependencies {
     // NMI Legacy Dependencies
     api(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
     //noinspection Aligned16KB
-    implementation("net.zetetic:android-database-sqlcipher:4.5.4@aar")
-    implementation("androidx.sqlite:sqlite:2.6.2")
-    implementation("com.jakewharton.timber:timber:5.0.1")
+    implementation("net.zetetic:sqlcipher-android:4.7.2@aar")
+    implementation("androidx.sqlite:sqlite:2.1.0")
+    implementation("com.jakewharton.timber:timber:4.7.1")
 
     // Retrofit & OkHttp (Required by Cloud Commerce SDK)
-    implementation("com.squareup.retrofit2:retrofit:3.0.0")
-    implementation("com.squareup.retrofit2:converter-moshi:3.0.0")
-    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
-    implementation("com.squareup.retrofit2:converter-scalars:3.0.0")
-    implementation("com.squareup.okhttp3:okhttp:5.3.2")
-    implementation("com.squareup.okhttp3:okhttp-urlconnection:5.0.0-alpha.2")
-    implementation("com.squareup.okhttp3:logging-interceptor:5.3.2")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp-urlconnection:4.4.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.4.0")
     
-    // Moshi & Gson (JSON Parsing)
-    implementation("com.squareup.moshi:moshi-kotlin:1.15.2")
-    implementation("com.google.code.gson:gson:2.13.2")
+    // Gson (JSON Parsing)
+    implementation("com.google.code.gson:gson:2.8.6")
     
     // RxJava (Required by Cloud Commerce SDK)
-    implementation("io.reactivex.rxjava3:rxjava:3.1.12")
-    implementation("io.reactivex.rxjava3:rxandroid:3.0.2")
-    implementation("com.squareup.retrofit2:adapter-rxjava3:3.0.0")
+    implementation("io.reactivex.rxjava3:rxjava:3.0.0")
+    implementation("io.reactivex.rxjava3:rxandroid:3.0.0")
+    implementation("com.squareup.retrofit2:adapter-rxjava3:2.9.0")
     
     // Google Play Services - Location, Integrity & SafetyNet (Required for Tap to Pay)
     implementation("com.google.android.gms:play-services-location:21.3.0")
@@ -135,15 +132,13 @@ dependencies {
     // SLF4J (Required by Cloud Commerce SDK)
     implementation("org.slf4j:slf4j-api:1.7.30")
     
+    // Kotlin
+    implementation("androidx.core:core-ktx:1.8.0")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.0")
+    
     // Kotlin Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-
-    // Ktor
-    implementation("io.ktor:ktor-client-core:3.4.0")
-    implementation("io.ktor:ktor-client-okhttp:3.4.0")
-    implementation("io.ktor:ktor-client-content-negotiation:3.4.0")
-    implementation("io.ktor:ktor-serialization-gson:3.4.0")
 }
 
 // Ensure Kotlin metadata is properly generated for top-level functions
