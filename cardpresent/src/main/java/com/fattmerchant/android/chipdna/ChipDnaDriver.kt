@@ -382,8 +382,12 @@ internal class ChipDnaDriver :
                     log("Error code: $errorCode")
                     log("Error description: $errorDescription")
                     
+                    val postFailStatus = ChipDnaMobile.getInstance().getStatus(null)
+                    val statusInfo = "SDK Status: ${postFailStatus[ParameterKeys.Result]}, POSGUID: ${postFailStatus[ParameterKeys.POSGUID]}, TAPPOIIDENTIFIER: ${postFailStatus[ParameterKeys.TapToMobilePOIIdentifier]}"
+                    log(statusInfo)
+                    
                     isConnectAndConfigureInProgress.set(false)
-                    continuation.resumeWith(Result.failure(ConnectReaderException(userMessage + "📊 SDK Status: ${preConnectStatus[ParameterKeys.Result]}, POSGUID: ${preConnectStatus[ParameterKeys.POSGUID]}, TAPPOIIDENTIFIER: ${preConnectStatus[ParameterKeys.TapToMobilePOIIdentifier]}")))
+                    continuation.resumeWith(Result.failure(ConnectReaderException("$userMessage | $statusInfo")))
                 }
             }
         }.connectAndConfigure(connectParams)
