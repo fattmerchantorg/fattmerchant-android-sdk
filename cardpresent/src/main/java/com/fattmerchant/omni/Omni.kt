@@ -158,6 +158,35 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
         }
     }
 
+    internal fun initializeSandbox(args: Map<String, Any>, completion: () -> Unit, error: (OmniException) -> Unit) {
+        coroutineScope.launch {
+
+            val mutatedArgs = args.toMutableMap()
+
+            // NMI
+            args["apiKey"]?.let { apiKey ->
+                val nmiDetails = MobileReaderDetails.NMIDetails()
+                nmiDetails.securityKey = apiKey as String
+                mutatedArgs["nmi"] = nmiDetails
+            }
+
+            // Tap to Pay Configuration (if provided)
+            args["tapToPayConfig"]?.let { config ->
+                mutatedArgs["tapToPayConfig"] = config
+            }
+
+            InitializeDrivers(
+                mobileReaderDriverRepository,
+                mutatedArgs,
+                coroutineContext
+            ).start(error)
+
+            initialized = true
+
+            completion()
+        }
+    }
+
     /**
      * Searches for all readers that are available given across all the mobile reader drivers
      */

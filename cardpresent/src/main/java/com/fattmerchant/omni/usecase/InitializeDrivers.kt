@@ -40,7 +40,7 @@ internal class InitializeDrivers(
 
         when {
             initializedDrivers.contains(true) -> return
-            error != null -> onError(error!!)
+            error != null -> onError(error)
             else -> onError(InitializeDriversException.NoMobileReadersFound)
         }
     }

@@ -55,7 +55,7 @@ class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
             params: InitParams,
             completion: () -> Unit,
             error: (OmniException) -> Unit,
-            usbListener: UsbAccessoryListener? = null
+            usbListener: UsbAccessoryListener? = null,
         ) {
             val paramMap = mutableMapOf(
                 "apiKey" to params.apiKey,
@@ -71,6 +71,12 @@ class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
             params.tapToPayConfig?.let {
                 paramMap["tapToPayConfig"] = it
             }
+
+            // If sandbox key is provided, add it to the map
+            params.sandBoxKey?.let {
+                paramMap["sandboxKey"] = it
+            }
+
 
             initialize(
                 paramMap,
@@ -110,10 +116,29 @@ class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
 
             // Init com.fattmerchant.omni
             omni.coroutineScope.launch {
-                omni.initialize(params, {
-                    completion()
-                }) {
-                    error(it)
+                params["sandboxKey"]?.let { sandboxKey ->
+                    val toggle = sandboxKey as Boolean
+                    if (toggle) {
+                        omni.initializeSandbox(params, {
+                            completion()
+                        }) {
+                            error(it)
+                        }
+                    } else {
+                        omni.initialize(params, {
+                            completion()
+                        }) {
+                            error(it)
+                        }
+                    }
+
+                }.run {
+                    omni.initialize(params, {
+                        completion()
+                    }) {
+                        error(it)
+                    }
+
                 }
             }
         }

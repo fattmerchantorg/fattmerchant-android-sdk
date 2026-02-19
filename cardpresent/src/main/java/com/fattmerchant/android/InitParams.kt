@@ -24,5 +24,8 @@ data class InitParams(
     var appId: String = "appid",
 
     /** Configuration for Tap to Pay on Android functionality */
-    var tapToPayConfig: TapToPayConfiguration? = null
+    var tapToPayConfig: TapToPayConfiguration? = null,
+
+    /** NMI Sandbox toggle */
+    var sandBoxKey: Boolean? = null
 )
