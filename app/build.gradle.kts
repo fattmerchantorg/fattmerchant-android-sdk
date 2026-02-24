@@ -5,7 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
-val staxApiKey: String = gradleLocalProperties(rootDir, providers).getProperty("staxApiKey") ?: "NoApiKey"
+val staxApiKey: String = gradleLocalProperties(rootDir).getProperty("staxApiKey") ?: "NoApiKey"
 
 android {
     namespace = "com.staxpayments"
