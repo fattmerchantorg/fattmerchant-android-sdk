@@ -4,12 +4,6 @@ import android.app.AlertDialog
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.creditcall.chipdnamobile.ChipDnaMobile
-import com.creditcall.chipdnamobile.ChipDnaMobileSerializer
-import com.creditcall.chipdnamobile.ParameterKeys
-import com.creditcall.chipdnamobile.ParameterValues
-import com.creditcall.chipdnamobile.Parameters
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
 import com.fattmerchant.omni.TransactionUpdateListener
@@ -26,9 +20,7 @@ import com.staxpayments.BuildConfig
 import com.staxpayments.sample.MainApplication
 import com.staxpayments.sample.SignatureProvider
 import com.staxpayments.sample.state.StaxUiState
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -43,8 +35,6 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class StaxViewModel : ViewModel(), UsbAccessoryListener {
     // Set the api key value by setting `staxApiKey` in your `local.properties` file
