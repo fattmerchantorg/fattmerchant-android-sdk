@@ -158,6 +158,11 @@ internal class ChipDnaDriver :
         ChipDnaMobile.initialize(appContext, params)
         ChipDnaMobile.getInstance().addConfigurationUpdateListener(this)
         ChipDnaMobile.getInstance().addDeviceUpdateListener(this)
+        // Re-register RequestActivityListener on every initialize call (including re-init after dispose).
+        // The demo registers this at init time; we match that by persisting and re-applying the delegate.
+        requestActivityDelegate?.let {
+            ChipDnaMobile.getInstance().addRequestActivityListener(it)
+        }
 
         securityKey = apiKey
         initArgs = args
@@ -296,12 +301,16 @@ internal class ChipDnaDriver :
         reader: TapToPayReader,
         continuation: kotlin.coroutines.Continuation<MobileReader?>
     ) {
-        val connectParams = Parameters().apply {
+        // Use getStatus() as the base params (matching ChipDnaMobileKotlinDemo approach),
+        // then add TTM-specific overrides. ApplyFirmwareUpdate=FALSE skips hardware
+        // firmware-update checks that require a physical reader.
+        val connectParams = ChipDnaMobile.getInstance().getStatus(null).apply {
             add(ParameterKeys.TapToMobilePOI, ParameterValues.TRUE)
             add(ParameterKeys.PaymentDevicePOI, ParameterValues.FALSE)
+            add(ParameterKeys.ApplyFirmwareUpdate, ParameterValues.FALSE)
         }
-        
-        log("📊 Connecting Tap to Pay: TapToMobilePOI=TRUE, PaymentDevicePOI=FALSE")
+
+        log("📊 Connecting Tap to Pay: TapToMobilePOI=TRUE, PaymentDevicePOI=FALSE, ApplyFirmwareUpdate=FALSE")
         
         val timeoutJob = launch {
             delay(120000)
@@ -697,7 +706,7 @@ internal class ChipDnaDriver :
             
             tapToPayConfig?.let { config ->
                 if (config.enabled) {
-                    val fingerprint = config.certificateFingerprint
+                    val fingerprint = config.certificateFingerprint?.takeIf { it.isNotEmpty() }
                         ?: (applicationContext?.let { CertificateUtils.getCertificateFingerprint(it) })
                     
                     if (fingerprint != null) {

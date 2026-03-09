@@ -23,6 +23,12 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        // Default values — overridden by the chipdnatest flavor below
+        buildConfigField("Boolean", "IS_NMI_TEST_FLAVOR", "false")
+        buildConfigField("String", "NMI_TEST_API_KEY", "\"\"")
+        buildConfigField("String", "NMI_TEST_APP_ID", "\"\"")
+        buildConfigField("String", "NMI_TEST_CERT_FINGERPRINT", "\"\"")
     }
 
     packaging {
@@ -45,6 +51,18 @@ android {
         create("mtf") {
             dimension = "environment"
             applicationIdSuffix = ".mtf"
+        }
+        // chipdnatest: uses NMI's pre-registered test identity so we can validate our SDK code path
+        // against the same sandbox environment where ChipDnaMobileKotlinDemo succeeds.
+        // Falls back to the MTF variant of :cardpresent (sandbox Cloud Commerce SDK).
+        create("chipdnatest") {
+            dimension = "environment"
+            applicationId = "com.creditcall.chipdnamobiledev"
+            matchingFallbacks += listOf("mtf")
+            buildConfigField("Boolean", "IS_NMI_TEST_FLAVOR", "true")
+            buildConfigField("String", "NMI_TEST_API_KEY", "\"7WXb667D6MSj5CcWj85Bf3Jn5F6DqAW5\"")
+            buildConfigField("String", "NMI_TEST_APP_ID", "\"STAXDEMO\"")
+            buildConfigField("String", "NMI_TEST_CERT_FINGERPRINT", "\"03:F9:1D:8A:E7:8F:E3:8A:0E:48:1F:93:46:84:32:0E:B3:DB:F3:2F:7B:3C:4D:26:EE:82:1F:A0:56:46:21:31\"")
         }
     }
 
@@ -83,10 +101,10 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
-    implementation("androidx.activity:activity-compose:1.12.3")
+    implementation("androidx.activity:activity-compose:1.12.4")
 
     // Jetpack Compose
-    implementation(platform("androidx.compose:compose-bom:2026.01.01"))
+    implementation(platform("androidx.compose:compose-bom:2026.02.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling")

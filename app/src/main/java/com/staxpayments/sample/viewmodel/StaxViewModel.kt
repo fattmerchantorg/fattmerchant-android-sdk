@@ -62,6 +62,9 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
     private var lastTransaction: Transaction? = null
     private var currentActivity: android.app.Activity? = null
 
+    /** Guards against multiple Omni.initialize() calls from the same ViewModel instance. */
+    private var isOmniInitialized = false
+
     private val _uiState = MutableStateFlow(StaxUiState())
     val uiState: StateFlow<StaxUiState> = _uiState.asStateFlow()
 
@@ -142,6 +145,11 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
      * Runs the main Stax.initialize() code
      */
     fun onInitialize() {
+        if (isOmniInitialized) {
+            log("Already initialized — skipping duplicate init")
+            return
+        }
+        isOmniInitialized = true
         log("Initializing...")
 
         /**
@@ -151,17 +159,25 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
          * custom Application class. However, for this example, we delay initialization to show
          * how it all works.
          */
+        // When running the chipdnatest flavor we swap in NMI's pre-registered test identity.
+        // This lets us verify our SDK code path against the same sandbox the demo uses.
+        val resolvedApiKey = if (BuildConfig.IS_NMI_TEST_FLAVOR) BuildConfig.NMI_TEST_API_KEY else apiKey
+        val resolvedAppId = if (BuildConfig.IS_NMI_TEST_FLAVOR) BuildConfig.NMI_TEST_APP_ID else "fattmerchantsample"
+        val resolvedCertFingerprint = BuildConfig.NMI_TEST_CERT_FINGERPRINT.takeIf { it.isNotEmpty() }
+
         val params = InitParams(
             MainApplication.context,
             MainApplication.application,
-            apiKey,
+            resolvedApiKey,
             environment = Environment.LIVE,
-            appId = "fattmerchantsample",
+            appId = resolvedAppId,
             tapToPayConfig = TapToPayConfiguration(
                 enabled = true,
                 allowExternalReaders = true,
-                testMode = true  // Use TEST environment with MTF SDK
-            )
+                certificateFingerprint = resolvedCertFingerprint,
+                testMode = true  // Use TEST environment with MTF/chipdnatest SDK
+            ),
+            sandBoxKey = true
         )
         
         Omni.initialize(
@@ -187,6 +203,11 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
      * Runs Stax.initialize() with an ephemeral token
      */
     fun onEphemeralInitialize() {
+        if (isOmniInitialized) {
+            log("Already initialized — skipping duplicate init")
+            return
+        }
+        isOmniInitialized = true
         log("Initializing with token...")
 
         val listener = this
