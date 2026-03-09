@@ -1,19 +1,9 @@
 package com.staxpayments.sample.viewmodel
 
-import android.Manifest
 import android.app.AlertDialog
 import android.content.Context
-import android.content.pm.PackageManager
-import android.util.Log
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.creditcall.chipdnamobile.ChipDnaMobile
-import com.creditcall.chipdnamobile.ChipDnaMobileSerializer
-import com.creditcall.chipdnamobile.ParameterKeys
-import com.creditcall.chipdnamobile.ParameterValues
-import com.creditcall.chipdnamobile.Parameters
 import com.fattmerchant.android.InitParams
 import com.fattmerchant.android.Omni
 import com.fattmerchant.omni.Environment
@@ -22,9 +12,6 @@ import com.fattmerchant.omni.UsbAccessoryListener
 import com.fattmerchant.omni.UserNotificationListener
 import com.fattmerchant.omni.data.Amount
 import com.fattmerchant.omni.data.MobileReader
-import com.fattmerchant.omni.data.ReaderType
-import com.fattmerchant.omni.data.TapToPayConfiguration
-import com.fattmerchant.omni.data.TapToPayReader
 import com.fattmerchant.omni.data.TransactionRequest
 import com.fattmerchant.omni.data.TransactionUpdate
 import com.fattmerchant.omni.data.UserNotification
@@ -34,10 +21,7 @@ import com.staxpayments.sample.BuildConfig
 import com.staxpayments.sample.MainApplication
 import com.staxpayments.sample.SignatureProvider
 import com.staxpayments.sample.state.StaxUiState
-import com.staxpayments.sample.state.TapToPayMode
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -52,10 +36,29 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
+
+// TODO: Enable Tap to Pay
+// Uncomment the following imports when enabling Tap to Pay
+// import com.fattmerchant.omni.data.ReaderType
+// import com.fattmerchant.omni.data.TapToPayConfiguration
+// import com.fattmerchant.omni.data.TapToPayReader
 
 class StaxViewModel : ViewModel(), UsbAccessoryListener {
+
+    companion object {
+        private const val TAG = "StaxViewModel"
+
+        // Replace with your Gateway API Key from the Gateway Control Panel's Security Keys page
+        // For the chipdnatest flavor, NMI's pre-registered test credentials are used instead
+        private const val APP_ID = "fattmerchantsample"
+
+        // TODO: Enable Tap to Pay
+        // Set the certificate fingerprint value. This is used by TTM to initialize transactions.
+        // Generate with: keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android
+        // If left null, the SDK will auto-extract the fingerprint from the app's signing certificate.
+        // private const val CERTIFICATE_FINGERPRINT: String? = null
+    }
+
     // Set the api key value by setting `staxApiKey` in your `local.properties` file
     private val apiKey = BuildConfig.STAX_API_KEY
     private var reader: MobileReader? = null
@@ -78,26 +81,7 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
             state.copy(logString = state.logString + "$msg\n")
         }
     }
-    
-    /**
-     * Updates the transaction status shown in the UI
-     */
-    private fun updateTransactionStatus(status: String) {
-        _uiState.update { state ->
-            state.copy(transactionStatus = status)
-        }
-    }
-    
-    /**
-     * Sets the Tap to Pay mode
-     */
-    fun setTapToPayMode(mode: TapToPayMode) {
-        _uiState.update { state ->
-            state.copy(tapToPayMode = mode)
-        }
-        log("Tap to Pay mode set to: $mode")
-    }
-    
+
     /**
      * Sets the current Activity for NFC operations
      */
@@ -110,7 +94,6 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
      */
     private suspend fun getToken(): JSONObject {
         return withContext(Dispatchers.IO) {
-            // Build an HttpURLConnection for GET /ephemeral to get a temporary token
             val url = URL("https://apiprod.fattlabs.com/ephemeral")
             val connection = url.openConnection() as HttpURLConnection
             connection.apply {
@@ -121,11 +104,6 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
                 readTimeout = 5000
             }
 
-            /**
-             * Connect, read, and return the response. There is no error handling since
-             * this is just a simple example. However, you should display an error to
-             * the user if you cannot log in with an ephemeral token.
-             */
             try {
                 val response = StringBuilder()
                 BufferedReader(InputStreamReader(connection.inputStream)).use { reader ->
@@ -142,54 +120,65 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
     }
 
     /**
-     * Runs the main Stax.initialize() code
+     * Runs the main Omni.initialize() code.
+     *
+     * Pass in your required parameters. `context` and `application` are not stored, but
+     * required for the initialization with our hardware. Rather than use static variables
+     * as used in this example, Stax recommends running your initialization code in a
+     * custom Application class.
      */
     fun onInitialize() {
         if (isOmniInitialized) {
-            log("Already initialized — skipping duplicate init")
+            log("Already initialized -- skipping duplicate init")
             return
         }
         isOmniInitialized = true
         log("Initializing...")
 
-        /**
-         * Pass in your required parameters. `context` and `application` are not stored, but
-         * required for the initialization with our hardware. Rather than use static variables
-         * as used in this example, Stax recommends running your initialization code in a
-         * custom Application class. However, for this example, we delay initialization to show
-         * how it all works.
-         */
-        // When running the chipdnatest flavor we swap in NMI's pre-registered test identity.
-        // This lets us verify our SDK code path against the same sandbox the demo uses.
-        val resolvedApiKey = if (BuildConfig.IS_NMI_TEST_FLAVOR) BuildConfig.NMI_TEST_API_KEY else apiKey
-        val resolvedAppId = if (BuildConfig.IS_NMI_TEST_FLAVOR) BuildConfig.NMI_TEST_APP_ID else "fattmerchantsample"
-        val resolvedCertFingerprint = BuildConfig.NMI_TEST_CERT_FINGERPRINT.takeIf { it.isNotEmpty() }
+        // TODO: Enable Tap to Pay
+        // When running the chipdnatest flavor, swap in NMI's pre-registered test credentials:
+        // val resolvedApiKey = if (BuildConfig.IS_NMI_TEST_FLAVOR) BuildConfig.NMI_TEST_API_KEY else apiKey
+        // val resolvedAppId = if (BuildConfig.IS_NMI_TEST_FLAVOR) BuildConfig.NMI_TEST_APP_ID else APP_ID
 
         val params = InitParams(
             MainApplication.context,
             MainApplication.application,
-            resolvedApiKey,
+            apiKey,
             environment = Environment.LIVE,
-            appId = resolvedAppId,
-            tapToPayConfig = TapToPayConfiguration(
-                enabled = true,
-                allowExternalReaders = true,
-                certificateFingerprint = resolvedCertFingerprint,
-                testMode = true  // Use TEST environment with MTF/chipdnatest SDK
-            ),
-            sandBoxKey = true
+            appId = APP_ID,
+
+            // TODO: Enable Tap to Pay
+            // Uncomment the following to enable Tap to Pay (NFC) transactions.
+            // Make sure your app:
+            //   1. Extends ChipDnaApplication (see MainApplication.kt)
+            //   2. Includes the Cloud Commerce SDK AAR (see CloudCommerceSDK module)
+            //   3. Has been registered with NMI (email taptopay-app-onboarding@nmi.com)
+            //   4. Is signed with the keystore matching the certificate fingerprint shared with NMI
+            //
+            // tapToPayConfig = TapToPayConfiguration(
+            //     enabled = true,
+            //     allowExternalReaders = true,  // false = Tap to Pay only, true = hybrid mode
+            //     certificateFingerprint = CERTIFICATE_FINGERPRINT,  // null = auto-extract from signing cert
+            //     testMode = true  // true = MTF/sandbox, false = production
+            // ),
+            // sandBoxKey = true  // Set to true when using MTF Cloud Commerce SDK
         )
-        
+
         Omni.initialize(
             params = params,
             completion = {
                 log("Initialized!")
                 Omni.shared()?.signatureProvider = SignatureProvider()
-                
-                // Auto-connect to Tap reader if Tap to Pay mode is enabled
-                if (_uiState.value.tapToPayMode != TapToPayMode.DISABLED) {
-                    connectToTapReader()
-                }
+
+                // TODO: Enable Tap to Pay
+                // Register the Activity provider for NFC operations. This is required before
+                // connecting to a Tap to Pay reader. The SDK needs an active Activity to display
+                // the NFC payment prompt.
+                //
+                // currentActivity?.let { activity ->
+                //     Omni.shared()?.registerTapToPayActivityProvider { activity }
+                //     log("Registered Activity delegate for Tap to Pay")
+                // }
             },
             error = { exception ->
                 log("There was an error initializing...")
@@ -200,11 +189,11 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
     }
 
     /**
-     * Runs Stax.initialize() with an ephemeral token
+     * Runs Omni.initialize() with an ephemeral token
      */
     fun onEphemeralInitialize() {
         if (isOmniInitialized) {
-            log("Already initialized — skipping duplicate init")
+            log("Already initialized -- skipping duplicate init")
             return
         }
         isOmniInitialized = true
@@ -213,21 +202,20 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
         val listener = this
         viewModelScope.launch {
             val token = getToken().getString("token")
-            /**
-             * This init uses the same code as the others, but substitutes the
-             * ephemeral token instead of the API Key. You can think of the
-             * token as a temporary API key with the same properties as the
-             * key used to create it.
-             */
+
             val params = InitParams(
                 MainApplication.context,
                 MainApplication.application,
                 token,
-                tapToPayConfig = TapToPayConfiguration(
-                    enabled = true,
-                    allowExternalReaders = true,
-                    testMode = true  // Use TEST environment with MTF SDK
-                )
+
+                // TODO: Enable Tap to Pay
+                // tapToPayConfig = TapToPayConfiguration(
+                //     enabled = true,
+                //     allowExternalReaders = true,
+                //     certificateFingerprint = CERTIFICATE_FINGERPRINT,
+                //     testMode = true
+                // ),
+                // sandBoxKey = true
             )
 
             Omni.initialize(
@@ -235,11 +223,11 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
                 completion = {
                     log("Initialized with token!")
                     Omni.shared()?.signatureProvider = SignatureProvider()
-                    
-                    // Auto-connect to Tap reader if Tap to Pay mode is enabled
-                    if (_uiState.value.tapToPayMode != TapToPayMode.DISABLED) {
-                        connectToTapReader()
-                    }
+
+                    // TODO: Enable Tap to Pay
+                    // currentActivity?.let { activity ->
+                    //     Omni.shared()?.registerTapToPayActivityProvider { activity }
+                    // }
                 },
                 error = { exception ->
                     log("There was an error initializing with token...")
@@ -250,83 +238,48 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
         }
     }
 
-    /**
-     * Connects to the Tap to Pay reader using the new simplified API
-     */
-    fun connectToTapReader() {
-        log("Connecting to Tap reader...")
-        
-        // Check location permissions - REQUIRED by NMI for Tap to Pay
-        val context = MainApplication.context
-        val fineLocationGranted = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-        
-        val coarseLocationGranted = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-        
-        // Log to logcat for debugging
-        Log.d("StaxViewModel", "📍 Location Permissions Check:")
-        Log.d("StaxViewModel", "   ACCESS_FINE_LOCATION: ${if (fineLocationGranted) "✅ GRANTED" else "❌ DENIED"}")
-        Log.d("StaxViewModel", "   ACCESS_COARSE_LOCATION: ${if (coarseLocationGranted) "✅ GRANTED" else "❌ DENIED"}")
-        
-        log("📍 Location Permissions Check:")
-        log("   ACCESS_FINE_LOCATION: ${if (fineLocationGranted) "✅ GRANTED" else "❌ DENIED"}")
-        log("   ACCESS_COARSE_LOCATION: ${if (coarseLocationGranted) "✅ GRANTED" else "❌ DENIED"}")
-        
-        if (!fineLocationGranted || !coarseLocationGranted) {
-            Log.e("StaxViewModel", "⚠️ WARNING: Location permissions not granted - NMI SDK will fail attestation")
-            Log.e("StaxViewModel", "⚠️ Please grant location permissions and try again")
-            log("⚠️ WARNING: Location permissions not granted - NMI SDK will fail attestation")
-            log("⚠️ Please grant location permissions and try again")
-            _uiState.update { state ->
-                state.copy(tapReaderConnected = false)
-            }
-            return
-        }
-        
-        Log.d("StaxViewModel", "✅ Location permissions granted, proceeding with connection")
-        
-        // CRITICAL: Register RequestActivityListener BEFORE connecting to Tap to Pay
-        // This is required for NFC attestation and operations
-        currentActivity?.let { activity ->
-            Log.d("StaxViewModel", "🔑 Registering RequestActivityListener for Tap to Pay attestation")
-            log("🔑 Registering RequestActivityListener for NFC operations...")
-            Omni.shared()?.registerTapToPayActivityProvider { activity }
-        } ?: run {
-            Log.e("StaxViewModel", "⚠️ WARNING: No Activity set - Tap to Pay requires Activity for NFC operations")
-            log("⚠️ WARNING: No Activity set - Tap to Pay requires Activity for NFC operations")
-            log("⚠️ Call setActivity() before connecting to Tap reader")
-            _uiState.update { state ->
-                state.copy(tapReaderConnected = false)
-            }
-            return
-        }
-        
-        val tapReader = TapToPayReader(
-            testMode = true  // Use false for production
-        )
-        
-        Omni.shared()?.connectReader(
-            mobileReader = tapReader,
-            onConnected = { connectedReader ->
-                reader = connectedReader
-                log("Connected to Tap reader: ${connectedReader.getName()}")
-                _uiState.update { state ->
-                    state.copy(tapReaderConnected = true)
-                }
-            },
-            onFail = { errorMsg ->
-                log("Failed to connect to Tap reader: $errorMsg")
-                _uiState.update { state ->
-                    state.copy(tapReaderConnected = false)
-                }
-            }
-        )
-    }
+    // TODO: Enable Tap to Pay
+    // Uncomment the following method to enable connecting to the Tap to Pay reader.
+    // This connects a virtual NFC reader — no physical pairing is needed.
+    //
+    // fun connectToTapReader() {
+    //     log("Connecting to Tap reader...")
+    //
+    //     // Check location permissions — required by NMI for Tap to Pay attestation
+    //     val context = MainApplication.context
+    //     val fineLocationGranted = ContextCompat.checkSelfPermission(
+    //         context, Manifest.permission.ACCESS_FINE_LOCATION
+    //     ) == PackageManager.PERMISSION_GRANTED
+    //     val coarseLocationGranted = ContextCompat.checkSelfPermission(
+    //         context, Manifest.permission.ACCESS_COARSE_LOCATION
+    //     ) == PackageManager.PERMISSION_GRANTED
+    //
+    //     if (!fineLocationGranted || !coarseLocationGranted) {
+    //         log("Location permissions not granted — NMI SDK will fail attestation")
+    //         return
+    //     }
+    //
+    //     // Register RequestActivityListener before connecting
+    //     currentActivity?.let { activity ->
+    //         Omni.shared()?.registerTapToPayActivityProvider { activity }
+    //     } ?: run {
+    //         log("No Activity set — call setActivity() before connecting to Tap reader")
+    //         return
+    //     }
+    //
+    //     val tapReader = TapToPayReader(testMode = true)  // false for production
+    //
+    //     Omni.shared()?.connectReader(
+    //         mobileReader = tapReader,
+    //         onConnected = { connectedReader ->
+    //             reader = connectedReader
+    //             log("Connected to Tap reader: ${connectedReader.getName()}")
+    //         },
+    //         onFail = { errorMsg ->
+    //             log("Failed to connect to Tap reader: $errorMsg")
+    //         }
+    //     )
+    // }
 
     /**
      * Searches for readers over BLE, shows an alert dialog, and connects to it
@@ -334,13 +287,11 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
     fun onSearchAndConnectToReaders(context: Context) {
         log("Searching for readers...")
 
-
         /**
          * `Omni.shared().getAvailableReaders` returns a list of readers that you can potentially
          * connect to. These readers are searched over Bluetooth and not connected to when running
-         * `getAvailableReaders()`. To connect them, we'll need to run `Stax.instance().connectReader`
+         * `getAvailableReaders()`. To connect them, we'll need to run `Omni.shared().connectReader`
          */
-
         Omni.shared()?.getAvailableReaders { found ->
             val readers = found.map { "${it.getName()} - ${it.getConnectionType()}" }.toTypedArray()
             log("Found readers: ${found.map { it.getName() }}")
@@ -349,11 +300,6 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
                 val selected = found[which]
                 log("Trying to connect to [${selected.getName()}]...")
 
-                /**
-                 * Passing in one of the readers that was found, we call `Stax.instance().connectReader`
-                 * to initiate the Bluetooth connection to the hardware reader. Depending on if the
-                 * connection is a success or fail determines which of the two callbacks are called.
-                 */
                 Omni.shared()?.connectReader(
                     mobileReader = selected,
                     onConnected = { connected ->
@@ -370,134 +316,70 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
     }
 
     /**
-     * Performs a charge of $0.01 on the reader
-     * TODO: Read value from text input
+     * Performs a charge of $0.01 on the reader.
      */
     fun onPerformSaleWithReader() {
-        // Check if Tap reader should be connected but isn't
-        if (_uiState.value.tapToPayMode != TapToPayMode.DISABLED && !_uiState.value.tapReaderConnected) {
-            log("⚠ Tap reader not connected. Connecting now...")
-            connectToTapReader()
-            // Note: In production, you'd want to wait for connection before proceeding
-            // For this demo, we'll proceed anyway and let the SDK handle the error
-        }
-        
-        // The Amount class is used for handling off-by-one errors, rounding, and more
         val amount = Amount(1)
         val request = TransactionRequest(amount)
 
         log("Attempting to charge ${amount.dollarsString()}")
-        
-        // Determine which reader type to use based on current mode
-        val readerType = when (_uiState.value.tapToPayMode) {
-            TapToPayMode.TAP_TO_PAY_ONLY -> ReaderType.TAP_TO_PAY
-            TapToPayMode.HYBRID -> ReaderType.AUTO  // Auto-select based on connected reader
-            TapToPayMode.DISABLED -> ReaderType.EXTERNAL_READER
-        }
-        
-        log("Using reader type: $readerType")
-        
-        // Show Tap to Pay prompt if in Tap to Pay mode
-        // The TapToPayPrompt now handles all SDK callbacks automatically
-        if (_uiState.value.tapToPayMode != TapToPayMode.DISABLED) {
-            _uiState.update { state ->
-                state.copy(
-                    showTapToPayPrompt = true,
-                    transactionAmount = amount.dollarsString().replace("$", ""),
-                    transactionSubtotal = amount.dollarsString().replace("$", ""),
-                    transactionTip = "0.00",
-                    transactionRequest = request // Pass the request to TapToPayPrompt
-                )
+
+        Omni.shared()?.apply {
+            transactionUpdateListener = object : TransactionUpdateListener {
+                override fun onTransactionUpdate(transactionUpdate: TransactionUpdate) {
+                    log("${transactionUpdate.value} | ${transactionUpdate.userFriendlyMessage}")
+                }
             }
-        } else {
-            // For non-Tap to Pay modes, handle transaction directly
-            Omni.shared()?.apply {
-                // Listen to transaction updates delivered by the Stax SDK
-                transactionUpdateListener = object : TransactionUpdateListener {
-                    override fun onTransactionUpdate(transactionUpdate: TransactionUpdate) {
-                        log("${transactionUpdate.value} | ${transactionUpdate.userFriendlyMessage}")
-                        // Update UI with transaction status
-                        transactionUpdate.userFriendlyMessage?.let { msg ->
-                            updateTransactionStatus(msg)
-                        } ?: updateTransactionStatus(transactionUpdate.value)
-                    }
+
+            userNotificationListener = object : UserNotificationListener {
+                override fun onUserNotification(userNotification: UserNotification) {
+                    log("${userNotification.value} | ${userNotification.userFriendlyMessage}")
                 }
 
-                // Listen to user-level notifications
-                userNotificationListener = object : UserNotificationListener {
-                    override fun onUserNotification(userNotification: UserNotification) {
-                        log("${userNotification.value} | ${userNotification.userFriendlyMessage}")
-                    }
-
-                    override fun onRawUserNotification(userNotification: String) {
-                        log(userNotification)
-                    }
+                override fun onRawUserNotification(userNotification: String) {
+                    log(userNotification)
                 }
-
-                /**
-                 * To run a charge, you call the `Stax.instance().takeMobileReaderTransaction()` function
-                 * with explicit readerType parameter.
-                 */
-                takeMobileReaderTransaction(
-                    request = request,
-                    readerType = readerType,
-                    completion = { transaction ->
-                        if (transaction.success == true) {
-                            log("Successfully executed transaction")
-                        } else {
-                            log("Transaction declined")
-                        }
-                        lastTransaction = transaction
-                    },
-                    error = {
-                        log("Couldn't perform sale: ${it.message}. ${it.detail}")
-                    }
-                )
             }
+
+            // TODO: Enable Tap to Pay
+            // To use Tap to Pay for transactions, pass readerType = ReaderType.TAP_TO_PAY
+            // For hybrid mode (auto-select based on connected reader), use ReaderType.AUTO
+            // For external readers only, use ReaderType.EXTERNAL_READER or omit the parameter
+            //
+            // takeMobileReaderTransaction(
+            //     request = request,
+            //     readerType = ReaderType.TAP_TO_PAY,  // or ReaderType.AUTO for hybrid
+            //     completion = { ... },
+            //     error = { ... }
+            // )
+
+            takeMobileReaderTransaction(
+                request = request,
+                completion = { transaction ->
+                    if (transaction.success == true) {
+                        log("Successfully executed transaction")
+                    } else {
+                        log("Transaction declined")
+                    }
+                    lastTransaction = transaction
+                },
+                error = {
+                    log("Couldn't perform sale: ${it.message}. ${it.detail}")
+                }
+            )
         }
-    }
-    
-    /**
-     * Handles successful transaction completion from TapToPayPrompt
-     */
-    fun onTransactionSuccess(transaction: Transaction) {
-        log("Successfully executed transaction")
-        lastTransaction = transaction
-        _uiState.update { it.copy(showTapToPayPrompt = false) }
-    }
-    
-    /**
-     * Handles transaction error from TapToPayPrompt
-     */
-    fun onTransactionError(errorMessage: String) {
-        log("Transaction error: $errorMessage")
-        _uiState.update { it.copy(showTapToPayPrompt = false) }
-    }
-    
-    /**
-     * Cancels the Tap to Pay prompt
-     */
-    fun dismissTapToPayPrompt() {
-        _uiState.update { it.copy(showTapToPayPrompt = false) }
-        onCancelTransaction()
     }
 
     /**
      * Performs a pre auth of $0.01 on the reader
-     * TODO: Read value from text input
      */
     fun onPerformAuthWithReader() {
-        // The Amount class also supports floats for more human-readable values
         val amount = Amount(0.01)
         val request = TransactionRequest(amount)
         request.preauth = true
 
         log("Attempting to auth ${amount.dollarsString()}")
 
-        /**
-         * To run a Pre-Authorization, you call the `Stax.instance().takeMobileReaderTransaction()`
-         * function, but set the request.preauth value to `true.
-         */
         Omni.shared()?.takeMobileReaderTransaction(
             request = request,
             completion = { transaction ->
@@ -516,7 +398,6 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
 
     /**
      * Takes the last transaction as a pre-auth and attempts to capture it
-     * TODO: Read value from text input
      */
     fun onCaptureLastAuth() {
         if (lastTransaction?.id == null) { return }
@@ -526,17 +407,12 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
 
         log("Attempting to capture last auth...")
 
-        /**
-         * To capture a pre-authorized transaction, you call the `Stax.instance().capturePreAuthTransaction()`
-         * function. The function takes in an ID, as well as an optional amount. If no amount is
-         * passed in, the full pre-authorized value will be captured.
-         */
         Omni.shared()?.capturePreauthTransaction(
             transactionId = id,
             amount = amount,
             completion = { transaction ->
                 if (transaction.success == true) {
-                    log("Successfully authorized transaction")
+                    log("Successfully captured transaction")
                 } else {
                     log("Transaction declined")
                 }
@@ -556,10 +432,6 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
 
         log("Attempting to void last transaction...")
 
-        /**
-         * Voiding the last transaction only requires the transaction id of the transaction you
-         * would like to void.
-         */
         Omni.shared()?.voidTransaction(
             transactionId = id,
             completion = { transaction ->
@@ -573,26 +445,20 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
                 log("Couldn't perform void: ${it.message}. ${it.detail}")
             }
         )
-
     }
 
     /**
      * Tokenize the test card
      */
     fun onTokenizeCard() {
-        /**
-         * Tokenizing a credit card does not use the hardware, but it is a helpful tool for
-         * tokenizing cards for use with the API. To tokenize a credit card, you create a
-         * [CreditCard] object, and pass it into the `Stax.instance().tokenize()` function.
-         */
         val card = CreditCard(
-            personName = "John Doe",            // "First Last" format
-            cardNumber = "4111111111111111",    // A Test Credit Card number
-            cardExp = "0530",                   // "MMYY" format
-            addressZip = "55555",               // 5 digit zip code
-            address1 = "123 Orange Avenue",     // Street address
-            addressCity = "Orlando",            // City
-            addressState = "FL",                // State code. NOT the fully qualified state name
+            personName = "John Doe",
+            cardNumber = "4111111111111111",
+            cardExp = "0530",
+            addressZip = "55555",
+            address1 = "123 Orange Avenue",
+            addressCity = "Orlando",
+            addressState = "FL",
         )
 
         Omni.shared()?.tokenize(
@@ -601,7 +467,7 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
                 log("Successfully tokenized credit card")
                 log(paymentMethod.toString())
             },
-            error =  {
+            error = {
                 log("Couldn't tokenize card: ${it.message}. ${it.detail}")
             }
         )
@@ -611,11 +477,6 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
      * Show reader details
      */
     fun onGetConnectedReaderDetails() {
-        /**
-         * You can get some of the connection details for the hardware reader by running the
-         * `Stax.instance().getConnectedReader()` function. This allows you to read various
-         * hardware details that may be helpful for debugging issues with the Stax support team
-         */
         Omni.shared()?.getConnectedReader(
             onReaderFound = { reader ->
                 if (reader != null) {
@@ -635,10 +496,6 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
      * Disconnect the current reader
      */
     fun onDisconnectReader() {
-        /**
-         * You can disconnect the current reader by running the `Stax.instance().disconnectReader()`
-         * function. In this example, we check if the reader is connected before trying to disconnect.
-         */
         Omni.shared()?.apply {
             disconnectReader(
                 mobileReader = null,
@@ -678,13 +535,5 @@ class StaxViewModel : ViewModel(), UsbAccessoryListener {
 
     override fun onUsbAccessoryDisconnected() {
         log("IDTech Accessory Disconnected!")
-    }
-    
-    /**
-     * Registers the Activity delegate for Tap to Pay NFC operations.
-     */
-    private fun registerActivityDelegate() {
-        Omni.shared()?.registerTapToPayActivityProvider { currentActivity }
-        log("Registered Activity delegate for Tap to Pay")
     }
 }

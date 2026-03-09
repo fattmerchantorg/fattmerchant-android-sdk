@@ -1,8 +1,13 @@
 package com.fattmerchant.android.chipdna
 
 import android.app.Activity
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import com.creditcall.chipdnamobile.ChipDnaMobile
 import com.creditcall.chipdnamobile.IRequestActivityListener
+import com.creditcall.chipdnamobile.ParameterKeys
+import com.creditcall.chipdnamobile.ParameterValues
 import java.lang.ref.WeakReference
 
 /**
@@ -27,17 +32,25 @@ class RequestActivityDelegate(
     /**
      * Called by ChipDNA SDK when it needs the current Activity for NFC operations.
      *
-     * This is invoked during Tap to Pay transactions to:
-     * - Display NFC prompts to the user
-     * - Handle contactless card interactions
-     * - Manage transaction UI flow
+     * This is invoked during Tap to Pay transactions. The SDK requires us to immediately
+     * call [ChipDnaMobile.continueRequestedActivity] with an active, foregrounded Activity
+     * to proceed with the NFC payment flow (matching the ChipDnaMobileKotlinDemo pattern).
      */
     override fun onRequestActivity() {
         val activity = activityProvider()
         if (activity == null) {
             Log.w(TAG, "No activity available for ChipDNA SDK request")
-        } else {
-            Log.d(TAG, "Providing activity to ChipDNA SDK: ${activity.javaClass.simpleName}")
+            return
+        }
+
+        Log.d(TAG, "Providing activity to ChipDNA SDK: ${activity.javaClass.simpleName}")
+        // continueRequestedActivity must be called on the main thread (matching the demo pattern
+        // where it is invoked from Fragment.onViewCreated after launching on Dispatchers.Main).
+        Handler(Looper.getMainLooper()).post {
+            val response = ChipDnaMobile.getInstance().continueRequestedActivity(activity)
+            if (ParameterValues.FALSE == response?.getValue(ParameterKeys.Result)) {
+                Log.e(TAG, "continueRequestedActivity failed: ${response.getValue(ParameterKeys.Errors)}")
+            }
         }
     }
 }

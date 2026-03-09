@@ -609,7 +609,7 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
         coroutineScope.launch {
             val chipDnaDriver = mobileReaderDriverRepository.getDrivers()
                 .firstOrNull() as? com.fattmerchant.android.chipdna.ChipDnaDriver
-            
+
             chipDnaDriver?.let {
                 val delegate = com.fattmerchant.android.chipdna.RequestActivityDelegate(activityProvider)
                 it.registerRequestActivityListener(delegate)

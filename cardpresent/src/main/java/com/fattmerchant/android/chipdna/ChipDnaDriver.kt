@@ -16,6 +16,7 @@ import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.UserNotificationListener
 import com.fattmerchant.omni.data.Amount
+import com.fattmerchant.omni.data.ConnectionType
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.MobileReaderDriver
 import com.fattmerchant.omni.data.MobileReaderDriver.InitializeMobileReaderDriverException
@@ -908,7 +909,7 @@ internal class ChipDnaDriver :
     fun isTapToPayEnabled(): Boolean {
         return tapToPayConfig?.enabled == true
     }
-    
+
     fun getTapToPayConfiguration(): TapToPayConfiguration? {
         return tapToPayConfig
     }

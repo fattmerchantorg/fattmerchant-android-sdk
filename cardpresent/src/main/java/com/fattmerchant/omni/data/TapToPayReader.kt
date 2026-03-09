@@ -1,7 +1,5 @@
 package com.fattmerchant.omni.data
 
-import com.fattmerchant.android.chipdna.ConnectionType
-
 /**
  * Represents a virtual Tap to Pay reader for NFC-based contactless payments.
  *

@@ -12,7 +12,7 @@ group = findProperty("PUBLISH_GROUP_ID")?.toString() ?: (findProperty("group") a
 val publishVersion = "5.3.1"
 
 // MTF AAR artifact
-val mtfAarFile = file("../cardpresent/libs/cloud-commerce-sdk-mtf-5.3.1.aar")
+val mtfAarFile = file("libs/cloud-commerce-sdk-mtf-5.3.1.aar")
 configurations {
     create("default")
 }

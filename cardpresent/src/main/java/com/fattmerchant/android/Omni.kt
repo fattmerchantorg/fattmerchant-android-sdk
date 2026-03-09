@@ -66,7 +66,7 @@ class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
             params.application?.let {
                 paramMap["application"] = it
             }
-            
+
             // Pass Tap to Pay configuration if provided
             params.tapToPayConfig?.let {
                 paramMap["tapToPayConfig"] = it
@@ -76,7 +76,6 @@ class Omni internal constructor(omniApi: OmniApi) : CommonOmni(omniApi) {
             params.sandBoxKey?.let {
                 paramMap["sandboxKey"] = it
             }
-
 
             initialize(
                 paramMap,

@@ -16,7 +16,7 @@ android {
     defaultConfig {
         minSdk = 30
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        
+
         // Export ProGuard rules to consuming apps
         consumerProguardFiles("proguard-rules.pro")
     }
@@ -37,20 +37,6 @@ android {
         compose = true
     }
 
-    // Define product flavors to match cloudcommerce module
-    // This allows SDK users to choose between production and MTF (testing) environments
-    flavorDimensions += "environment"
-    productFlavors {
-        create("production") {
-            dimension = "environment"
-            // Production flavor uses the standard Cloud Commerce SDK
-        }
-        create("mtf") {
-            dimension = "environment"
-            // MTF flavor uses the Merchant Test Framework version for testing
-        }
-    }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -62,10 +48,7 @@ android {
     }
 
     publishing {
-        singleVariant("productionRelease") {
-            withSourcesJar()
-        }
-        singleVariant("mtfRelease") {
+        singleVariant("release") {
             withSourcesJar()
         }
     }
@@ -76,10 +59,18 @@ android {
 }
 
 dependencies {
-    // AndroidX AppCompat (Required by Cloud Commerce SDK themes)
+    // NMI Cloud Commerce SDK — compile-only, NOT bundled in the published artifact.
+    // Consumer apps must add the Cloud Commerce AAR + its dependencies per NMI docs:
+    // https://docs.nmi.com/docs/preparing-for-development-android
+    compileOnly(project(":cloudcommerce-production"))
+
+    // ChipDNA JARs (NMI reader SDK — bundled with cardpresent)
+    api(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+
+    // AndroidX AppCompat
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
-    
+
     // Jetpack Compose - For TapToPayPrompt UI
     implementation("androidx.activity:activity-compose:1.12.4")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
@@ -91,54 +82,14 @@ dependencies {
     api("androidx.compose.material3:material3")
     api("androidx.compose.runtime:runtime:1.10.3")
 
-    // NMI Cloud Commerce SDK - Tap to Pay Support
-    // Uses separate cloudcommerce modules for each flavor - JitPack will publish all modules
-    add("productionApi", project(":cloudcommerce-production"))
-    add("mtfApi", project(":cloudcommerce-mtf"))
-    
-    // NMI Legacy Dependencies
-    api(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-    //noinspection Aligned16KB
-    implementation("net.zetetic:sqlcipher-android:4.7.2@aar")
-    implementation("androidx.sqlite:sqlite:2.1.0")
-    implementation("com.jakewharton.timber:timber:4.7.1")
-
-    // Retrofit & OkHttp (Required by Cloud Commerce SDK)
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
-    implementation("com.squareup.okhttp3:okhttp:4.4.0")
-    implementation("com.squareup.okhttp3:okhttp-urlconnection:4.4.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.4.0")
-    
-    // Moshi & Gson (JSON Parsing)
+    // Moshi & Gson (JSON Parsing — used by data models)
     implementation("com.squareup.moshi:moshi-kotlin:1.15.2")
     implementation("com.google.code.gson:gson:2.8.6")
-    
-    // RxJava (Required by Cloud Commerce SDK)
-    implementation("io.reactivex.rxjava3:rxjava:3.0.0")
-    implementation("io.reactivex.rxjava3:rxandroid:3.0.0")
-    implementation("com.squareup.retrofit2:adapter-rxjava3:2.9.0")
-    
-    // Google Play Services - Location, Integrity & SafetyNet (Required for Tap to Pay)
-    implementation("com.google.android.gms:play-services-location:21.3.0")
-    implementation("com.google.android.play:integrity:1.6.0")
-    implementation("com.google.android.gms:play-services-safetynet:18.1.0")
-    
-    // Security (Required by Cloud Commerce SDK)
-    implementation("androidx.security:security-crypto:1.1.0-alpha06")
-    
-    // Apache Commons (Required by Cloud Commerce SDK)
-    implementation("commons-codec:commons-codec:1.11")
-    
-    // SLF4J (Required by Cloud Commerce SDK)
-    implementation("org.slf4j:slf4j-api:1.7.30")
-    
+
     // Kotlin
     implementation("androidx.core:core-ktx:1.8.0")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.0")
-    
+
     // Kotlin Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
@@ -148,6 +99,28 @@ dependencies {
     implementation("io.ktor:ktor-client-okhttp:3.4.0")
     implementation("io.ktor:ktor-client-content-negotiation:3.4.0")
     implementation("io.ktor:ktor-serialization-gson:3.4.0")
+
+    // Required by Cloud Commerce SDK (bundled so consumer apps don't need to add these)
+    //noinspection Aligned16KB
+    implementation("net.zetetic:sqlcipher-android:4.7.2@aar")
+    implementation("androidx.sqlite:sqlite:2.1.0")
+    implementation("com.jakewharton.timber:timber:4.7.1")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.4.0")
+    implementation("com.squareup.okhttp3:okhttp-urlconnection:4.4.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.4.0")
+    implementation("io.reactivex.rxjava3:rxjava:3.0.0")
+    implementation("io.reactivex.rxjava3:rxandroid:3.0.0")
+    implementation("com.squareup.retrofit2:adapter-rxjava3:2.9.0")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("com.google.android.play:integrity:1.6.0")
+    implementation("com.google.android.gms:play-services-safetynet:18.1.0")
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation("commons-codec:commons-codec:1.11")
+    implementation("org.slf4j:slf4j-api:1.7.30")
 }
 
 // Ensure Kotlin metadata is properly generated for top-level functions
@@ -157,29 +130,29 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
         freeCompilerArgs.add("-module-name=cardpresent")
     }
 }
-// Publishing configuration for product flavors
+
+// Publishing configuration - single variant (no more production/mtf flavors)
 afterEvaluate {
     publishing {
         publications {
-            // Production variant publication
-            create<MavenPublication>("productionRelease") {
-                from(components["productionRelease"])
+            create<MavenPublication>("release") {
+                from(components["release"])
                 groupId = group.toString()
-                artifactId = "cardpresent-production"
+                artifactId = "cardpresent"
                 version = findProperty("PUBLISH_VERSION") as String? ?: "2.7.0"
-                
+
                 pom {
-                    name.set("Fattmerchant Android SDK - Card Present (Production)")
-                    description.set("Accept payments on Android using card readers and NFC Tap to Pay - Production version")
+                    name.set("Fattmerchant Android SDK - Card Present")
+                    description.set("Accept payments on Android using card readers and NFC Tap to Pay")
                     url.set("https://github.com/fattmerchantorg/fattmerchant-android-sdk")
-                    
+
                     licenses {
                         license {
                             name.set("MIT License")
                             url.set("https://opensource.org/licenses/MIT")
                         }
                     }
-                    
+
                     developers {
                         developer {
                             id.set("fattmerchant")
@@ -187,42 +160,7 @@ afterEvaluate {
                             email.set("support@fattmerchant.com")
                         }
                     }
-                    
-                    scm {
-                        connection.set("scm:git:git://github.com/fattmerchantorg/fattmerchant-android-sdk.git")
-                        developerConnection.set("scm:git:ssh://git@github.com:fattmerchantorg/fattmerchant-android-sdk.git")
-                        url.set("https://github.com/fattmerchantorg/fattmerchant-android-sdk")
-                    }
-                }
-            }
-            
-            // MTF (testing) variant publication
-            create<MavenPublication>("mtfRelease") {
-                from(components["mtfRelease"])
-                groupId = group.toString()
-                artifactId = "cardpresent-mtf"
-                version = findProperty("PUBLISH_VERSION") as String? ?: "2.7.0"
-                
-                pom {
-                    name.set("Fattmerchant Android SDK - Card Present (MTF)")
-                    description.set("Accept payments on Android using card readers and NFC Tap to Pay - MTF testing version")
-                    url.set("https://github.com/fattmerchantorg/fattmerchant-android-sdk")
-                    
-                    licenses {
-                        license {
-                            name.set("MIT License")
-                            url.set("https://opensource.org/licenses/MIT")
-                        }
-                    }
-                    
-                    developers {
-                        developer {
-                            id.set("fattmerchant")
-                            name.set("Fattmerchant")
-                            email.set("support@fattmerchant.com")
-                        }
-                    }
-                    
+
                     scm {
                         connection.set("scm:git:git://github.com/fattmerchantorg/fattmerchant-android-sdk.git")
                         developerConnection.set("scm:git:ssh://git@github.com:fattmerchantorg/fattmerchant-android-sdk.git")

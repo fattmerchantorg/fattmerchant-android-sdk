@@ -1,6 +1,5 @@
 package com.fattmerchant.omni.usecase
 
-import com.fattmerchant.android.chipdna.ChipDnaDriver
 import com.fattmerchant.omni.SignatureProviding
 import com.fattmerchant.omni.TransactionUpdateListener
 import com.fattmerchant.omni.UserNotificationListener
@@ -44,7 +43,7 @@ internal class TakeMobileReaderPayment(
             val transactionMeta = mutableMapOf<String, Any>()
 
             when {
-                result.source.contains(ChipDnaDriver().source) -> {
+                result.source.contains("NMI") -> {
                     result.userReference?.let {
                         transactionMeta["nmiUserRef"] = it
                     }

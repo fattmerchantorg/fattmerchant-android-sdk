@@ -1,7 +1,5 @@
 package com.fattmerchant.omni.data
 
-import com.fattmerchant.android.chipdna.ConnectionType
-
 /**
  * A mobile reader that can take a payment
  */

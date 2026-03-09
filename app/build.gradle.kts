@@ -24,11 +24,13 @@ android {
             useSupportLibrary = true
         }
 
-        // Default values — overridden by the chipdnatest flavor below
-        buildConfigField("Boolean", "IS_NMI_TEST_FLAVOR", "false")
-        buildConfigField("String", "NMI_TEST_API_KEY", "\"\"")
-        buildConfigField("String", "NMI_TEST_APP_ID", "\"\"")
-        buildConfigField("String", "NMI_TEST_CERT_FINGERPRINT", "\"\"")
+        // TODO: Enable Tap to Pay
+        // These BuildConfig fields are used by the chipdnatest flavor (commented out below).
+        // Uncomment when enabling the chipdnatest flavor.
+        // buildConfigField("Boolean", "IS_NMI_TEST_FLAVOR", "false")
+        // buildConfigField("String", "NMI_TEST_API_KEY", "\"\"")
+        // buildConfigField("String", "NMI_TEST_APP_ID", "\"\"")
+        // buildConfigField("String", "NMI_TEST_CERT_FINGERPRINT", "\"\"")
     }
 
     packaging {
@@ -42,7 +44,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    // Define product flavors to match cardpresent module
+    // Flavors select which Cloud Commerce SDK variant to use
     flavorDimensions += "environment"
     productFlavors {
         create("production") {
@@ -52,18 +54,22 @@ android {
             dimension = "environment"
             applicationIdSuffix = ".mtf"
         }
-        // chipdnatest: uses NMI's pre-registered test identity so we can validate our SDK code path
-        // against the same sandbox environment where ChipDnaMobileKotlinDemo succeeds.
-        // Falls back to the MTF variant of :cardpresent (sandbox Cloud Commerce SDK).
-        create("chipdnatest") {
-            dimension = "environment"
-            applicationId = "com.creditcall.chipdnamobiledev"
-            matchingFallbacks += listOf("mtf")
-            buildConfigField("Boolean", "IS_NMI_TEST_FLAVOR", "true")
-            buildConfigField("String", "NMI_TEST_API_KEY", "\"7WXb667D6MSj5CcWj85Bf3Jn5F6DqAW5\"")
-            buildConfigField("String", "NMI_TEST_APP_ID", "\"STAXDEMO\"")
-            buildConfigField("String", "NMI_TEST_CERT_FINGERPRINT", "\"03:F9:1D:8A:E7:8F:E3:8A:0E:48:1F:93:46:84:32:0E:B3:DB:F3:2F:7B:3C:4D:26:EE:82:1F:A0:56:46:21:31\"")
-        }
+        // TODO: Enable Tap to Pay
+        // chipdnatest: uses NMI's pre-registered test identity so you can validate the SDK
+        // code path against the same sandbox environment where ChipDnaMobileKotlinDemo succeeds.
+        // Make sure the applicationId matches the one registered with NMI for Tap to Pay.
+        // Make sure the APK is signed with the keystore matching the certificate fingerprint
+        // shared with NMI.
+        //
+        // create("chipdnatest") {
+        //     dimension = "environment"
+        //     applicationId = "com.creditcall.chipdnamobiledev"  // NMI pre-registered package name
+        //     matchingFallbacks += listOf("mtf")
+        //     buildConfigField("Boolean", "IS_NMI_TEST_FLAVOR", "true")
+        //     buildConfigField("String", "NMI_TEST_API_KEY", "\"YOUR_NMI_API_KEY\"")
+        //     buildConfigField("String", "NMI_TEST_APP_ID", "\"YOUR_APP_ID\"")
+        //     buildConfigField("String", "NMI_TEST_CERT_FINGERPRINT", "\"YOUR_CERT_SHA256_FINGERPRINT\"")
+        // }
     }
 
     buildTypes {
@@ -93,8 +99,16 @@ android {
 }
 
 dependencies {
-    // Stax SDK (includes Cloud Commerce SDK transitively)
+    // Stax SDK (includes ChipDNA driver + all Cloud Commerce transitive deps)
     implementation(project(":cardpresent"))
+
+    // TODO: Enable Tap to Pay
+    // The NMI Cloud Commerce SDK AAR is ONLY required for Tap to Pay (NFC) transactions.
+    // If you don't need Tap to Pay, you can leave these commented out.
+    // https://docs.nmi.com/docs/preparing-for-development-android
+    // add("productionImplementation", project(mapOf("path" to ":CloudCommerceSDK", "configuration" to "prod")))
+    // add("mtfImplementation", project(mapOf("path" to ":CloudCommerceSDK", "configuration" to "mtf")))
+    // add("chipdnatestImplementation", project(mapOf("path" to ":CloudCommerceSDK", "configuration" to "mtf")))
 
     // Dependencies
     implementation("androidx.appcompat:appcompat:1.7.1")

@@ -12,7 +12,7 @@ group = findProperty("PUBLISH_GROUP_ID")?.toString() ?: (findProperty("group") a
 val publishVersion = "5.3.1"
 
 // Production AAR artifact
-val productionAarFile = file("../cardpresent/libs/cloud-commerce-sdk-5.3.1.aar")
+val productionAarFile = file("libs/cloud-commerce-sdk-5.3.1.aar")
 configurations {
     create("default")
 }

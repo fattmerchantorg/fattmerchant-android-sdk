@@ -155,4 +155,5 @@ internal interface MobileReaderDriver {
      */
     @Throws(CancelCurrentTransactionException::class)
     suspend fun cancelCurrentTransaction(error: ((OmniException) -> Unit)?): Boolean
+
 }

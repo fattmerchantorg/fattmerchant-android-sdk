@@ -6,6 +6,7 @@ import com.creditcall.chipdnamobile.DeviceStatus
 import com.creditcall.chipdnamobile.ParameterKeys
 import com.creditcall.chipdnamobile.ParameterValues
 import com.creditcall.chipdnamobile.Parameters
+import com.fattmerchant.omni.data.ConnectionType
 import com.fattmerchant.omni.data.MobileReader
 import com.fattmerchant.omni.data.TransactionRequest
 import com.fattmerchant.omni.data.TransactionUpdate
@@ -17,35 +18,6 @@ import java.util.Date
 import java.util.Locale
 import com.creditcall.chipdnamobile.TransactionUpdate as ChipDnaTransactionUpdate
 import com.creditcall.chipdnamobile.UserNotification as ChipDnaUserNotification
-
-enum class ConnectionType {
-    BT,
-    BLE,
-    USB,
-    NFC,    // Added for Tap to Pay support
-    UNKNOWN;
-
-    companion object {
-        fun parse(str: String): ConnectionType {
-            val bt = ParameterValues.BluetoothConnectionType
-            val ble = ParameterValues.BluetoothLeConnectionType
-            val usb = ParameterValues.UsbConnectionType
-
-            return if (str.equals(bt, ignoreCase = true)) { BT }
-            else if (str.equals(ble, ignoreCase = true)) { BLE }
-            else if (str.equals(usb, ignoreCase = true)) { USB }
-            else if (str.equals("NFC", ignoreCase = true)) { NFC }
-            else { UNKNOWN }
-        }
-    }
-
-    fun toParameterValue(): String {
-        return if (this == BT) { ParameterValues.BluetoothConnectionType }
-        else if (this == BLE) { ParameterValues.BluetoothLeConnectionType }
-        else if (this == USB) { ParameterValues.UsbConnectionType }
-        else { ParameterValues.BluetoothLeConnectionType } // Default to BLE
-    }
-}
 
 /**
  * Attempts to get the connected mobile reader.

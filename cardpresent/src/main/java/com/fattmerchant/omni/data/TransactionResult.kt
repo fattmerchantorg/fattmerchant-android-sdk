@@ -1,6 +1,5 @@
 package com.fattmerchant.omni.data
 
-import com.fattmerchant.android.chipdna.ChipDnaDriver
 import com.fattmerchant.omni.data.models.Customer
 import com.fattmerchant.omni.data.models.Invoice
 import com.fattmerchant.omni.data.models.PaymentMethod
@@ -115,7 +114,7 @@ open class TransactionResult {
         var transactionMeta = this.transactionMeta ?: mutableMapOf()
 
         when {
-            source.contains(ChipDnaDriver().source) -> {
+            source.contains("NMI") -> {
                 userReference?.let {
                     transactionMeta["nmiUserRef"] = it
                 }
