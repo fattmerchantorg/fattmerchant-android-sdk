@@ -303,12 +303,13 @@ class OmniApi {
         } catch (e: NoTransformationFoundException) {
             // We were expecting an object of type T, but couldn't transform the response body to T
             print(e)
-            throw e
+            error(Error(e.message ?: "Response transformation failed"))
+            return null
         } catch (e: Exception) {
-            // This happens when there was an error executing the request
-            // This is a good place to look at that exception and do something with it before throwing it back
+            // This happens when there was an error executing the request (network errors, DNS failures, etc.)
             print(e)
-            throw e
+            error(Error(e.message ?: "Network request failed"))
+            return null
         }
     }
 
@@ -374,12 +375,13 @@ class OmniApi {
         } catch (e: NoTransformationFoundException) {
             // We were expecting an object of type T, but couldn't transform the response body to T
             print(e)
-            throw e
+            error(Error(e.message ?: "Response transformation failed"))
+            return null
         } catch (e: Exception) {
-            // This happens when there was an error executing the request
-            // This is a good place to look at that exception and do something with it before throwing it back
+            // This happens when there was an error executing the request (network errors, DNS failures, etc.)
             print(e)
-            throw e
+            error(Error(e.message ?: "Network request failed"))
+            return null
         }
     }
 
