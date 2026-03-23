@@ -138,12 +138,6 @@ open class Omni internal constructor(internal var omniApi: OmniApi) {
                 mobileReaderDetails.anywhereCommerce?.let {
                     mutatedArgs["awc"] = it
                 }
-
-                InitializeDrivers(
-                    mobileReaderDriverRepository,
-                    mutatedArgs,
-                    coroutineContext
-                ).start(error)
             }
 
             InitializeDrivers(
