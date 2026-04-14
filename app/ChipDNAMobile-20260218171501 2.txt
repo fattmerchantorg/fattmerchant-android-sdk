@@ -1,0 +1,334 @@
+[Software Version : 4.1.0.201275325, Platform : Android, Device Model : Pixel 8, Software Name : ChipDna Mobile, Software Version Name : Asteroid, Device OS Version : 16]
+2026-02-18 17:15:01,371 131 INFO ChipDNAMobile ChipDnaStandardDevice: Timber intialized
+2026-02-18 17:15:01,373 131 INFO ChipDNAMobile ChipDnaStandardDevice: initialize: [PASSWORD : L=4, IS_SMART_POS_INTEGRATION : False]
+2026-02-18 17:15:01,404 131 INFO ChipDNAMobile DatabaseHelper: Creating database
+2026-02-18 17:15:01,570 131 INFO ChipDNAMobile LogFileUploader: Setting log capture dates to [from: to:]
+2026-02-18 17:15:01,572 131 INFO ChipDNAMobile OfflineManager: Schedule processing queue: 83824
+2026-02-18 17:15:01,572 131 INFO ChipDNAMobile ChipDnaMobileStatus: Set: IDLE
+2026-02-18 17:15:01,572 131 INFO ChipDNAMobile ChipDnaStandardDevice: Software Name: ChipDna Mobile
+2026-02-18 17:15:01,573 131 INFO ChipDNAMobile ChipDnaStandardDevice: Software Version Name: Asteroid
+2026-02-18 17:15:01,573 131 INFO ChipDNAMobile ChipDnaStandardDevice: Software Version: 4.1.0.201275325
+2026-02-18 17:15:01,573 131 INFO ChipDNAMobile ChipDnaStandardDevice: Platform: Android
+2026-02-18 17:15:01,574 131 INFO ChipDNAMobile ChipDnaStandardDevice: Device Model: Pixel 8
+2026-02-18 17:15:01,574 131 INFO ChipDNAMobile ChipDnaStandardDevice: Device OS Version: 16
+2026-02-18 17:15:01,574 131 INFO ChipDNAMobile ChipDnaStandardDevice: initialize response: [RESULT : True]
+2026-02-18 17:15:01,576 2 INFO ChipDNAMobile ChipDnaStandardDevice: getStatus:
+2026-02-18 17:15:01,583 2 INFO ChipDNAMobile ChipDnaStandardDevice: getStatus response: [VERSION_INFORMATION : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><VersionInformation><ChipDnaVersion>4.1.0.201275325</ChipDnaVersion><ChipDnaReleaseName>Asteroid</ChipDnaReleaseName><ChipDnaApplicationName>ChipDna Mobile</ChipDnaApplicationName></VersionInformation>, APPLICATION_IDENTIFIER : , REQUEST_QUEUE_STATUS : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><RequestQueueStatus><TotalNumberOfPendingRequests>0</TotalNumberOfPendingRequests><TotalNumberOfFailedRequests>0</TotalNumberOfFailedRequests><PendingRequestsStorageLimit>0</PendingRequestsStorageLimit><PendingRequestsValueLimit>0</PendingRequestsValueLimit><TotalPendingValueStored>0</TotalPendingValueStored><TotalFailedValueStored>0</TotalFailedValueStored><DateTimeFormat>dd/MM/yyyy HH:mm:ss</DateTimeFormat><PendingRequestTotalsByRequestType><Item><Key>RefundConf</Key><Value>0</Value></Item><Item><Key>SaleConf</Key><Value>0</Value></Item><Item><Key>Refund</Key><Value>0</Value></Item><Item><Key>Sale</Key><Value>0</Value></Item><Item><Key>RefundVoid</Key><Value>0</Value></Item><Item><Key>SaleVoid</Key><Value>0</Value></Item></PendingRequestTotalsByRequestType><PendingRequestVolumesByRequestType><Item><Key>RefundConf</Key><Value>0</Value></Item><Item><Key>SaleConf</Key><Value>0</Value></Item><Item><Key>Refund</Key><Value>0</Value></Item><Item><Key>Sale</Key><Value>0</Value></Item><Item><Key>RefundVoid</Key><Value>0</Value></Item><Item><Key>SaleVoid</Key><Value>0</Value></Item></PendingRequestVolumesByRequestType></RequestQueueStatus>, ENVIRONMENT : LIVE, TMS_STATUS : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><TmsStatus><DaysUntilConfigUpdateRequired>0</DaysUntilConfigUpdateRequired><RequiredConfigUpdateDateTime>20260218171501</RequiredConfigUpdateDateTime><DateTimeFormat>yyyyMMddHHmmss</DateTimeFormat></TmsStatus>, CHIPDNA_STATUS : IDLE, TERMINAL_STATUS : L=90, RESULT : True]
+2026-02-18 17:15:01,585 2 INFO ChipDNAMobile ChipDnaStandardDevice: getStatus:
+2026-02-18 17:15:01,588 2 INFO ChipDNAMobile ChipDnaStandardDevice: getStatus response: [VERSION_INFORMATION : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><VersionInformation><ChipDnaVersion>4.1.0.201275325</ChipDnaVersion><ChipDnaReleaseName>Asteroid</ChipDnaReleaseName><ChipDnaApplicationName>ChipDna Mobile</ChipDnaApplicationName></VersionInformation>, APPLICATION_IDENTIFIER : , REQUEST_QUEUE_STATUS : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><RequestQueueStatus><TotalNumberOfPendingRequests>0</TotalNumberOfPendingRequests><TotalNumberOfFailedRequests>0</TotalNumberOfFailedRequests><PendingRequestsStorageLimit>0</PendingRequestsStorageLimit><PendingRequestsValueLimit>0</PendingRequestsValueLimit><TotalPendingValueStored>0</TotalPendingValueStored><TotalFailedValueStored>0</TotalFailedValueStored><DateTimeFormat>dd/MM/yyyy HH:mm:ss</DateTimeFormat><PendingRequestTotalsByRequestType><Item><Key>RefundConf</Key><Value>0</Value></Item><Item><Key>SaleConf</Key><Value>0</Value></Item><Item><Key>Refund</Key><Value>0</Value></Item><Item><Key>Sale</Key><Value>0</Value></Item><Item><Key>RefundVoid</Key><Value>0</Value></Item><Item><Key>SaleVoid</Key><Value>0</Value></Item></PendingRequestTotalsByRequestType><PendingRequestVolumesByRequestType><Item><Key>RefundConf</Key><Value>0</Value></Item><Item><Key>SaleConf</Key><Value>0</Value></Item><Item><Key>Refund</Key><Value>0</Value></Item><Item><Key>Sale</Key><Value>0</Value></Item><Item><Key>RefundVoid</Key><Value>0</Value></Item><Item><Key>SaleVoid</Key><Value>0</Value></Item></PendingRequestVolumesByRequestType></RequestQueueStatus>, ENVIRONMENT : LIVE, TMS_STATUS : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><TmsStatus><DaysUntilConfigUpdateRequired>0</DaysUntilConfigUpdateRequired><RequiredConfigUpdateDateTime>20260218171501</RequiredConfigUpdateDateTime><DateTimeFormat>yyyyMMddHHmmss</DateTimeFormat></TmsStatus>, CHIPDNA_STATUS : IDLE, TERMINAL_STATUS : L=90, RESULT : True]
+2026-02-18 17:16:25,407 138 INFO ChipDNAMobile OfflineManager: Offline processing started
+2026-02-18 17:16:25,413 138 INFO ChipDNAMobile OfflineManager: No requests pending
+2026-02-18 17:16:25,414 138 INFO ChipDNAMobile OfflineManager: Processing complete
+2026-02-18 17:16:25,417 138 INFO ChipDNAMobile OfflineManager: Schedule processing queue: 117571
+2026-02-18 17:16:54,938 2 INFO ChipDNAMobile ChipDnaStandardDevice: setProperties: [CLIENT_SECRET : L=0, API_KEY : L=26, CLIENT_ID : L=0, ENVIRONMENT : STAGING, CERTIFICATE_FINGERPRINT : 73:18:C2:70:37:72:71:3F:79:67:E6:A6:2A:B6:BC:36:DF:C2:A8:BA:60:53:CB:9F:14:D7:84:FD:99:7D:C6:50, REGISTRATION_URL : ]
+2026-02-18 17:16:54,939 2 INFO ChipDNAMobile ChipDnaMobileStatus: Set: SETTING_PROPERTIES
+2026-02-18 17:16:54,943 2 INFO ChipDNAMobile ChipDnaMobileStatus: Set: IDLE
+2026-02-18 17:16:54,944 2 INFO ChipDNAMobile ChipDnaStandardDevice: setProperties response: [ERRORS : ApiKey, RESULT : False]
+2026-02-18 17:18:22,993 138 INFO ChipDNAMobile OfflineManager: Offline processing started
+2026-02-18 17:18:22,998 138 INFO ChipDNAMobile OfflineManager: No requests pending
+2026-02-18 17:18:22,999 138 INFO ChipDNAMobile OfflineManager: Processing complete
+2026-02-18 17:18:23,000 138 INFO ChipDNAMobile OfflineManager: Schedule processing queue: 96483
+2026-02-18 17:18:51,908 2 INFO ChipDNAMobile ChipDnaStandardDevice: setProperties: [CLIENT_SECRET : L=0, API_KEY : L=32, CLIENT_ID : L=0, ENVIRONMENT : STAGING, CERTIFICATE_FINGERPRINT : 73:18:C2:70:37:72:71:3F:79:67:E6:A6:2A:B6:BC:36:DF:C2:A8:BA:60:53:CB:9F:14:D7:84:FD:99:7D:C6:50, REGISTRATION_URL : ]
+2026-02-18 17:18:51,910 2 INFO ChipDNAMobile ChipDnaMobileStatus: Set: SETTING_PROPERTIES
+2026-02-18 17:18:51,944 2 INFO ChipDNAMobile ChipDnaMobileStatus: Set: IDLE
+2026-02-18 17:18:51,945 2 INFO ChipDNAMobile ChipDnaStandardDevice: setProperties response: [RESULT : True]
+2026-02-18 17:19:59,489 138 INFO ChipDNAMobile OfflineManager: Offline processing started
+2026-02-18 17:19:59,493 138 INFO ChipDNAMobile OfflineManager: No requests pending
+2026-02-18 17:19:59,494 138 INFO ChipDNAMobile OfflineManager: Processing complete
+2026-02-18 17:19:59,495 138 INFO ChipDNAMobile OfflineManager: Schedule processing queue: 82547
+2026-02-18 17:20:01,064 2 INFO ChipDNAMobile ChipDnaStandardDevice: setProperties: [CLIENT_SECRET : L=0, API_KEY : L=32, CLIENT_ID : L=0, APPLICATION_IDENTIFIER : NMIWBUK, ENVIRONMENT : STAGING, CERTIFICATE_FINGERPRINT : 73:18:C2:70:37:72:71:3F:79:67:E6:A6:2A:B6:BC:36:DF:C2:A8:BA:60:53:CB:9F:14:D7:84:FD:99:7D:C6:50, REGISTRATION_URL : ]
+2026-02-18 17:20:01,065 2 INFO ChipDNAMobile ChipDnaMobileStatus: Set: SETTING_PROPERTIES
+2026-02-18 17:20:01,089 2 INFO ChipDNAMobile ChipDnaMobileStatus: Set: IDLE
+2026-02-18 17:20:01,090 2 INFO ChipDNAMobile ChipDnaStandardDevice: setProperties response: [RESULT : True]
+2026-02-18 17:20:34,205 2 INFO ChipDNAMobile ChipDnaStandardDevice: connectAndConfigure: [TAP_TO_MOBILE_POI : True, APPLY_FIRMWARE_UPDATE : False, PAYMENT_DEVICE_POI : False]
+2026-02-18 17:20:34,210 2 INFO ChipDNAMobile ChipDnaMobileStatus: Set: CONNECTING_TO_PIN_PAD
+2026-02-18 17:20:34,212 2 INFO ChipDNAMobile ChipDnaStandardDevice: connectAndConfigure response: [RESULT : True]
+2026-02-18 17:20:34,214 146 INFO ChipDNAMobile ChipDnaStandardDevice: configurationUpdate notification: [CONFIGURATION_UPDATE : CONNECT_AND_CONFIGURE_STARTED]
+2026-02-18 17:20:34,241 146 DEBUG ChipDNAMobile ChipDnaStandardDevice: setTapToMobileOnly ? true
+2026-02-18 17:20:34,260 146 DEBUG ChipDNAMobile ChipDnaStandardDevice$C: connectAndConfigure - isPaymentDevice ? false, registerRequired ? true, isTapToMobile ? true, tapToMobileRegisterRequired ? true, getRegistrationType = null
+2026-02-18 17:20:34,262 146 INFO ChipDNAMobile ChipDnaStandardDevice: configurationUpdate notification: [CONFIGURATION_UPDATE : REGISTERING]
+2026-02-18 17:20:34,265 146 DEBUG ChipDNAMobile ChipDnaStandardDevice: registerTapToMobile
+2026-02-18 17:20:34,267 146 DEBUG ChipDNAMobile ChipDnaStandardDevice: setTapToMobilePoiInformation
+2026-02-18 17:20:34,269 146 DEBUG ChipDNAMobile ChipDnaStandardDevice: registerWithPaymentGateway - tapToMobileSpecific ? true
+2026-02-18 17:20:34,277 146 DEBUG ChipDNAMobile CardEaseXML: performPaymentGatewayRegisterRequest - tapToMobileSpecific ? true
+2026-02-18 17:20:36,264 146 DEBUG ChipDNAMobile ChipDnaStandardDevice: processSuccessfulRegistration - tapToMobileSpecific ? true
+2026-02-18 17:20:36,266 146 DEBUG ChipDNAMobile ChipDnaStandardDevice: processSuccessfulRegistration - set TapToMobile TerminalId & TransactionKey
+2026-02-18 17:20:36,267 146 DEBUG ChipDNAMobile ChipDnaStandardDevice: processSuccessfulRegistration - set CardEase TerminalId & TransactionKey
+2026-02-18 17:20:36,290 146 DEBUG ChipDNAMobile ChipDnaStandardDevice: registerTapToMobile - register with success ? true
+2026-02-18 17:20:36,306 146 DEBUG ChipDNAMobile ChipDnaStandardDevice$C: connectAndConfigure - isTapToMobileRegistered ? true
+2026-02-18 17:20:36,324 146 INFO ChipDNAMobile ChipDnaStandardDevice: configurationUpdate notification: [CONFIGURATION_UPDATE : PERFORMING_TMS_UPDATE]
+2026-02-18 17:20:37,052 146 INFO ChipDNAMobile LogFileUploader: Setting log capture dates to [from: to:]
+2026-02-18 17:20:37,649 146 INFO ChipDNAMobile TmsUpdateProperty: Tms Update Property - lastSuccessfulConfigUpdateTime  - 0
+2026-02-18 17:20:37,652 146 INFO ChipDNAMobile TmsUpdateProperty: Tms Update Property - requireFullConfigUpdate  - true
+2026-02-18 17:20:37,655 146 INFO ChipDNAMobile TmsUpdateProperty: Tms Update Property - lastConfigUpdateUtc  - null
+2026-02-18 17:20:37,657 146 INFO ChipDNAMobile TmsUpdateProperty: Tms Update Property - configUpdateRequired  - false
+2026-02-18 17:20:37,659 146 INFO ChipDNAMobile TmsUpdateProperty: Tms Update Property - lastSuccessfulStatusUpdateTime  - 1771435237028
+2026-02-18 17:20:37,660 146 INFO ChipDNAMobile TmsUpdateProperty: Tms Update Property - lastAttemptedStatusUpdateTime  - 1771435237028
+2026-02-18 17:20:37,710 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - Start document
+2026-02-18 17:20:37,712 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property _LogOfflineTransactionData (Unused)]
+2026-02-18 17:20:37,713 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property _OutputDebugging (Unused)]
+2026-02-18 17:20:37,714 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property _SimulateCommsFailure (Unused)]
+2026-02-18 17:20:37,716 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property AccountVerificationCvmRequired - N]
+2026-02-18 17:20:37,718 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property AccountVerificationSignatureCheckRequired - 0,0,0,0]
+2026-02-18 17:20:37,720 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property ApplicationGuiLatestVersion (Unused)]
+2026-02-18 17:20:37,721 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property ApplicationLatestVersion (Unused)]
+2026-02-18 17:20:37,722 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property ApplicationState (Unused)]
+2026-02-18 17:20:37,723 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property ApplicationUpdateUrl (Unused)]
+2026-02-18 17:20:37,724 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property AutoConfirmSupported - Y]
+2026-02-18 17:20:37,725 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property BinRangeWhitelistSupported - N]
+2026-02-18 17:20:37,726 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property CardDataInputCapability - 1,1,0,0]
+2026-02-18 17:20:37,727 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property CardReaderName (Unused)]
+2026-02-18 17:20:37,728 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property CardReaderVersion (Unused)]
+2026-02-18 17:20:37,729 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property CashSupported - N]
+2026-02-18 17:20:37,730 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property CertificationIdentifier - ]
+2026-02-18 17:20:37,731 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property ChequeSupported - N]
+2026-02-18 17:20:37,733 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property CommonUseSupported (Unused)]
+2026-02-18 17:20:37,734 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property ConfigRequiredUtc (Unused)]
+2026-02-18 17:20:37,735 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property DccProvider (Unused)]
+2026-02-18 17:20:37,736 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property DccSupported (Unused)]
+2026-02-18 17:20:37,738 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start file DefaultAmounts - File hash: ul6OlDSYCti96RH+S3OZHjbMHHs=]
+2026-02-18 17:20:37,742 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property DeferredAuthsSupported - N]
+2026-02-18 17:20:37,742 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property DelayOnlineProcessingSupported - N]
+2026-02-18 17:20:37,743 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start file FirmwareUpdateConfiguration - File hash: mv/s4NXnOhM4W5XjohMBsFTYa+c=]
+2026-02-18 17:20:37,745 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property FloorLimits - 0,0,0,0]
+2026-02-18 17:20:37,745 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property ForcedAcceptanceSupported - N]
+2026-02-18 17:20:37,746 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property InternationalDiallingCode - 44,0]
+2026-02-18 17:20:37,747 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property JwtAuthenticationUrl - https://secure.nmi.com/api/auth/v1/auth.php]
+2026-02-18 17:20:37,748 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property JwtExpiryPadding - 180]
+2026-02-18 17:20:37,748 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property JwtExpiryTime - 900]
+2026-02-18 17:20:37,749 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property LinkedRefundsSupported - Y]
+2026-02-18 17:20:37,750 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property LogCaptureBeginUtc (Unused)]
+2026-02-18 17:20:37,750 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property LogCaptureEndUtc (Unused)]
+2026-02-18 17:20:37,754 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property LogFileStoreCountLimit - 90]
+2026-02-18 17:20:37,755 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property MagstripeAccountTypesSupported - 1,0]
+2026-02-18 17:20:37,756 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property MaximumAmount - 2000000.0000]
+2026-02-18 17:20:37,756 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property MaximumDaysBetweenTmsUpdates - 45]
+2026-02-18 17:20:37,757 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property MerchantAccount (Unused)]
+2026-02-18 17:20:37,757 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property MerchantAccountAmex (Unused)]
+2026-02-18 17:20:37,758 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property MerchantAccountCashCheque (Unused)]
+2026-02-18 17:20:37,758 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property MerchantAccountDiners (Unused)]
+2026-02-18 17:20:37,759 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property MerchantAccounts - <MerchantAccounts><MerchantAccount><Merchant id="5b27f621-ee0c-f111-ad14-2cea7fe43139" ref="TST_NMI WB UK_123123" number="123123" alternative-number="123456789" category-code="5812">NMI WB UK</Merchant><Acquirer id="4bea3cf4-4b34-dc11-928e-001422187e37" code="TST">Test Acquirer</Acquirer><Provider id="3aab2983-3d8d-4fad-ac13-3545ce2997e0">CreditCall Test Host</Provider><CardSchemes><CardScheme id="1" type="0" dom-int="7">Visa</CardScheme><CardScheme id="2" type="0" dom-int="7">MasterCard</CardScheme><CardScheme id="3" type="0" dom-int="7">Maestro</CardScheme><CardScheme id="4" type="0" dom-int="7">Amex</CardScheme><CardScheme id="5" type="0" dom-int="7">JCB</CardScheme><CardScheme id="6" type="0" dom-int="7">Diners</CardScheme><CardScheme id="7" type="0" dom-int="7">Discover</CardScheme></CardSchemes><TransactionTypes><TransactionType id="0">Authorisation [Credit]</TransactionType><TransactionType id="1">Refund [Debit]</TransactionType><TransactionType id="3">PreAuth [Neither]</TransactionType><TransactionType id="4">Offline Authorisation [Credit]</TransactionType><TransactionType id="6">Standalone Refund [Debit]</TransactionType><TransactionType id="30">Deferred Auth</TransactionType></TransactionTypes><Currencies><Currency numeric-code="826" char-code="GBP" exponent="2" symbol="£" major-unit="Pound Sterling" minor-unit="Pence" /></Currencies></MerchantAccount></MerchantAccounts>]
+2026-02-18 17:20:37,762 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property MerchantCategoryCode (Unused)]
+2026-02-18 17:20:37,762 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property MerchantNameAndLocation - NMI WB UK]
+2026-02-18 17:20:37,763 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property MinimumAmount - 0.0000]
+2026-02-18 17:20:37,763 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property MinimumMinutesBetweenStatusChecks - 1440]
+2026-02-18 17:20:37,763 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start file MiuraConfig_sred-mag.cfg]
+2026-02-18 17:20:37,765 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start file MiuraConfig_sred-mag.cfg.sig]
+2026-02-18 17:20:37,765 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property MobilePos - Y]
+2026-02-18 17:20:37,766 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start file NCCTest]
+2026-02-18 17:20:37,766 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property NoCvmRefundsSupported - Y]
+2026-02-18 17:20:37,767 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property OfflineAuthsSupported - Y]
+2026-02-18 17:20:37,767 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property OfflineRequestRetryMaximumTimeInterval - 2592000]
+2026-02-18 17:20:37,767 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property OfflineRequestRetryMinimumTimeInterval - 86400]
+2026-02-18 17:20:37,767 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property OfflineSupport - 0]
+2026-02-18 17:20:37,768 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property OfflineTransactionVolumeLimits - -1,-1]
+2026-02-18 17:20:37,768 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property OperationHeadTimeout - 10000]
+2026-02-18 17:20:37,768 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property OperationPollTimeout - 5000]
+2026-02-18 17:20:37,769 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property OperationPostTimeout - 10000]
+2026-02-18 17:20:37,769 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property OperatorPin - length=4]
+2026-02-18 17:20:37,769 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property OperatorPinRequiredRefunds - N]
+2026-02-18 17:20:37,770 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property OperatorPinRequiredVerification - N,0]
+2026-02-18 17:20:37,770 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property PartialApprovalsCompletionSupport - 1]
+2026-02-18 17:20:37,770 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property PartialApprovalsSupported - N]
+2026-02-18 17:20:37,771 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start file PciP2PEConfig]
+2026-02-18 17:20:37,771 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property PciP2PESupported - N]
+2026-02-18 17:20:37,771 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property PciSecurityRebootTime (Unused)]
+2026-02-18 17:20:37,772 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property PinPadName - ]
+2026-02-18 17:20:37,772 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property PinPadVersion - ]
+2026-02-18 17:20:37,772 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property PreAuthsSupported - Y]
+2026-02-18 17:20:37,772 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property ReceiptCopyToEmailAddresses - ]
+2026-02-18 17:20:37,773 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property ReceiptCopyToSelf (Unused)]
+2026-02-18 17:20:37,773 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property ReceiptFooter - ]
+2026-02-18 17:20:37,774 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property ReceiptHeader - ]
+2026-02-18 17:20:37,774 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property ReceiptSourceEmail - 2]
+2026-02-18 17:20:37,774 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property ReceiptSourceSms - 2]
+2026-02-18 17:20:37,774 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property RefundAmountConfirmationRequired - 1,1,0,0]
+2026-02-18 17:20:37,775 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property RefundSignatureCheckRequired - 0,0,0,0]
+2026-02-18 17:20:37,775 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property RegisterMaintenanceSettings - EN=Y, CE=90d, OE=365d]
+2026-02-18 17:20:37,776 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property RequestQueueMaximumTimeInterval - 30m]
+2026-02-18 17:20:37,776 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property RequestQueueMinimumTimeInterval - 60s]
+2026-02-18 17:20:37,776 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property RequestQueueRandomTimeInterval - 60s]
+2026-02-18 17:20:37,777 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property SaleAmountConfirmationRequired - 1,1,0,0]
+2026-02-18 17:20:37,777 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property ServerTimeout - 45]
+2026-02-18 17:20:37,777 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property ServerUrl - https://test.cardeasexml.com/gw.cex]
+2026-02-18 17:20:37,778 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property SignatureCaptureSupported - N]
+2026-02-18 17:20:37,778 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property SignatureCheckRequired - Y]
+2026-02-18 17:20:37,778 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property SignatureCheckRequiredWhenNoCvm - N]
+2026-02-18 17:20:37,779 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property SoapPassword - ]
+2026-02-18 17:20:37,779 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property SoapUsername - ]
+2026-02-18 17:20:37,779 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property SpeedOptimisationFeaturesSupported - N]
+2026-02-18 17:20:37,780 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property StandaloneRefundsSupported - Y]
+2026-02-18 17:20:37,780 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property TapToMobileServerUrl - https://test.cardeasexml.com/gwdirect.cex]
+2026-02-18 17:20:37,780 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property TapToMobileSupported - Y]
+2026-02-18 17:20:37,781 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property TerminalCountryAlphaCodes - ]
+2026-02-18 17:20:37,781 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property TerminalCountryCode - 826]
+2026-02-18 17:20:37,781 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property TerminalCurrency - 826,GBP,2,£]
+2026-02-18 17:20:37,782 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property TerminalLanguage - en,eng]
+2026-02-18 17:20:37,782 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property TerminalProfileIdentifier (Unused)]
+2026-02-18 17:20:37,782 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property TerminalSerialNumber - 92819265]
+2026-02-18 17:20:37,783 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property TerminalState (Unused)]
+2026-02-18 17:20:37,783 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property TestReceiptSelectorOverride - ]
+2026-02-18 17:20:37,783 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property TippingAmountConfirmationRequired (Unused)]
+2026-02-18 17:20:37,784 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property TippingQueryPromptSupported (Unused)]
+2026-02-18 17:20:37,784 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property TippingSupported - 1,1,1]
+2026-02-18 17:20:37,784 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property TtmClientId - length=36]
+2026-02-18 17:20:37,784 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property TtmClientSecret - length=64]
+2026-02-18 17:20:37,785 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property ValidHomeNetworkIdentities (Unused)]
+2026-02-18 17:20:37,785 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start property VoiceReferralsSupported - N]
+2026-02-18 17:20:37,786 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property WebMisEmailAddress (Unused)]
+2026-02-18 17:20:37,786 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Received property WebMisUrl (Unused)]
+2026-02-18 17:20:37,786 146 INFO ChipDNAMobile TmsManager: TMS Response Parse - [Start file XmlEncryptionCertificate - File hash: YJHFvvi0u4OEfQ7OWxDNrqiIQRI= - Version: 20261102]
+2026-02-18 17:20:37,840 146 INFO ChipDNAMobile OfflineManager: Schedule processing queue: 83489
+2026-02-18 17:20:37,843 146 DEBUG ChipDNAMobile ChipDnaStandardDevice: connectToTapToMobile forceTmsUpdate ? false, fullTmsUpdate ? false
+2026-02-18 17:20:37,847 151 INFO ChipDNAMobile ChipDnaStandardDevice: Register maintenance
+2026-02-18 17:20:37,852 151 INFO ChipDNAMobile ChipDnaStandardDevice: Delete Completed Register Entries - Expiry Date [2025-11-20-17-20-37]
+2026-02-18 17:20:37,856 151 INFO ChipDNAMobile ChipDnaStandardDevice: Delete Completed Register Entries - Count = [0]
+2026-02-18 17:20:37,860 151 INFO ChipDNAMobile ChipDnaStandardDevice: Delete All Expired Register Entries - Expiry Date [2025-02-18-17-20-37]
+2026-02-18 17:20:37,860 146 INFO ChipDNAMobile CloudCommerceWrapper: initializing CCSDK - version 5.3.0
+2026-02-18 17:20:37,861 146 DEBUG ChipDNAMobile TapToMobile: isJwtExpired ? true
+2026-02-18 17:20:37,862 151 INFO ChipDNAMobile ChipDnaStandardDevice: Delete All Expired Register Entries - Count = [0]
+2026-02-18 17:20:37,864 136 INFO ChipDNAMobile ChipDnaStandardDevice: configurationUpdate notification: [CONFIGURATION_UPDATE : CHECKING_TAP_TO_MOBILE_CONFIGURATION]
+2026-02-18 17:20:37,869 152 INFO ChipDNAMobile TapToMobile$updateJwt: TapToMobile update JWT - started
+2026-02-18 17:20:38,919 152 DEBUG ChipDNAMobile JwtClient: sendFormURLEncodedRequest retrieved new access token with success.
+2026-02-18 17:20:38,924 152 INFO ChipDNAMobile TapToMobile$updateJwt: TapToMobile updated JWT token
+2026-02-18 17:20:38,929 146 DEBUG ChipDNAMobile TapToMobile: isUpdateRequired ? true
+2026-02-18 17:20:38,930 146 DEBUG ChipDNAMobile TapToMobile: configure
+2026-02-18 17:20:38,933 146 INFO ChipDNAMobile CloudCommerceWrapper: prepareSDK countryCode = GB, currencyCode = 0826, categoryCode = 5812
+2026-02-18 17:20:38,935 136 INFO ChipDNAMobile ChipDnaStandardDevice: configurationUpdate notification: [CONFIGURATION_UPDATE : UPDATING_TAP_TO_MOBILE_CONFIGURATION]
+2026-02-18 17:20:49,174 161 INFO ChipDNAMobile CloudCommerceWrapper$pr: Prepare finished with success, isForceUpgrade = false, isRecommendedUpgrade = false
+2026-02-18 17:20:49,181 161 DEBUG ChipDNAMobile CloudCommerceTapToMobil: onPrepareFinished - SdkUpgradeResponse(isForceUpgrade=false, isRecommendedUpgrade=false)
+2026-02-18 17:20:49,182 161 INFO ChipDNAMobile ChipDnaStandardDevice: TapToMobile configure - withSuccess ? true, error = null
+2026-02-18 17:20:49,183 161 INFO ChipDNAMobile ChipDnaMobileStatus: Set: IDLE
+2026-02-18 17:20:49,183 161 INFO ChipDNAMobile ChipDnaStandardDevice: connectionAndConfigureFinished notification: [TMS_UPDATE_UTC : 20260218172037, DATE_TIME_FORMAT : yyyyMMddHHmmss, RESULT : True]
+2026-02-18 17:20:57,608 142 INFO ChipDNAMobile ChipDnaStandardDevice: getAvailableCurrencies:
+2026-02-18 17:20:57,613 142 INFO ChipDNAMobile ChipDnaStandardDevice: getAvailableCurrencies response: [AVAILABLE_CURRENCIES : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><AvailableCurrencies><Currencies payment-method="Card"><Currency numeric-code="826" char-code="GBP" symbol="£" exponent="2" /></Currencies><Currencies payment-method="Cash" /><Currencies payment-method="Cheque" /></AvailableCurrencies>, RESULT : True]
+2026-02-18 17:21:15,208 2 INFO ChipDNAMobile ChipDnaStandardDevice: startTransaction: [CURRENCY : GBP, USER_REFERENCE : CDM-26-02-18-17.21.15, TRANSACTION_AUTH_PREFERENCE : ONLINE, PAN_KEY_ENTRY : False, OFFLINE_PROCESSING_MODE : AUTOMATIC, AMOUNT : 1000, MAGSTRIPE_DEBIT : False, AMOUNT_TYPE : ACTUAL_AMOUNT, PAYMENT_METHOD : CARD, PARTIAL_APPROVAL : False, TRANSACTION_TYPE : SALE, MAGSTRIPE_SIGNATURE : False]
+2026-02-18 17:21:15,210 2 INFO ChipDNAMobile ChipDnaMobileStatus: Set: PROCESSING_TRANSACTION
+2026-02-18 17:21:15,215 2 DEBUG ChipDNAMobile TapToMobile: isJwtExpired ? false
+2026-02-18 17:21:15,216 2 INFO ChipDNAMobile ChipDnaStandardDevice: startTransaction response: [RESULT : True]
+2026-02-18 17:21:15,219 136 INFO ChipDNAMobile ChipDnaStandardDevice: RequestActivityListener notification: notify 1 registered listeners
+2026-02-18 17:21:15,306 2 DEBUG ChipDNAMobile TapToMobile: setActivity
+2026-02-18 17:21:15,307 136 INFO ChipDNAMobile ChipDnaStandardDevice: transactionUpdate notification: [TRANSACTION_UPDATE : StartingTransaction]
+2026-02-18 17:21:15,315 2 INFO ChipDNAMobile CloudCommerceWrapper: initiatePayment - amountAuthorizedNumeric = 000000001000, tip = 000000000000, orderId = CDM-26-02-18-17.21.15, transactionCurrencyCode = 0826, configData = {country=GB}
+2026-02-18 17:21:19,447 161 INFO ChipDNAMobile CloudCommerceWrapper: performTransaction - amountAuthorizedNumeric = 000000001000, tip = 000000000000, transactionCurrencyCode = 0826, configData = {country=GB}
+2026-02-18 17:21:19,453 136 INFO ChipDNAMobile ChipDnaStandardDevice: transactionUpdate notification: [TRANSACTION_UPDATE : CardEntryPrompted]
+2026-02-18 17:21:42,020 161 DEBUG ChipDNAMobile CloudCommerceWrapper$pe: onTagDiscovered
+2026-02-18 17:21:46,015 158 FATAL ChipDNAMobile CloudCommerceWrapper$su: Failed to perform transaction: TRY_AGAIN - Original message: TRY AGAIN
+2026-02-18 17:21:46,020 158 INFO ChipDNAMobile CloudCommerceWrapper: performTransaction - amountAuthorizedNumeric = 000000001000, tip = 000000000000, transactionCurrencyCode = 0826, configData = {country=GB}
+2026-02-18 17:21:46,024 136 INFO ChipDNAMobile ChipDnaStandardDevice: transactionUpdate notification: [TRANSACTION_UPDATE : CardEntryPrompted]
+2026-02-18 17:21:46,204 136 INFO ChipDNAMobile ChipDnaStandardDevice: userNotification notification: [RESPONSE_REQUIRED : False, USER_NOTIFICATION : TryCardAgain]
+2026-02-18 17:21:46,723 2 INFO ChipDNAMobile ChipDnaStandardDevice: terminateTransaction:
+2026-02-18 17:21:46,725 2 DEBUG ChipDNAMobile TapToMobile: terminateTransaction
+2026-02-18 17:21:46,726 2 DEBUG ChipDNAMobile CloudCommerceTapToMobil: abortTransaction - canTerminateTransaction ? true
+2026-02-18 17:21:47,103 2 INFO ChipDNAMobile TapToMobile: ~transaction complete, state: null
+2026-02-18 17:21:47,106 2 INFO ChipDNAMobile ChipDnaStandardDevice: terminateTransaction response: [RESULT : True]
+2026-02-18 17:21:47,109 136 INFO ChipDNAMobile ChipDnaStandardDevice: transactionFinished notification: [ERRORS : MerchantTerminatedTransaction]
+2026-02-18 17:21:47,115 136 INFO ChipDNAMobile ChipDnaMobileStatus: Set: IDLE
+2026-02-18 17:21:57,258 2 INFO ChipDNAMobile ChipDnaStandardDevice: startTransaction: [CURRENCY : GBP, USER_REFERENCE : CDM-26-02-18-17.21.57, TRANSACTION_AUTH_PREFERENCE : ONLINE, PAN_KEY_ENTRY : False, OFFLINE_PROCESSING_MODE : AUTOMATIC, AMOUNT : 1000, MAGSTRIPE_DEBIT : False, AMOUNT_TYPE : ACTUAL_AMOUNT, PAYMENT_METHOD : CARD, PARTIAL_APPROVAL : False, TRANSACTION_TYPE : SALE, MAGSTRIPE_SIGNATURE : False]
+2026-02-18 17:21:57,259 2 INFO ChipDNAMobile ChipDnaMobileStatus: Set: PROCESSING_TRANSACTION
+2026-02-18 17:21:57,262 2 DEBUG ChipDNAMobile TapToMobile: isJwtExpired ? false
+2026-02-18 17:21:57,263 2 INFO ChipDNAMobile ChipDnaStandardDevice: startTransaction response: [RESULT : True]
+2026-02-18 17:21:57,264 136 INFO ChipDNAMobile ChipDnaStandardDevice: RequestActivityListener notification: notify 1 registered listeners
+2026-02-18 17:21:57,308 2 DEBUG ChipDNAMobile TapToMobile: setActivity
+2026-02-18 17:21:57,308 136 INFO ChipDNAMobile ChipDnaStandardDevice: transactionUpdate notification: [TRANSACTION_UPDATE : StartingTransaction]
+2026-02-18 17:21:57,312 2 INFO ChipDNAMobile CloudCommerceWrapper: initiatePayment - amountAuthorizedNumeric = 000000001000, tip = 000000000000, orderId = CDM-26-02-18-17.21.57, transactionCurrencyCode = 0826, configData = {country=GB}
+2026-02-18 17:22:01,042 161 INFO ChipDNAMobile CloudCommerceWrapper: performTransaction - amountAuthorizedNumeric = 000000001000, tip = 000000000000, transactionCurrencyCode = 0826, configData = {country=GB}
+2026-02-18 17:22:01,047 136 INFO ChipDNAMobile ChipDnaStandardDevice: transactionUpdate notification: [TRANSACTION_UPDATE : CardEntryPrompted]
+2026-02-18 17:22:01,335 150 INFO ChipDNAMobile OfflineManager: Offline processing started
+2026-02-18 17:22:01,343 150 INFO ChipDNAMobile OfflineManager: No requests pending
+2026-02-18 17:22:01,344 150 INFO ChipDNAMobile OfflineManager: Processing complete
+2026-02-18 17:22:01,344 150 INFO ChipDNAMobile OfflineManager: Schedule processing queue: 79341
+2026-02-18 17:22:02,045 2 INFO ChipDNAMobile ChipDnaStandardDevice: terminateTransaction:
+2026-02-18 17:22:02,047 2 DEBUG ChipDNAMobile TapToMobile: terminateTransaction
+2026-02-18 17:22:02,048 2 DEBUG ChipDNAMobile CloudCommerceTapToMobil: abortTransaction - canTerminateTransaction ? true
+2026-02-18 17:22:02,504 2 INFO ChipDNAMobile TapToMobile: ~transaction complete, state: null
+2026-02-18 17:22:02,506 2 INFO ChipDNAMobile ChipDnaStandardDevice: terminateTransaction response: [RESULT : True]
+2026-02-18 17:22:02,507 136 INFO ChipDNAMobile ChipDnaStandardDevice: transactionFinished notification: [ERRORS : MerchantTerminatedTransaction]
+2026-02-18 17:22:02,509 136 INFO ChipDNAMobile ChipDnaMobileStatus: Set: IDLE
+2026-02-18 17:22:50,200 2 INFO ChipDNAMobile ChipDnaStandardDevice: startTransaction: [CURRENCY : GBP, USER_REFERENCE : CDM-26-02-18-17.22.50, TRANSACTION_AUTH_PREFERENCE : ONLINE, PAN_KEY_ENTRY : False, AMOUNT_TYPE : ACTUAL_AMOUNT, PAYMENT_METHOD : CARD, PARTIAL_APPROVAL : False, TRANSACTION_TYPE : SALE, MAGSTRIPE_SIGNATURE : False, OFFLINE_PROCESSING_MODE : AUTOMATIC, AMOUNT : 123, MAGSTRIPE_DEBIT : False, TRANSACTION_POI : TAP_TO_MOBILE]
+2026-02-18 17:22:50,201 2 INFO ChipDNAMobile ChipDnaMobileStatus: Set: PROCESSING_TRANSACTION
+2026-02-18 17:22:50,204 2 DEBUG ChipDNAMobile TapToMobile: isJwtExpired ? false
+2026-02-18 17:22:50,205 2 INFO ChipDNAMobile ChipDnaStandardDevice: startTransaction response: [RESULT : True]
+2026-02-18 17:22:50,205 136 INFO ChipDNAMobile ChipDnaStandardDevice: RequestActivityListener notification: notify 1 registered listeners
+2026-02-18 17:22:50,241 2 DEBUG ChipDNAMobile TapToMobile: setActivity
+2026-02-18 17:22:50,242 136 INFO ChipDNAMobile ChipDnaStandardDevice: transactionUpdate notification: [TRANSACTION_UPDATE : StartingTransaction]
+2026-02-18 17:22:50,246 2 INFO ChipDNAMobile CloudCommerceWrapper: initiatePayment - amountAuthorizedNumeric = 000000000123, tip = 000000000000, orderId = CDM-26-02-18-17.22.50, transactionCurrencyCode = 0826, configData = {country=GB}
+2026-02-18 17:22:54,393 158 INFO ChipDNAMobile CloudCommerceWrapper: performTransaction - amountAuthorizedNumeric = 000000000123, tip = 000000000000, transactionCurrencyCode = 0826, configData = {country=GB}
+2026-02-18 17:22:54,406 136 INFO ChipDNAMobile ChipDnaStandardDevice: transactionUpdate notification: [TRANSACTION_UPDATE : CardEntryPrompted]
+2026-02-18 17:22:58,159 158 DEBUG ChipDNAMobile CloudCommerceWrapper$pe: onTagDiscovered
+2026-02-18 17:23:00,039 166 DEBUG ChipDNAMobile CloudCommerceWrapper$su: Transaction update paymentOutcomeResponse message: Card read OK Please remove card, uirdMessageID: CARD_READ_OK_REMOVED_CARD
+2026-02-18 17:23:00,042 136 INFO ChipDNAMobile ChipDnaStandardDevice: transactionUpdate notification: [TRANSACTION_UPDATE : CardTapped]
+2026-02-18 17:23:00,421 166 DEBUG ChipDNAMobile CloudCommerceWrapper$su: Transaction update paymentOutcomeResponse message: Authorising Please Wait, uirdMessageID: AUTHORISING
+2026-02-18 17:23:00,426 136 INFO ChipDNAMobile ChipDnaStandardDevice: transactionUpdate notification: [TRANSACTION_UPDATE : OnlineAuthorisation]
+2026-02-18 17:23:03,651 166 DEBUG ChipDNAMobile CloudCommerceWrapper$su: Transaction update paymentOutcomeResponse message: APPROVED, uirdMessageID: APPROVED
+2026-02-18 17:23:03,653 166 DEBUG ChipDNAMobile TransactionResponseKt: Partner Data Map: {cardHash=5gIrE+ZOrT63wtZfXAgDcjv/l3w=, issueNumber=01, cardReference=3f7ddf17-c84b-e911-a88f-002219649f24, cardSchemeAccountType=credit, cardSchemeId=2}
+2026-02-18 17:23:03,657 166 DEBUG ChipDNAMobile TransactionResponseKt: CVM Tags: [CvmTagsEntity(tag=9F34, value=1F0302)]
+2026-02-18 17:23:03,690 166 DEBUG ChipDNAMobile CloudCommerceWrapper$su: Transaction update paymentOutcomeResponse message: TransactionResponse(transactionId=11721739086, transactionOutcome=APPROVED, authorizedAmount=1.23, authorizationCode=373043434342, authorizationResponseCode=3030, cardBrandName=MASTERCARD, maskedCardNumber=5413xxxxxxxx0034, externalReferenceId=7c865574-ee0c-f111-a4ac-005056aa7803, message=APPROVED, issuer=NON_SCA, cardHash=5gIrE+ZOrT63wtZfXAgDcjv/l3w=, issueNumber=01, cardReference=3f7ddf17-c84b-e911-a88f-002219649f24, cardSchemeAccountType=credit, cardSchemeId=2, primaryAccountReference=null, applicationPreferredName=MCD03 v1 0, applicationIdentifier=A0000000041010, applicationCryptogram=047F62A7F787B19C, applicationTransactionCounter=0001, terminalVerificationResults=0000008001, issuerApplicationData=011003A00000000000000000000000000000, applicationPANSequenceNumber=01, cvmTags=[], cvmAction=NO_CVM)
+2026-02-18 17:23:03,693 166 DEBUG ChipDNAMobile CloudCommerceWrapper: Transaction finished
+2026-02-18 17:23:03,698 166 INFO ChipDNAMobile TapToMobile: ~transaction complete, state: Committed
+2026-02-18 17:23:03,735 136 INFO ChipDNAMobile ChipDnaStandardDevice: transactionFinished notification: [CURRENCY : GBP, USER_REFERENCE : CDM-26-02-18-17.22.50, TRANSACTION_RESULT : APPROVED, AUTH_CODE : 70CCCB, DATE_TIME_FORMAT : dd/MM/yyyy HH:mm:ss, PREFORMATTED_CUSTOMER_RECEIPT : 
+NMI WB UK
+AID: A0000000041010
+MCD03 v1 0
+Card: ************0034
+PAN Seq No: 01
+CONTACTLESS
+SALE
+Total: GBP1.23
+NO CARDHOLDER VERIFICATION
+APPROVED
+Auth Code: 70CCCB
+Ref: 7c865574-ee0
+Merchant: *****23123
+18/02/2026 17:23:03
+Please retain for your records
+Customer Copy
+
+, PREFORMATTED_MERCHANT_RECEIPT : 
+NMI WB UK
+AID: A0000000041010
+MCD03 v1 0
+Card: ************0034
+PAN Seq No: 01
+CONTACTLESS
+SALE
+Total: GBP1.23
+NO CARDHOLDER VERIFICATION
+APPROVED
+Auth Code: 70CCCB
+Ref: 7c865574-ee0
+Merchant: *****23123
+18/02/2026 17:23:03
+Please retain for your records
+Merchant Copy
+
+, TRANSACTION_TYPE : SALE, TRANSACTION_DATE_TIME : 18/02/2026 17:23:03, CARD_HASH_COLLECTION : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><CardHashes><CardHash scope="Platform" source="Platform">5gIrE+ZOrT63wtZfXAgDcjv/l3w=</CardHash></CardHashes>, ACQUIRER_RESPONSE_CODE : 3030, TRANSACTION_STATE : COMMITTED, AMOUNT : 123, CARD_SCHEME_ID : MASTERCARD, CARD_REFERENCE : 3f7ddf17-c84b-e911-a88f-002219649f24, CARD_EASE_REFERENCE : 7c865574-ee0c-f111-a4ac-005056aa7803, MASKED_PAN : 5413xx******0034, TRANSACTION_ID : 11721739086, TRANSACTION_DATE_TIME_UTC : 18/02/2026 17:23:03, RECEIPT_DATA : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><ReceiptData><ReceiptItem priority="1"><ReceiptItemId>cem.receipt.header</ReceiptItemId><Value></Value><Inclusion>Optional</Inclusion></ReceiptItem><ReceiptItem priority="15"><ReceiptItemId>cem.receipt.datetime</ReceiptItemId><Value>18/02/2026 17:23:03</Value><Inclusion>Mandatory</Inclusion></ReceiptItem><ReceiptItem priority="5"><ReceiptItemId>cem.receipt.maskedcardnumber</ReceiptItemId><Label>Card</Label><Value>************0034</Value><Inclusion>Mandatory</Inclusion></ReceiptItem><ReceiptItem priority="14"><ReceiptItemId>cem.receipt.merchantnumber</ReceiptItemId><Label>Merchant</Label><Value>*****23123</Value><Inclusion>Mandatory</Inclusion></ReceiptItem><ReceiptItem priority="2"><ReceiptItemId>cem.receipt.nameandaddress</ReceiptItemId><Value>NMI WB UK</Value><Inclusion>Mandatory</Inclusion></ReceiptItem><ReceiptItem priority="3"><ReceiptItemId>cem.receipt.applicationid</ReceiptItemId><Label>AID</Label><Value>A0000000041010</Value><Inclusion>Mandatory</Inclusion></ReceiptItem><ReceiptItem priority="7"><ReceiptItemId>cem.receipt.transactionsource</ReceiptItemId><Value>CONTACTLESS</Value><Inclusion>Mandatory</Inclusion></ReceiptItem><ReceiptItem priority="11"><ReceiptItemId>cem.receipt.result</ReceiptItemId><Value>APPROVED</Value><Inclusion>Mandatory</Inclusion></ReceiptItem><ReceiptItem priority="4"><ReceiptItemId>cem.receipt.app.preferred.name</ReceiptItemId><Value>MCD03 v1 0</Value><Inclusion>Mandatory</Inclusion></ReceiptItem><ReceiptItem priority="10"><ReceiptItemId>cem.receipt.cvm</ReceiptItemId><Value>NO CARDHOLDER VERIFICATION</Value><Inclusion>Mandatory</Inclusion></ReceiptItem><ReceiptItem priority="6"><ReceiptItemId>cem.receipt.pansequencenumber</ReceiptItemId><Label>PAN Seq No</Label><Value>01</Value><Inclusion>Mandatory</Inclusion></ReceiptItem><ReceiptItem priority="13"><ReceiptItemId>cem.receipt.cereference</ReceiptItemId><Label>Ref</Label><Value>7c865574-ee0</Value><Inclusion>Mandatory</Inclusion></ReceiptItem><ReceiptItem priority="8"><ReceiptItemId>cem.receipt.transactiontype</ReceiptItemId><Value>SALE</Value><Inclusion>Mandatory</Inclusion></ReceiptItem><ReceiptItem priority="9"><ReceiptItemId>cem.receipt.transactiontotal</ReceiptItemId><Label>Total</Label><Value>1.23</Value><Inclusion>Mandatory</Inclusion></ReceiptItem><ReceiptItem priority="16"><ReceiptItemId>cem.receipt.retention</ReceiptItemId><Value>Please retain for your records</Value><Inclusion>Optional</Inclusion></ReceiptItem><ReceiptItem priority="0"><ReceiptItemId>cem.receipt.transactioncurrency</ReceiptItemId><Value>GBP</Value><Inclusion>Mandatory</Inclusion></ReceiptItem><ReceiptItem priority="12"><ReceiptItemId>cem.receipt.authcode</ReceiptItemId><Label>Auth Code</Label><Value>70CCCB</Value><Inclusion>Mandatory</Inclusion></ReceiptItem></ReceiptData>]
+2026-02-18 17:23:03,737 136 INFO ChipDNAMobile ChipDnaMobileStatus: Set: IDLE
+2026-02-18 17:23:20,696 150 INFO ChipDNAMobile OfflineManager: Offline processing started
+2026-02-18 17:23:20,705 150 INFO ChipDNAMobile OfflineManager: No requests pending
+2026-02-18 17:23:20,707 150 INFO ChipDNAMobile OfflineManager: Processing complete
+2026-02-18 17:23:20,707 150 INFO ChipDNAMobile OfflineManager: Schedule processing queue: 68429
+2026-02-18 17:24:29,155 150 INFO ChipDNAMobile OfflineManager: Offline processing started
+2026-02-18 17:24:29,171 150 INFO ChipDNAMobile OfflineManager: No requests pending
+2026-02-18 17:24:29,175 150 INFO ChipDNAMobile OfflineManager: Processing complete
+2026-02-18 17:24:29,179 150 INFO ChipDNAMobile OfflineManager: Schedule processing queue: 75084
+2026-02-18 17:25:44,279 150 INFO ChipDNAMobile OfflineManager: Offline processing started
+2026-02-18 17:25:44,292 150 INFO ChipDNAMobile OfflineManager: No requests pending
+2026-02-18 17:25:44,297 150 INFO ChipDNAMobile OfflineManager: Processing complete
+2026-02-18 17:25:44,302 150 INFO ChipDNAMobile OfflineManager: Schedule processing queue: 67605
+2026-02-18 17:26:51,916 150 INFO ChipDNAMobile OfflineManager: Offline processing started
+2026-02-18 17:26:51,924 150 INFO ChipDNAMobile OfflineManager: No requests pending
+2026-02-18 17:26:51,928 150 INFO ChipDNAMobile OfflineManager: Processing complete
+2026-02-18 17:26:51,931 150 INFO ChipDNAMobile OfflineManager: Schedule processing queue: 79988
+2026-02-18 17:28:11,935 150 INFO ChipDNAMobile OfflineManager: Offline processing started
+2026-02-18 17:28:11,949 150 INFO ChipDNAMobile OfflineManager: No requests pending
+2026-02-18 17:28:11,954 150 INFO ChipDNAMobile OfflineManager: Processing complete
+2026-02-18 17:28:11,959 150 INFO ChipDNAMobile OfflineManager: Schedule processing queue: 75925
+2026-02-18 17:29:27,900 150 INFO ChipDNAMobile OfflineManager: Offline processing started
+2026-02-18 17:29:27,913 150 INFO ChipDNAMobile OfflineManager: No requests pending
+2026-02-18 17:29:27,918 150 INFO ChipDNAMobile OfflineManager: Processing complete
+2026-02-18 17:29:27,921 150 INFO ChipDNAMobile OfflineManager: Schedule processing queue: 69106
+2026-02-18 17:30:37,044 150 INFO ChipDNAMobile OfflineManager: Offline processing started
+2026-02-18 17:30:37,060 150 INFO ChipDNAMobile OfflineManager: No requests pending
+2026-02-18 17:30:37,064 150 INFO ChipDNAMobile OfflineManager: Processing complete
+2026-02-18 17:30:37,069 150 INFO ChipDNAMobile OfflineManager: Schedule processing queue: 116482

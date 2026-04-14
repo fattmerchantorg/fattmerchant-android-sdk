@@ -1,0 +1,177 @@
+[Software Version : 4.0.5.197893042, Platform : Android, Device Model : Pixel 6, Software Name : ChipDna Mobile, Software Version Name : Starfish, Device OS Version : 16]
+2026-02-16 21:47:33,811 2 INFO ChipDNAMobile oF: Timber intialized
+2026-02-16 21:47:33,812 2 INFO ChipDNAMobile oF: initialize: [PASSWORD : L=8, AUTO_CONFIRM : True]
+2026-02-16 21:47:34,246 2 INFO ChipDNAMobile oz: Setting log capture dates to [from: to:]
+2026-02-16 21:47:34,248 2 INFO ChipDNAMobile HD: Schedule processing queue: 110375
+2026-02-16 21:47:34,248 2 INFO ChipDNAMobile Ra: Set: IDLE
+2026-02-16 21:47:34,248 2 INFO ChipDNAMobile oF: Software Name: ChipDna Mobile
+2026-02-16 21:47:34,249 2 INFO ChipDNAMobile oF: Software Version Name: Starfish
+2026-02-16 21:47:34,249 2 INFO ChipDNAMobile oF: Software Version: 4.0.5.197893042
+2026-02-16 21:47:34,249 2 INFO ChipDNAMobile oF: Platform: Android
+2026-02-16 21:47:34,250 2 INFO ChipDNAMobile oF: Device Model: Pixel 6
+2026-02-16 21:47:34,250 2 INFO ChipDNAMobile oF: Device OS Version: 16
+2026-02-16 21:47:34,250 2 INFO ChipDNAMobile oF: initialize response: [RESULT : True]
+2026-02-16 21:47:34,252 2 INFO ChipDNAMobile oF: setProperties: [API_KEY : L=32, APPLICATION_IDENTIFIER : fattpayandroid, ENVIRONMENT : LIVE, CERTIFICATE_FINGERPRINT : 76:A5:B2:04:E2:55:86:8F:B9:82:E9:98:0C:63:CB:D6:D6:1F:42:A8:8B:57:3F:BE:EE:02:20:25:1A:1B:FE:BD]
+2026-02-16 21:47:34,252 2 INFO ChipDNAMobile Ra: Set: SETTING_PROPERTIES
+2026-02-16 21:47:34,269 2 INFO ChipDNAMobile Ra: Set: IDLE
+2026-02-16 21:47:34,269 2 INFO ChipDNAMobile oF: setProperties response: [RESULT : True]
+2026-02-16 21:47:34,270 2 INFO ChipDNAMobile oF: Timber intialized
+2026-02-16 21:47:34,270 2 INFO ChipDNAMobile oF: initialize: [PASSWORD : L=8, AUTO_CONFIRM : True]
+2026-02-16 21:47:34,271 2 INFO ChipDNAMobile oF: initialize response: [ERRORS : AlreadyInitialized, RESULT : False]
+2026-02-16 21:47:34,272 2 WARN ChipDNAMobile ChipDnaMobile: Failed to initialize ChipDna Mobile - AlreadyInitialized
+2026-02-16 21:47:34,272 2 INFO ChipDNAMobile oF: setProperties: [API_KEY : L=32, APPLICATION_IDENTIFIER : fattpayandroid, ENVIRONMENT : LIVE, CERTIFICATE_FINGERPRINT : 76:A5:B2:04:E2:55:86:8F:B9:82:E9:98:0C:63:CB:D6:D6:1F:42:A8:8B:57:3F:BE:EE:02:20:25:1A:1B:FE:BD]
+2026-02-16 21:47:34,273 2 INFO ChipDNAMobile Ra: Set: SETTING_PROPERTIES
+2026-02-16 21:47:34,283 2 INFO ChipDNAMobile Ra: Set: IDLE
+2026-02-16 21:47:34,283 2 INFO ChipDNAMobile oF: setProperties response: [RESULT : True]
+2026-02-16 21:47:34,290 2 INFO ChipDNAMobile oF: getStatus:
+2026-02-16 21:47:34,296 2 INFO ChipDNAMobile oF: getStatus response: [VERSION_INFORMATION : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><VersionInformation><ChipDnaVersion>4.0.5.197893042</ChipDnaVersion><ChipDnaReleaseName>Starfish</ChipDnaReleaseName><ChipDnaApplicationName>ChipDna Mobile</ChipDnaApplicationName></VersionInformation>, APPLICATION_IDENTIFIER : fattpayandroid, REQUEST_QUEUE_STATUS : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><RequestQueueStatus><TotalNumberOfPendingRequests>0</TotalNumberOfPendingRequests><TotalNumberOfFailedRequests>0</TotalNumberOfFailedRequests><PendingRequestsStorageLimit>0</PendingRequestsStorageLimit><PendingRequestsValueLimit>0</PendingRequestsValueLimit><TotalPendingValueStored>0</TotalPendingValueStored><TotalFailedValueStored>0</TotalFailedValueStored><DateTimeFormat>dd/MM/yyyy HH:mm:ss</DateTimeFormat><PendingRequestTotalsByRequestType><Item><Key>Refund</Key><Value>0</Value></Item><Item><Key>RefundConf</Key><Value>0</Value></Item><Item><Key>SaleConf</Key><Value>0</Value></Item><Item><Key>SaleVoid</Key><Value>0</Value></Item><Item><Key>RefundVoid</Key><Value>0</Value></Item><Item><Key>Sale</Key><Value>0</Value></Item></PendingRequestTotalsByRequestType><PendingRequestVolumesByRequestType><Item><Key>Refund</Key><Value>0</Value></Item><Item><Key>RefundConf</Key><Value>0</Value></Item><Item><Key>SaleConf</Key><Value>0</Value></Item><Item><Key>SaleVoid</Key><Value>0</Value></Item><Item><Key>RefundVoid</Key><Value>0</Value></Item><Item><Key>Sale</Key><Value>0</Value></Item></PendingRequestVolumesByRequestType></RequestQueueStatus>, ENVIRONMENT : LIVE, TMS_STATUS : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><TmsStatus><DaysUntilConfigUpdateRequired>0</DaysUntilConfigUpdateRequired><RequiredConfigUpdateDateTime>20260216164734</RequiredConfigUpdateDateTime><DateTimeFormat>yyyyMMddHHmmss</DateTimeFormat></TmsStatus>, CHIPDNA_STATUS : IDLE, TERMINAL_STATUS : L=154, POS_GUID : 6ceb8d8a-6acc-43c8-8eab-74e45c791d51, TAP_TO_MOBILE_POI_IDENTIFIER : ca74b1cd-1a51-45ec-a417-0bcf866774dc, RESULT : True]
+2026-02-16 21:47:34,297 2 INFO ChipDNAMobile oF: connectAndConfigure: [TAP_TO_MOBILE_POI : True, PAYMENT_DEVICE_POI : False]
+2026-02-16 21:47:34,299 2 INFO ChipDNAMobile Ra: Set: CONNECTING_TO_PIN_PAD
+2026-02-16 21:47:34,300 2 INFO ChipDNAMobile oF: connectAndConfigure response: [RESULT : True]
+2026-02-16 21:47:34,301 172 INFO ChipDNAMobile oF: configurationUpdate notification: [CONFIGURATION_UPDATE : CONNECT_AND_CONFIGURE_STARTED]
+2026-02-16 21:47:34,319 172 INFO ChipDNAMobile oF: configurationUpdate notification: [CONFIGURATION_UPDATE : REGISTERING]
+2026-02-16 21:47:34,494 172 INFO ChipDNAMobile oF: connectionAndConfigureFinished notification: [ERRORS : ServerCommunicationError,RegistrationRequired]
+2026-02-16 21:47:34,496 172 INFO ChipDNAMobile Ra: Set: IDLE
+2026-02-16 21:47:39,287 2 INFO ChipDNAMobile oF: Timber intialized
+2026-02-16 21:47:39,288 2 INFO ChipDNAMobile oF: initialize: [PASSWORD : L=8, AUTO_CONFIRM : True]
+2026-02-16 21:47:39,289 2 INFO ChipDNAMobile oF: initialize response: [ERRORS : AlreadyInitialized, RESULT : False]
+2026-02-16 21:47:39,289 2 WARN ChipDNAMobile ChipDnaMobile: Failed to initialize ChipDna Mobile - AlreadyInitialized
+2026-02-16 21:47:39,291 2 INFO ChipDNAMobile oF: setProperties: [API_KEY : L=32, APPLICATION_IDENTIFIER : fattpayandroid, ENVIRONMENT : LIVE, CERTIFICATE_FINGERPRINT : 76:A5:B2:04:E2:55:86:8F:B9:82:E9:98:0C:63:CB:D6:D6:1F:42:A8:8B:57:3F:BE:EE:02:20:25:1A:1B:FE:BD]
+2026-02-16 21:47:39,291 2 INFO ChipDNAMobile Ra: Set: SETTING_PROPERTIES
+2026-02-16 21:47:39,309 2 INFO ChipDNAMobile Ra: Set: IDLE
+2026-02-16 21:47:39,310 2 INFO ChipDNAMobile oF: setProperties response: [RESULT : True]
+2026-02-16 21:47:39,310 2 INFO ChipDNAMobile oF: Timber intialized
+2026-02-16 21:47:39,311 2 INFO ChipDNAMobile oF: initialize: [PASSWORD : L=8, AUTO_CONFIRM : True]
+2026-02-16 21:47:39,311 2 INFO ChipDNAMobile oF: initialize response: [ERRORS : AlreadyInitialized, RESULT : False]
+2026-02-16 21:47:39,311 2 WARN ChipDNAMobile ChipDnaMobile: Failed to initialize ChipDna Mobile - AlreadyInitialized
+2026-02-16 21:47:39,312 2 INFO ChipDNAMobile oF: setProperties: [API_KEY : L=32, APPLICATION_IDENTIFIER : fattpayandroid, ENVIRONMENT : LIVE, CERTIFICATE_FINGERPRINT : 76:A5:B2:04:E2:55:86:8F:B9:82:E9:98:0C:63:CB:D6:D6:1F:42:A8:8B:57:3F:BE:EE:02:20:25:1A:1B:FE:BD]
+2026-02-16 21:47:39,312 2 INFO ChipDNAMobile Ra: Set: SETTING_PROPERTIES
+2026-02-16 21:47:39,322 2 INFO ChipDNAMobile Ra: Set: IDLE
+2026-02-16 21:47:39,322 2 INFO ChipDNAMobile oF: setProperties response: [RESULT : True]
+2026-02-16 21:47:39,326 2 INFO ChipDNAMobile oF: getStatus:
+2026-02-16 21:47:39,330 2 INFO ChipDNAMobile oF: getStatus response: [VERSION_INFORMATION : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><VersionInformation><ChipDnaVersion>4.0.5.197893042</ChipDnaVersion><ChipDnaReleaseName>Starfish</ChipDnaReleaseName><ChipDnaApplicationName>ChipDna Mobile</ChipDnaApplicationName></VersionInformation>, APPLICATION_IDENTIFIER : fattpayandroid, REQUEST_QUEUE_STATUS : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><RequestQueueStatus><TotalNumberOfPendingRequests>0</TotalNumberOfPendingRequests><TotalNumberOfFailedRequests>0</TotalNumberOfFailedRequests><PendingRequestsStorageLimit>0</PendingRequestsStorageLimit><PendingRequestsValueLimit>0</PendingRequestsValueLimit><TotalPendingValueStored>0</TotalPendingValueStored><TotalFailedValueStored>0</TotalFailedValueStored><DateTimeFormat>dd/MM/yyyy HH:mm:ss</DateTimeFormat><PendingRequestTotalsByRequestType><Item><Key>Refund</Key><Value>0</Value></Item><Item><Key>RefundConf</Key><Value>0</Value></Item><Item><Key>SaleConf</Key><Value>0</Value></Item><Item><Key>SaleVoid</Key><Value>0</Value></Item><Item><Key>RefundVoid</Key><Value>0</Value></Item><Item><Key>Sale</Key><Value>0</Value></Item></PendingRequestTotalsByRequestType><PendingRequestVolumesByRequestType><Item><Key>Refund</Key><Value>0</Value></Item><Item><Key>RefundConf</Key><Value>0</Value></Item><Item><Key>SaleConf</Key><Value>0</Value></Item><Item><Key>SaleVoid</Key><Value>0</Value></Item><Item><Key>RefundVoid</Key><Value>0</Value></Item><Item><Key>Sale</Key><Value>0</Value></Item></PendingRequestVolumesByRequestType></RequestQueueStatus>, ENVIRONMENT : LIVE, TMS_STATUS : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><TmsStatus><DaysUntilConfigUpdateRequired>0</DaysUntilConfigUpdateRequired><RequiredConfigUpdateDateTime>20260216164739</RequiredConfigUpdateDateTime><DateTimeFormat>yyyyMMddHHmmss</DateTimeFormat></TmsStatus>, CHIPDNA_STATUS : IDLE, TERMINAL_STATUS : L=154, POS_GUID : 6ceb8d8a-6acc-43c8-8eab-74e45c791d51, TAP_TO_MOBILE_POI_IDENTIFIER : ca74b1cd-1a51-45ec-a417-0bcf866774dc, RESULT : True]
+2026-02-16 21:47:39,331 2 INFO ChipDNAMobile oF: connectAndConfigure: [TAP_TO_MOBILE_POI : True, PAYMENT_DEVICE_POI : False]
+2026-02-16 21:47:39,331 2 INFO ChipDNAMobile Ra: Set: CONNECTING_TO_PIN_PAD
+2026-02-16 21:47:39,332 2 INFO ChipDNAMobile oF: connectAndConfigure response: [RESULT : True]
+2026-02-16 21:47:39,333 185 INFO ChipDNAMobile oF: configurationUpdate notification: [CONFIGURATION_UPDATE : CONNECT_AND_CONFIGURE_STARTED]
+2026-02-16 21:47:39,350 185 INFO ChipDNAMobile oF: configurationUpdate notification: [CONFIGURATION_UPDATE : REGISTERING]
+2026-02-16 21:47:39,411 185 INFO ChipDNAMobile oF: connectionAndConfigureFinished notification: [ERRORS : ServerCommunicationError,RegistrationRequired]
+2026-02-16 21:47:39,414 185 INFO ChipDNAMobile Ra: Set: IDLE
+2026-02-16 21:47:54,738 2 INFO ChipDNAMobile oF: getAvailablePinPads: [SEARCH_PIN_PADS_USB : True, SEARCH_PIN_PADS_BLUETOOTH_LE : True]
+2026-02-16 21:47:54,739 2 INFO ChipDNAMobile oF: getAvailablePinPads response:
+2026-02-16 21:47:57,019 2 INFO ChipDNAMobile oF: Timber intialized
+2026-02-16 21:47:57,023 2 INFO ChipDNAMobile oF: initialize: [PASSWORD : L=8, AUTO_CONFIRM : True]
+2026-02-16 21:47:57,027 2 INFO ChipDNAMobile oF: initialize response: [ERRORS : AlreadyInitialized, RESULT : False]
+2026-02-16 21:47:57,030 2 WARN ChipDNAMobile ChipDnaMobile: Failed to initialize ChipDna Mobile - AlreadyInitialized
+2026-02-16 21:47:57,038 2 INFO ChipDNAMobile oF: setProperties: [API_KEY : L=32, APPLICATION_IDENTIFIER : fattpayandroid, ENVIRONMENT : LIVE, CERTIFICATE_FINGERPRINT : 76:A5:B2:04:E2:55:86:8F:B9:82:E9:98:0C:63:CB:D6:D6:1F:42:A8:8B:57:3F:BE:EE:02:20:25:1A:1B:FE:BD]
+2026-02-16 21:47:57,041 2 INFO ChipDNAMobile Ra: Set: SETTING_PROPERTIES
+2026-02-16 21:47:57,074 2 INFO ChipDNAMobile Ra: Set: IDLE
+2026-02-16 21:47:57,075 2 INFO ChipDNAMobile oF: setProperties response: [RESULT : True]
+2026-02-16 21:47:57,076 2 INFO ChipDNAMobile oF: Timber intialized
+2026-02-16 21:47:57,076 2 INFO ChipDNAMobile oF: initialize: [PASSWORD : L=8, AUTO_CONFIRM : True]
+2026-02-16 21:47:57,076 2 INFO ChipDNAMobile oF: initialize response: [ERRORS : AlreadyInitialized, RESULT : False]
+2026-02-16 21:47:57,076 2 WARN ChipDNAMobile ChipDnaMobile: Failed to initialize ChipDna Mobile - AlreadyInitialized
+2026-02-16 21:47:57,077 2 INFO ChipDNAMobile oF: setProperties: [API_KEY : L=32, APPLICATION_IDENTIFIER : fattpayandroid, ENVIRONMENT : LIVE, CERTIFICATE_FINGERPRINT : 76:A5:B2:04:E2:55:86:8F:B9:82:E9:98:0C:63:CB:D6:D6:1F:42:A8:8B:57:3F:BE:EE:02:20:25:1A:1B:FE:BD]
+2026-02-16 21:47:57,078 2 INFO ChipDNAMobile Ra: Set: SETTING_PROPERTIES
+2026-02-16 21:47:57,090 2 INFO ChipDNAMobile Ra: Set: IDLE
+2026-02-16 21:47:57,091 2 INFO ChipDNAMobile oF: setProperties response: [RESULT : True]
+2026-02-16 21:47:57,103 2 INFO ChipDNAMobile oF: getStatus:
+2026-02-16 21:47:57,107 2 INFO ChipDNAMobile oF: getStatus response: [VERSION_INFORMATION : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><VersionInformation><ChipDnaVersion>4.0.5.197893042</ChipDnaVersion><ChipDnaReleaseName>Starfish</ChipDnaReleaseName><ChipDnaApplicationName>ChipDna Mobile</ChipDnaApplicationName></VersionInformation>, APPLICATION_IDENTIFIER : fattpayandroid, REQUEST_QUEUE_STATUS : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><RequestQueueStatus><TotalNumberOfPendingRequests>0</TotalNumberOfPendingRequests><TotalNumberOfFailedRequests>0</TotalNumberOfFailedRequests><PendingRequestsStorageLimit>0</PendingRequestsStorageLimit><PendingRequestsValueLimit>0</PendingRequestsValueLimit><TotalPendingValueStored>0</TotalPendingValueStored><TotalFailedValueStored>0</TotalFailedValueStored><DateTimeFormat>dd/MM/yyyy HH:mm:ss</DateTimeFormat><PendingRequestTotalsByRequestType><Item><Key>Refund</Key><Value>0</Value></Item><Item><Key>RefundConf</Key><Value>0</Value></Item><Item><Key>SaleConf</Key><Value>0</Value></Item><Item><Key>SaleVoid</Key><Value>0</Value></Item><Item><Key>RefundVoid</Key><Value>0</Value></Item><Item><Key>Sale</Key><Value>0</Value></Item></PendingRequestTotalsByRequestType><PendingRequestVolumesByRequestType><Item><Key>Refund</Key><Value>0</Value></Item><Item><Key>RefundConf</Key><Value>0</Value></Item><Item><Key>SaleConf</Key><Value>0</Value></Item><Item><Key>SaleVoid</Key><Value>0</Value></Item><Item><Key>RefundVoid</Key><Value>0</Value></Item><Item><Key>Sale</Key><Value>0</Value></Item></PendingRequestVolumesByRequestType></RequestQueueStatus>, ENVIRONMENT : LIVE, TMS_STATUS : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><TmsStatus><DaysUntilConfigUpdateRequired>0</DaysUntilConfigUpdateRequired><RequiredConfigUpdateDateTime>20260216164757</RequiredConfigUpdateDateTime><DateTimeFormat>yyyyMMddHHmmss</DateTimeFormat></TmsStatus>, CHIPDNA_STATUS : IDLE, TERMINAL_STATUS : L=154, POS_GUID : 6ceb8d8a-6acc-43c8-8eab-74e45c791d51, TAP_TO_MOBILE_POI_IDENTIFIER : ca74b1cd-1a51-45ec-a417-0bcf866774dc, RESULT : True]
+2026-02-16 21:47:57,107 2 INFO ChipDNAMobile oF: connectAndConfigure: [TAP_TO_MOBILE_POI : True, PAYMENT_DEVICE_POI : False]
+2026-02-16 21:47:57,108 2 INFO ChipDNAMobile Ra: Set: CONNECTING_TO_PIN_PAD
+2026-02-16 21:47:57,109 2 INFO ChipDNAMobile oF: connectAndConfigure response: [RESULT : True]
+2026-02-16 21:47:57,109 197 INFO ChipDNAMobile oF: configurationUpdate notification: [CONFIGURATION_UPDATE : CONNECT_AND_CONFIGURE_STARTED]
+2026-02-16 21:47:57,110 2 INFO ChipDNAMobile oF: getStatus:
+2026-02-16 21:47:57,124 197 INFO ChipDNAMobile oF: configurationUpdate notification: [CONFIGURATION_UPDATE : REGISTERING]
+2026-02-16 21:47:57,126 2 INFO ChipDNAMobile oF: getStatus response: [VERSION_INFORMATION : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><VersionInformation><ChipDnaVersion>4.0.5.197893042</ChipDnaVersion><ChipDnaReleaseName>Starfish</ChipDnaReleaseName><ChipDnaApplicationName>ChipDna Mobile</ChipDnaApplicationName></VersionInformation>, APPLICATION_IDENTIFIER : fattpayandroid, REQUEST_QUEUE_STATUS : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><RequestQueueStatus><TotalNumberOfPendingRequests>0</TotalNumberOfPendingRequests><TotalNumberOfFailedRequests>0</TotalNumberOfFailedRequests><PendingRequestsStorageLimit>0</PendingRequestsStorageLimit><PendingRequestsValueLimit>0</PendingRequestsValueLimit><TotalPendingValueStored>0</TotalPendingValueStored><TotalFailedValueStored>0</TotalFailedValueStored><DateTimeFormat>dd/MM/yyyy HH:mm:ss</DateTimeFormat><PendingRequestTotalsByRequestType><Item><Key>Refund</Key><Value>0</Value></Item><Item><Key>RefundConf</Key><Value>0</Value></Item><Item><Key>SaleConf</Key><Value>0</Value></Item><Item><Key>SaleVoid</Key><Value>0</Value></Item><Item><Key>RefundVoid</Key><Value>0</Value></Item><Item><Key>Sale</Key><Value>0</Value></Item></PendingRequestTotalsByRequestType><PendingRequestVolumesByRequestType><Item><Key>Refund</Key><Value>0</Value></Item><Item><Key>RefundConf</Key><Value>0</Value></Item><Item><Key>SaleConf</Key><Value>0</Value></Item><Item><Key>SaleVoid</Key><Value>0</Value></Item><Item><Key>RefundVoid</Key><Value>0</Value></Item><Item><Key>Sale</Key><Value>0</Value></Item></PendingRequestVolumesByRequestType></RequestQueueStatus>, ENVIRONMENT : LIVE, TMS_STATUS : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><TmsStatus><DaysUntilConfigUpdateRequired>0</DaysUntilConfigUpdateRequired><RequiredConfigUpdateDateTime>20260216164757</RequiredConfigUpdateDateTime><DateTimeFormat>yyyyMMddHHmmss</DateTimeFormat></TmsStatus>, CHIPDNA_STATUS : CONNECTING_TO_PIN_PAD, TERMINAL_STATUS : L=154, POS_GUID : 6ceb8d8a-6acc-43c8-8eab-74e45c791d51, TAP_TO_MOBILE_POI_IDENTIFIER : ca74b1cd-1a51-45ec-a417-0bcf866774dc, RESULT : True]
+2026-02-16 21:47:57,126 2 INFO ChipDNAMobile oF: connectAndConfigure: [TAP_TO_MOBILE_POI : True, PAYMENT_DEVICE_POI : False]
+2026-02-16 21:47:57,127 2 INFO ChipDNAMobile oF: connectAndConfigure response: [ERRORS : AnotherOperationBeingProcessed, RESULT : False]
+2026-02-16 21:47:57,191 197 INFO ChipDNAMobile oF: connectionAndConfigureFinished notification: [ERRORS : ServerCommunicationError,RegistrationRequired]
+2026-02-16 21:47:57,193 197 INFO ChipDNAMobile Ra: Set: IDLE
+2026-02-16 21:47:59,745 192 INFO ChipDNAMobile oF: availablePinPads notification: [AVAILABLE_PIN_PADS : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><PinPads />]
+2026-02-17 05:52:42,426 2 INFO ChipDNAMobile oF: Timber intialized
+2026-02-17 05:52:42,428 2 INFO ChipDNAMobile oF: initialize: [PASSWORD : L=8, AUTO_CONFIRM : True]
+2026-02-17 05:52:42,868 2 INFO ChipDNAMobile oz: Setting log capture dates to [from: to:]
+2026-02-17 05:52:42,869 2 INFO ChipDNAMobile HD: Schedule processing queue: 66745
+2026-02-17 05:52:42,870 2 INFO ChipDNAMobile Ra: Set: IDLE
+2026-02-17 05:52:42,870 2 INFO ChipDNAMobile oF: Software Name: ChipDna Mobile
+2026-02-17 05:52:42,870 2 INFO ChipDNAMobile oF: Software Version Name: Starfish
+2026-02-17 05:52:42,871 2 INFO ChipDNAMobile oF: Software Version: 4.0.5.197893042
+2026-02-17 05:52:42,871 2 INFO ChipDNAMobile oF: Platform: Android
+2026-02-17 05:52:42,871 2 INFO ChipDNAMobile oF: Device Model: Pixel 6
+2026-02-17 05:52:42,872 2 INFO ChipDNAMobile oF: Device OS Version: 16
+2026-02-17 05:52:42,872 2 INFO ChipDNAMobile oF: initialize response: [RESULT : True]
+2026-02-17 05:52:42,874 2 INFO ChipDNAMobile oF: setProperties: [API_KEY : L=32, APPLICATION_IDENTIFIER : fattpayandroid, ENVIRONMENT : LIVE, CERTIFICATE_FINGERPRINT : 76:A5:B2:04:E2:55:86:8F:B9:82:E9:98:0C:63:CB:D6:D6:1F:42:A8:8B:57:3F:BE:EE:02:20:25:1A:1B:FE:BD]
+2026-02-17 05:52:42,874 2 INFO ChipDNAMobile Ra: Set: SETTING_PROPERTIES
+2026-02-17 05:52:42,889 2 INFO ChipDNAMobile Ra: Set: IDLE
+2026-02-17 05:52:42,889 2 INFO ChipDNAMobile oF: setProperties response: [RESULT : True]
+2026-02-17 05:52:42,890 2 INFO ChipDNAMobile oF: Timber intialized
+2026-02-17 05:52:42,890 2 INFO ChipDNAMobile oF: initialize: [PASSWORD : L=8, AUTO_CONFIRM : True]
+2026-02-17 05:52:42,892 2 INFO ChipDNAMobile oF: initialize response: [ERRORS : AlreadyInitialized, RESULT : False]
+2026-02-17 05:52:42,892 2 WARN ChipDNAMobile ChipDnaMobile: Failed to initialize ChipDna Mobile - AlreadyInitialized
+2026-02-17 05:52:42,893 2 INFO ChipDNAMobile oF: setProperties: [API_KEY : L=32, APPLICATION_IDENTIFIER : fattpayandroid, ENVIRONMENT : LIVE, CERTIFICATE_FINGERPRINT : 76:A5:B2:04:E2:55:86:8F:B9:82:E9:98:0C:63:CB:D6:D6:1F:42:A8:8B:57:3F:BE:EE:02:20:25:1A:1B:FE:BD]
+2026-02-17 05:52:42,893 2 INFO ChipDNAMobile Ra: Set: SETTING_PROPERTIES
+2026-02-17 05:52:42,904 2 INFO ChipDNAMobile Ra: Set: IDLE
+2026-02-17 05:52:42,904 2 INFO ChipDNAMobile oF: setProperties response: [RESULT : True]
+2026-02-17 05:52:42,943 2 INFO ChipDNAMobile oF: getStatus:
+2026-02-17 05:52:42,949 2 INFO ChipDNAMobile oF: getStatus response: [VERSION_INFORMATION : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><VersionInformation><ChipDnaVersion>4.0.5.197893042</ChipDnaVersion><ChipDnaReleaseName>Starfish</ChipDnaReleaseName><ChipDnaApplicationName>ChipDna Mobile</ChipDnaApplicationName></VersionInformation>, APPLICATION_IDENTIFIER : fattpayandroid, REQUEST_QUEUE_STATUS : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><RequestQueueStatus><TotalNumberOfPendingRequests>0</TotalNumberOfPendingRequests><TotalNumberOfFailedRequests>0</TotalNumberOfFailedRequests><PendingRequestsStorageLimit>0</PendingRequestsStorageLimit><PendingRequestsValueLimit>0</PendingRequestsValueLimit><TotalPendingValueStored>0</TotalPendingValueStored><TotalFailedValueStored>0</TotalFailedValueStored><DateTimeFormat>dd/MM/yyyy HH:mm:ss</DateTimeFormat><PendingRequestTotalsByRequestType><Item><Key>Sale</Key><Value>0</Value></Item><Item><Key>SaleConf</Key><Value>0</Value></Item><Item><Key>SaleVoid</Key><Value>0</Value></Item><Item><Key>Refund</Key><Value>0</Value></Item><Item><Key>RefundConf</Key><Value>0</Value></Item><Item><Key>RefundVoid</Key><Value>0</Value></Item></PendingRequestTotalsByRequestType><PendingRequestVolumesByRequestType><Item><Key>Sale</Key><Value>0</Value></Item><Item><Key>SaleConf</Key><Value>0</Value></Item><Item><Key>SaleVoid</Key><Value>0</Value></Item><Item><Key>Refund</Key><Value>0</Value></Item><Item><Key>RefundConf</Key><Value>0</Value></Item><Item><Key>RefundVoid</Key><Value>0</Value></Item></PendingRequestVolumesByRequestType></RequestQueueStatus>, ENVIRONMENT : LIVE, TMS_STATUS : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><TmsStatus><DaysUntilConfigUpdateRequired>0</DaysUntilConfigUpdateRequired><RequiredConfigUpdateDateTime>20260217005242</RequiredConfigUpdateDateTime><DateTimeFormat>yyyyMMddHHmmss</DateTimeFormat></TmsStatus>, CHIPDNA_STATUS : IDLE, TERMINAL_STATUS : L=154, POS_GUID : 6ceb8d8a-6acc-43c8-8eab-74e45c791d51, TAP_TO_MOBILE_POI_IDENTIFIER : ca74b1cd-1a51-45ec-a417-0bcf866774dc, RESULT : True]
+2026-02-17 05:52:42,950 2 INFO ChipDNAMobile oF: connectAndConfigure: [TAP_TO_MOBILE_POI : True, PAYMENT_DEVICE_POI : False]
+2026-02-17 05:52:42,952 2 INFO ChipDNAMobile Ra: Set: CONNECTING_TO_PIN_PAD
+2026-02-17 05:52:42,953 2 INFO ChipDNAMobile oF: connectAndConfigure response: [RESULT : True]
+2026-02-17 05:52:42,954 166 INFO ChipDNAMobile oF: configurationUpdate notification: [CONFIGURATION_UPDATE : CONNECT_AND_CONFIGURE_STARTED]
+2026-02-17 05:52:42,969 166 INFO ChipDNAMobile oF: configurationUpdate notification: [CONFIGURATION_UPDATE : REGISTERING]
+2026-02-17 05:52:43,132 166 INFO ChipDNAMobile oF: connectionAndConfigureFinished notification: [ERRORS : ServerCommunicationError,RegistrationRequired]
+2026-02-17 05:52:43,137 166 INFO ChipDNAMobile Ra: Set: IDLE
+2026-02-17 05:52:50,016 2 INFO ChipDNAMobile oF: Timber intialized
+2026-02-17 05:52:50,017 2 INFO ChipDNAMobile oF: initialize: [PASSWORD : L=8, AUTO_CONFIRM : True]
+2026-02-17 05:52:50,018 2 INFO ChipDNAMobile oF: initialize response: [ERRORS : AlreadyInitialized, RESULT : False]
+2026-02-17 05:52:50,018 2 WARN ChipDNAMobile ChipDnaMobile: Failed to initialize ChipDna Mobile - AlreadyInitialized
+2026-02-17 05:52:50,022 2 INFO ChipDNAMobile oF: setProperties: [API_KEY : L=32, APPLICATION_IDENTIFIER : fattpayandroid, ENVIRONMENT : LIVE, CERTIFICATE_FINGERPRINT : 76:A5:B2:04:E2:55:86:8F:B9:82:E9:98:0C:63:CB:D6:D6:1F:42:A8:8B:57:3F:BE:EE:02:20:25:1A:1B:FE:BD]
+2026-02-17 05:52:50,022 2 INFO ChipDNAMobile Ra: Set: SETTING_PROPERTIES
+2026-02-17 05:52:50,042 2 INFO ChipDNAMobile Ra: Set: IDLE
+2026-02-17 05:52:50,044 2 INFO ChipDNAMobile oF: setProperties response: [RESULT : True]
+2026-02-17 05:52:50,045 2 INFO ChipDNAMobile oF: Timber intialized
+2026-02-17 05:52:50,046 2 INFO ChipDNAMobile oF: initialize: [PASSWORD : L=8, AUTO_CONFIRM : True]
+2026-02-17 05:52:50,047 2 INFO ChipDNAMobile oF: initialize response: [ERRORS : AlreadyInitialized, RESULT : False]
+2026-02-17 05:52:50,048 2 WARN ChipDNAMobile ChipDnaMobile: Failed to initialize ChipDna Mobile - AlreadyInitialized
+2026-02-17 05:52:50,050 2 INFO ChipDNAMobile oF: setProperties: [API_KEY : L=32, APPLICATION_IDENTIFIER : fattpayandroid, ENVIRONMENT : LIVE, CERTIFICATE_FINGERPRINT : 76:A5:B2:04:E2:55:86:8F:B9:82:E9:98:0C:63:CB:D6:D6:1F:42:A8:8B:57:3F:BE:EE:02:20:25:1A:1B:FE:BD]
+2026-02-17 05:52:50,050 2 INFO ChipDNAMobile Ra: Set: SETTING_PROPERTIES
+2026-02-17 05:52:50,066 2 INFO ChipDNAMobile Ra: Set: IDLE
+2026-02-17 05:52:50,067 2 INFO ChipDNAMobile oF: setProperties response: [RESULT : True]
+2026-02-17 05:52:50,073 2 INFO ChipDNAMobile oF: getStatus:
+2026-02-17 05:52:50,079 2 INFO ChipDNAMobile oF: getStatus response: [VERSION_INFORMATION : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><VersionInformation><ChipDnaVersion>4.0.5.197893042</ChipDnaVersion><ChipDnaReleaseName>Starfish</ChipDnaReleaseName><ChipDnaApplicationName>ChipDna Mobile</ChipDnaApplicationName></VersionInformation>, APPLICATION_IDENTIFIER : fattpayandroid, REQUEST_QUEUE_STATUS : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><RequestQueueStatus><TotalNumberOfPendingRequests>0</TotalNumberOfPendingRequests><TotalNumberOfFailedRequests>0</TotalNumberOfFailedRequests><PendingRequestsStorageLimit>0</PendingRequestsStorageLimit><PendingRequestsValueLimit>0</PendingRequestsValueLimit><TotalPendingValueStored>0</TotalPendingValueStored><TotalFailedValueStored>0</TotalFailedValueStored><DateTimeFormat>dd/MM/yyyy HH:mm:ss</DateTimeFormat><PendingRequestTotalsByRequestType><Item><Key>Sale</Key><Value>0</Value></Item><Item><Key>SaleConf</Key><Value>0</Value></Item><Item><Key>SaleVoid</Key><Value>0</Value></Item><Item><Key>Refund</Key><Value>0</Value></Item><Item><Key>RefundConf</Key><Value>0</Value></Item><Item><Key>RefundVoid</Key><Value>0</Value></Item></PendingRequestTotalsByRequestType><PendingRequestVolumesByRequestType><Item><Key>Sale</Key><Value>0</Value></Item><Item><Key>SaleConf</Key><Value>0</Value></Item><Item><Key>SaleVoid</Key><Value>0</Value></Item><Item><Key>Refund</Key><Value>0</Value></Item><Item><Key>RefundConf</Key><Value>0</Value></Item><Item><Key>RefundVoid</Key><Value>0</Value></Item></PendingRequestVolumesByRequestType></RequestQueueStatus>, ENVIRONMENT : LIVE, TMS_STATUS : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><TmsStatus><DaysUntilConfigUpdateRequired>0</DaysUntilConfigUpdateRequired><RequiredConfigUpdateDateTime>20260217005250</RequiredConfigUpdateDateTime><DateTimeFormat>yyyyMMddHHmmss</DateTimeFormat></TmsStatus>, CHIPDNA_STATUS : IDLE, TERMINAL_STATUS : L=154, POS_GUID : 6ceb8d8a-6acc-43c8-8eab-74e45c791d51, TAP_TO_MOBILE_POI_IDENTIFIER : ca74b1cd-1a51-45ec-a417-0bcf866774dc, RESULT : True]
+2026-02-17 05:52:50,081 2 INFO ChipDNAMobile oF: connectAndConfigure: [TAP_TO_MOBILE_POI : True, PAYMENT_DEVICE_POI : False]
+2026-02-17 05:52:50,082 2 INFO ChipDNAMobile Ra: Set: CONNECTING_TO_PIN_PAD
+2026-02-17 05:52:50,082 2 INFO ChipDNAMobile oF: connectAndConfigure response: [RESULT : True]
+2026-02-17 05:52:50,084 186 INFO ChipDNAMobile oF: configurationUpdate notification: [CONFIGURATION_UPDATE : CONNECT_AND_CONFIGURE_STARTED]
+2026-02-17 05:52:50,100 186 INFO ChipDNAMobile oF: configurationUpdate notification: [CONFIGURATION_UPDATE : REGISTERING]
+2026-02-17 05:52:50,162 186 INFO ChipDNAMobile oF: connectionAndConfigureFinished notification: [ERRORS : ServerCommunicationError,RegistrationRequired]
+2026-02-17 05:52:50,165 186 INFO ChipDNAMobile Ra: Set: IDLE
+2026-02-17 05:52:56,066 2 INFO ChipDNAMobile oF: getAvailablePinPads: [SEARCH_PIN_PADS_USB : True, SEARCH_PIN_PADS_BLUETOOTH_LE : True]
+2026-02-17 05:52:56,067 2 INFO ChipDNAMobile oF: getAvailablePinPads response:
+2026-02-17 05:53:00,420 2 INFO ChipDNAMobile oF: Timber intialized
+2026-02-17 05:53:00,422 2 INFO ChipDNAMobile oF: initialize: [PASSWORD : L=8, AUTO_CONFIRM : True]
+2026-02-17 05:53:00,424 2 INFO ChipDNAMobile oF: initialize response: [ERRORS : AlreadyInitialized, RESULT : False]
+2026-02-17 05:53:00,426 2 WARN ChipDNAMobile ChipDnaMobile: Failed to initialize ChipDna Mobile - AlreadyInitialized
+2026-02-17 05:53:00,429 2 INFO ChipDNAMobile oF: setProperties: [API_KEY : L=32, APPLICATION_IDENTIFIER : fattpayandroid, ENVIRONMENT : LIVE, CERTIFICATE_FINGERPRINT : 76:A5:B2:04:E2:55:86:8F:B9:82:E9:98:0C:63:CB:D6:D6:1F:42:A8:8B:57:3F:BE:EE:02:20:25:1A:1B:FE:BD]
+2026-02-17 05:53:00,431 2 INFO ChipDNAMobile Ra: Set: SETTING_PROPERTIES
+2026-02-17 05:53:00,463 2 INFO ChipDNAMobile Ra: Set: IDLE
+2026-02-17 05:53:00,466 2 INFO ChipDNAMobile oF: setProperties response: [RESULT : True]
+2026-02-17 05:53:00,469 2 INFO ChipDNAMobile oF: Timber intialized
+2026-02-17 05:53:00,470 2 INFO ChipDNAMobile oF: initialize: [PASSWORD : L=8, AUTO_CONFIRM : True]
+2026-02-17 05:53:00,472 2 INFO ChipDNAMobile oF: initialize response: [ERRORS : AlreadyInitialized, RESULT : False]
+2026-02-17 05:53:00,473 2 WARN ChipDNAMobile ChipDnaMobile: Failed to initialize ChipDna Mobile - AlreadyInitialized
+2026-02-17 05:53:00,477 2 INFO ChipDNAMobile oF: setProperties: [API_KEY : L=32, APPLICATION_IDENTIFIER : fattpayandroid, ENVIRONMENT : LIVE, CERTIFICATE_FINGERPRINT : 76:A5:B2:04:E2:55:86:8F:B9:82:E9:98:0C:63:CB:D6:D6:1F:42:A8:8B:57:3F:BE:EE:02:20:25:1A:1B:FE:BD]
+2026-02-17 05:53:00,478 2 INFO ChipDNAMobile Ra: Set: SETTING_PROPERTIES
+2026-02-17 05:53:00,504 2 INFO ChipDNAMobile Ra: Set: IDLE
+2026-02-17 05:53:00,505 2 INFO ChipDNAMobile oF: setProperties response: [RESULT : True]
+2026-02-17 05:53:00,522 2 INFO ChipDNAMobile oF: getStatus:
+2026-02-17 05:53:00,526 2 INFO ChipDNAMobile oF: getStatus response: [VERSION_INFORMATION : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><VersionInformation><ChipDnaVersion>4.0.5.197893042</ChipDnaVersion><ChipDnaReleaseName>Starfish</ChipDnaReleaseName><ChipDnaApplicationName>ChipDna Mobile</ChipDnaApplicationName></VersionInformation>, APPLICATION_IDENTIFIER : fattpayandroid, REQUEST_QUEUE_STATUS : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><RequestQueueStatus><TotalNumberOfPendingRequests>0</TotalNumberOfPendingRequests><TotalNumberOfFailedRequests>0</TotalNumberOfFailedRequests><PendingRequestsStorageLimit>0</PendingRequestsStorageLimit><PendingRequestsValueLimit>0</PendingRequestsValueLimit><TotalPendingValueStored>0</TotalPendingValueStored><TotalFailedValueStored>0</TotalFailedValueStored><DateTimeFormat>dd/MM/yyyy HH:mm:ss</DateTimeFormat><PendingRequestTotalsByRequestType><Item><Key>Sale</Key><Value>0</Value></Item><Item><Key>SaleConf</Key><Value>0</Value></Item><Item><Key>SaleVoid</Key><Value>0</Value></Item><Item><Key>Refund</Key><Value>0</Value></Item><Item><Key>RefundConf</Key><Value>0</Value></Item><Item><Key>RefundVoid</Key><Value>0</Value></Item></PendingRequestTotalsByRequestType><PendingRequestVolumesByRequestType><Item><Key>Sale</Key><Value>0</Value></Item><Item><Key>SaleConf</Key><Value>0</Value></Item><Item><Key>SaleVoid</Key><Value>0</Value></Item><Item><Key>Refund</Key><Value>0</Value></Item><Item><Key>RefundConf</Key><Value>0</Value></Item><Item><Key>RefundVoid</Key><Value>0</Value></Item></PendingRequestVolumesByRequestType></RequestQueueStatus>, ENVIRONMENT : LIVE, TMS_STATUS : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><TmsStatus><DaysUntilConfigUpdateRequired>0</DaysUntilConfigUpdateRequired><RequiredConfigUpdateDateTime>20260217005300</RequiredConfigUpdateDateTime><DateTimeFormat>yyyyMMddHHmmss</DateTimeFormat></TmsStatus>, CHIPDNA_STATUS : IDLE, TERMINAL_STATUS : L=154, POS_GUID : 6ceb8d8a-6acc-43c8-8eab-74e45c791d51, TAP_TO_MOBILE_POI_IDENTIFIER : ca74b1cd-1a51-45ec-a417-0bcf866774dc, RESULT : True]
+2026-02-17 05:53:00,527 2 INFO ChipDNAMobile oF: connectAndConfigure: [TAP_TO_MOBILE_POI : True, PAYMENT_DEVICE_POI : False]
+2026-02-17 05:53:00,528 2 INFO ChipDNAMobile Ra: Set: CONNECTING_TO_PIN_PAD
+2026-02-17 05:53:00,528 2 INFO ChipDNAMobile oF: connectAndConfigure response: [RESULT : True]
+2026-02-17 05:53:00,529 199 INFO ChipDNAMobile oF: configurationUpdate notification: [CONFIGURATION_UPDATE : CONNECT_AND_CONFIGURE_STARTED]
+2026-02-17 05:53:00,544 199 INFO ChipDNAMobile oF: configurationUpdate notification: [CONFIGURATION_UPDATE : REGISTERING]
+2026-02-17 05:53:00,613 199 INFO ChipDNAMobile oF: connectionAndConfigureFinished notification: [ERRORS : ServerCommunicationError,RegistrationRequired]
+2026-02-17 05:53:00,617 199 INFO ChipDNAMobile Ra: Set: IDLE
+2026-02-17 05:53:01,073 194 INFO ChipDNAMobile oF: availablePinPads notification: [AVAILABLE_PIN_PADS : <?xml version='1.0' encoding='UTF-8' standalone='yes' ?><PinPads />]
