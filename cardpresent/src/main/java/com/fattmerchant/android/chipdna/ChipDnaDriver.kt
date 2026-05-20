@@ -699,17 +699,27 @@ internal class ChipDnaDriver :
         } else {
             ParameterValues.LiveEnvironment
         }
-        
+
+        val apiKeyFingerprint = when {
+            apiKey.length >= 8 -> "${apiKey.take(4)}…${apiKey.takeLast(4)} (len=${apiKey.length})"
+            apiKey.isEmpty() -> "<empty>"
+            else -> "<len=${apiKey.length}>"
+        }
+        log(
+            "🔐 setCredentials: envMode=$envMode, testMode=${tapToPayConfig?.testMode}, " +
+                "ttpEnabled=${tapToPayConfig?.enabled}, appId=$appId, apiKey=$apiKeyFingerprint"
+        )
+
         val params = Parameters().apply {
             add(ParameterKeys.ApiKey, apiKey)
             add(ParameterKeys.Environment, environment)
             add(ParameterKeys.ApplicationIdentifier, appId)
-            
+
             tapToPayConfig?.let { config ->
                 if (config.enabled) {
                     val fingerprint = config.certificateFingerprint?.takeIf { it.isNotEmpty() }
                         ?: (applicationContext?.let { CertificateUtils.getCertificateFingerprint(it) })
-                    
+
                     if (fingerprint != null) {
                         add(ParameterKeys.CertificateFingerprint, fingerprint)
                     } else {
@@ -718,8 +728,7 @@ internal class ChipDnaDriver :
                 }
             }
         }
-        
-        log("🔐 Setting credentials (Environment: $envMode)")
+
         return ChipDnaMobile.getInstance().setProperties(params)
     }
 
