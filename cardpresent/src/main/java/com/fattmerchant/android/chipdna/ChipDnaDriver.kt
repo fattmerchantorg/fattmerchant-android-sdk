@@ -213,6 +213,18 @@ internal class ChipDnaDriver :
 
         return suspendCancellableCoroutine { continuation ->
             val connectAndConfigureParams = ChipDnaMobile.getInstance().getStatus(null)
+
+            // Force a TMS update for BBPOS readers to refresh terminal config
+            // (e.g. recover from stale TMS data causing DNS resolution failures).
+            if (reader.getName().uppercase().startsWith("CHB")) {
+                connectAndConfigureParams.add(ParameterKeys.ForceTmsUpdate, ParameterValues.TRUE)
+            }
+
+            log("connectAndConfigure params:")
+            connectAndConfigureParams.toList().forEach { param ->
+                log("  ${param.key} = ${param.value}")
+            }
+
             ChipDnaMobile.getInstance().apply {
                 clearAllConnectAndConfigureFinishedListeners()
                 addConnectAndConfigureFinishedListener { params ->
