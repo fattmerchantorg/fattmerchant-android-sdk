@@ -220,11 +220,6 @@ internal class ChipDnaDriver :
                 connectAndConfigureParams.add(ParameterKeys.ForceTmsUpdate, ParameterValues.TRUE)
             }
 
-            log("connectAndConfigure params:")
-            connectAndConfigureParams.toList().forEach { param ->
-                log("  ${param.key} = ${param.value}")
-            }
-
             ChipDnaMobile.getInstance().apply {
                 clearAllConnectAndConfigureFinishedListeners()
                 addConnectAndConfigureFinishedListener { params ->
