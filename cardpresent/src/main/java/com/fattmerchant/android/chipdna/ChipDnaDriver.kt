@@ -321,6 +321,20 @@ internal class ChipDnaDriver :
                 ConnectReaderException("Connection timeout: ChipDNA Mobile did not respond within 2 minutes")
             ))
         }
+
+        // Heartbeat: emit SDK status every 30s during connectAndConfigure so a silent hang
+        // is distinguishable from a slow-progressing connect. Each heartbeat captures the
+        // SDK's view of Result + Errors, which lets us cross-reference with ChipDNA's
+        // internal file log at the same wall-clock timestamp.
+        val heartbeatJob = launch {
+            repeat(3) { attempt ->
+                delay(30000)
+                runCatching {
+                    val s = ChipDnaMobile.getInstance().getStatus(null)
+                    log("⏰ Heartbeat #${attempt + 1} (t=${(attempt + 1) * 30}s): Result=${s[ParameterKeys.Result]}, Errors=${s[ParameterKeys.Errors] ?: "none"}")
+                }.onFailure { log("⏰ Heartbeat #${attempt + 1} failed to read status: ${it.message}") }
+            }
+        }
         
         if (!ChipDnaMobile.isInitialized()) {
             log("❌ ChipDNA Mobile is not initialized")
@@ -346,7 +360,8 @@ internal class ChipDnaDriver :
                 val errors = callbackParams[ParameterKeys.Errors]
                 
                 timeoutJob.cancel()
-                
+                heartbeatJob.cancel()
+
                 log("✅ connectAndConfigure callback received")
                 log("Result: $result")
                 log("Errors: $errors")
