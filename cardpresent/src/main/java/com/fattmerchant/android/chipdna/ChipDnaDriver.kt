@@ -764,6 +764,13 @@ internal class ChipDnaDriver :
                     val fingerprint = config.certificateFingerprint?.takeIf { it.isNotEmpty() }
                         ?: (applicationContext?.let { CertificateUtils.getCertificateFingerprint(it) })
 
+                    // DIAGNOSTIC: surface the cert we're SENDING vs the device's actual installed
+                    // signing cert (the Play app-signing key on a Play-distributed build). If these
+                    // differ, MasterCard's attestation cannot match and connect fails. This line lets
+                    // the logcat capture prove a cert mismatch instead of us guessing.
+                    val deviceInstalledCert = applicationContext?.let { CertificateUtils.getCertificateFingerprint(it) }
+                    log("🔏 CertificateFingerprint sent=$fingerprint | deviceInstalledCert=$deviceInstalledCert | match=${fingerprint == deviceInstalledCert}")
+
                     if (fingerprint != null) {
                         add(ParameterKeys.CertificateFingerprint, fingerprint)
                     } else {
