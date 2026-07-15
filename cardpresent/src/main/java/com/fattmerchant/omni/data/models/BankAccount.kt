@@ -1,44 +1,44 @@
 package com.fattmerchant.omni.data.models
 
-import com.squareup.moshi.Json
+import com.google.gson.annotations.SerializedName
 
 /** A bank account */
 class BankAccount(
 
-    @Json(name = "person_name")
+    @SerializedName("person_name")
     var personName: String,
 
-    @Json(name = "bank_type")
+    @SerializedName("bank_type")
     var bankType: String = "checkings",
 
-    @Json(name = "bank_holder_type")
+    @SerializedName("bank_holder_type")
     var bankHolderType: String = "business",
 
-    @Json(name = "bank_account")
+    @SerializedName("bank_account")
     var bankAccount: String,
 
-    @Json(name = "bank_routing")
+    @SerializedName("bank_routing")
     var bankRouting: String,
 
-    @Json(name = "address_zip")
+    @SerializedName("address_zip")
     var addressZip: String,
 
-    @Json(name = "bank_name")
+    @SerializedName("bank_name")
     var bankName: String? = null,
 
-    @Json(name = "address_1")
+    @SerializedName("address_1")
     var address1: String? = null,
 
-    @Json(name = "address_2")
+    @SerializedName("address_2")
     var address2: String? = null,
 
-    @Json(name = "address_city")
+    @SerializedName("address_city")
     var addressCity: String? = null,
 
-    @Json(name = "address_state")
+    @SerializedName("address_state")
     var addressState: String? = null,
 
-    @Json(name = "customer_id")
+    @SerializedName("customer_id")
     var customerId: String? = null,
 
     var note: String? = null,

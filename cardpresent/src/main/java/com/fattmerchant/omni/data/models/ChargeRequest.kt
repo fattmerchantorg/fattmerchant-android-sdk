@@ -1,9 +1,9 @@
 package com.fattmerchant.omni.data.models
 
-import com.squareup.moshi.Json
+import com.google.gson.annotations.SerializedName
 
 class ChargeRequest(
-    @Json(name = "payment_method_id")
+    @SerializedName("payment_method_id")
     var paymentMethodId: String,
     var total: String,
     var preAuth: Boolean,

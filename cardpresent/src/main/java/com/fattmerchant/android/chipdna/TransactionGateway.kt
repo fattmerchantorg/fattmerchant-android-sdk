@@ -2,6 +2,7 @@ package com.fattmerchant.android.chipdna
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.request.get
 
 /**
@@ -22,9 +23,10 @@ internal class TransactionGateway {
          * @return the expiration date of the card in the 'mmyy' format if found. Null otherwise
          */
         suspend fun getTransactionCcExpiration(securityKey: String, transactionId: String): String? {
-            val client = HttpClient {}
-            val response = client.get(urlString = "$baseUrl?security_key=$securityKey&transaction_id=$transactionId")
-            return ChipDnaXMLTransactionParser.parseExpirationDate(response.body(), transactionId)
+            return HttpClient(OkHttp).use { client ->
+                val response = client.get("$baseUrl?security_key=$securityKey&transaction_id=$transactionId")
+                ChipDnaXMLTransactionParser.parseExpirationDate(response.body(), transactionId)
+            }
         }
     }
 }
