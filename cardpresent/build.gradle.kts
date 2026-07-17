@@ -82,13 +82,14 @@ dependencies {
     api("androidx.compose.material3:material3")
     api("androidx.compose.runtime:runtime:1.10.3")
 
-    // Moshi & Gson (JSON Parsing — used by data models)
-    implementation("com.squareup.moshi:moshi-kotlin:1.15.2")
+    // Gson (JSON parsing for data models — @SerializedName on CreditCard/BankAccount/ChargeRequest).
+    // Moshi removed from cardpresent: those models were migrated @Json -> @SerializedName and nothing
+    // else in this module uses Moshi. (moshi-kotlin is still required by :chipdna and :tokenization.)
     implementation("com.google.code.gson:gson:2.8.6")
 
-    // Kotlin
+    // Kotlin / AndroidX core
     implementation("androidx.core:core-ktx:1.8.0")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.0")
+    // (kotlin-stdlib is supplied by the Kotlin plugin at the correct version — do not re-add an explicit pin.)
 
     // Kotlin Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
@@ -100,27 +101,39 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:3.4.0")
     implementation("io.ktor:ktor-serialization-gson:3.4.0")
 
-    // Required by Cloud Commerce SDK (bundled so consumer apps don't need to add these)
+    // ── Vendored reader SDK (ChipDnaMobile.jar) runtime deps — DO NOT REMOVE ────────────
+    // ChipDnaMobile.jar (bundled above via the *.jar fileTree) is a bare jar with no POM, so
+    // its transitive runtime deps are declared here. They have no first-party imports; verify
+    // with `javap` against libs/ChipDnaMobile.jar before touching this block.
     //noinspection Aligned16KB
-    implementation("net.zetetic:sqlcipher-android:4.7.2@aar")
-    implementation("androidx.sqlite:sqlite:2.1.0")
-    implementation("com.jakewharton.timber:timber:4.7.1")
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
-    implementation("com.squareup.okhttp3:okhttp:4.4.0")
-    implementation("com.squareup.okhttp3:okhttp-urlconnection:4.4.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.4.0")
-    implementation("io.reactivex.rxjava3:rxjava:3.0.0")
-    implementation("io.reactivex.rxjava3:rxandroid:3.0.0")
-    implementation("com.squareup.retrofit2:adapter-rxjava3:2.9.0")
-    implementation("com.google.android.gms:play-services-location:21.3.0")
-    implementation("com.google.android.play:integrity:1.6.0")
-    implementation("com.google.android.gms:play-services-safetynet:18.1.0")
-    implementation("androidx.security:security-crypto:1.1.0-alpha06")
-    implementation("commons-codec:commons-codec:1.11")
-    implementation("org.slf4j:slf4j-api:1.7.30")
+    implementation("net.zetetic:sqlcipher-android:4.7.2@aar") // ChipDNA: net.zetetic.database.sqlcipher.* (encrypted reader DB)
+    implementation("androidx.sqlite:sqlite:2.1.0")            // ChipDNA: androidx.sqlite.db.SupportSQLiteDatabase
+    implementation("com.jakewharton.timber:timber:4.7.1")     // ChipDNA: timber.log.Timber (reader logging)
+
+    // ── Cloud Commerce SDK (Tap-to-Pay) runtime deps — DO NOT REMOVE ────────────────────
+    // The Cloud Commerce AAR (compileOnly project(":cloudcommerce-production")) ships NO POM, so
+    // its transitive runtime deps are declared here as `implementation` and propagate to consumer
+    // apps at runtime (POM runtime scope). They have ZERO first-party imports BY DESIGN — a
+    // source-level "unused dependency" scan WILL wrongly flag them as dead (this is exactly how a
+    // prior cleanup broke reader/Tap-to-Pay support). Do NOT remove without decompiling
+    // cloud-commerce-sdk-*.aar. The trailing comment on each line is the class it references.
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")             // CC: retrofit2.Retrofit$Builder / Call / Converter (87 refs)
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")       // CC: retrofit2.converter.gson.GsonConverterFactory
+    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")    // CC: retrofit2.converter.scalars.ScalarsConverterFactory
+    implementation("com.squareup.retrofit2:adapter-rxjava3:2.9.0")      // CC: retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
+    implementation("com.squareup.okhttp3:okhttp:4.4.0")                 // CC: okhttp3.OkHttpClient$Builder / CertificatePinner (151 refs)
+    implementation("com.squareup.okhttp3:okhttp-urlconnection:4.4.0")   // CC: okhttp3.JavaNetCookieJar (ships ONLY in this artifact)
+    implementation("com.squareup.okhttp3:logging-interceptor:4.4.0")    // CC: okhttp3.logging.HttpLoggingInterceptor
+    implementation("io.reactivex.rxjava3:rxjava:3.0.0")                 // CC (363 refs) + ChipDNA: Observable / Single / Schedulers
+    implementation("io.reactivex.rxjava3:rxandroid:3.0.0")              // CC: io.reactivex.rxjava3.android.AndroidSchedulers (this artifact only)
+    implementation("com.google.android.gms:play-services-location:21.3.0") // CC: FusedLocationProviderClient / LocationServices
+    implementation("com.google.android.play:integrity:1.6.0")           // CC: com.google.android.play.core.integrity.IntegrityManager (attestation)
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")   // CC: androidx.security.crypto.EncryptedSharedPreferences / MasterKeys
+    implementation("commons-codec:commons-codec:1.11")                  // CC: org.apache.commons.codec.binary.Base64
+    implementation("org.slf4j:slf4j-api:1.7.30")                        // CC: org.slf4j.Logger / LoggerFactory (76 refs)
+    // Removed here as genuinely dead on this branch (verified 0 refs in the Cloud Commerce AAR):
+    //   • com.squareup.retrofit2:converter-moshi     — CC uses the Gson converter, not Moshi
+    //   • com.google.android.gms:play-services-safetynet — CC uses Play Integrity, not deprecated SafetyNet
 }
 
 // Ensure Kotlin metadata is properly generated for top-level functions
