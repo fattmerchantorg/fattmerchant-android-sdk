@@ -35,6 +35,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.xmlpull.v1.XmlPullParserException
@@ -313,94 +315,135 @@ internal class ChipDnaDriver :
 
         log("📊 Connecting Tap to Pay: TapToMobilePOI=TRUE, PaymentDevicePOI=FALSE, ApplyFirmwareUpdate=FALSE")
         
+        // Single-shot guard: the sync return, the async finished-listener, the timeout, and the
+        // not-initialized check can all race; only the first resume of the CancellableContinuation
+        // may run (a second would throw IllegalStateException on a background thread).
+        val resumed = AtomicBoolean(false)
         val timeoutJob = launch {
             delay(120000)
             log("⏱️ Connection timeout after 2 minutes")
-            isConnectAndConfigureInProgress.set(false)
-            continuation.resumeWith(Result.failure(
-                ConnectReaderException("Connection timeout: ChipDNA Mobile did not respond within 2 minutes")
-            ))
+            if (resumed.compareAndSet(false, true)) {
+                isConnectAndConfigureInProgress.set(false)
+                continuation.resumeWith(Result.failure(
+                    ConnectReaderException("Connection timeout: ChipDNA Mobile did not respond within 2 minutes")
+                ))
+            }
+        }
+
+        // Heartbeat: emit SDK status every 30s during connectAndConfigure so a silent hang
+        // is distinguishable from a slow-progressing connect. Each heartbeat captures the
+        // SDK's view of Result + Errors, which lets us cross-reference with ChipDNA's
+        // internal file log at the same wall-clock timestamp.
+        val heartbeatJob = launch {
+            repeat(3) { attempt ->
+                delay(30000)
+                try {
+                    val s = ChipDnaMobile.getInstance().getStatus(null)
+                    log("⏰ Heartbeat #${attempt + 1} (t=${(attempt + 1) * 30}s): Result=${s[ParameterKeys.Result]}, Errors=${s[ParameterKeys.Errors] ?: "none"}")
+                } catch (c: CancellationException) {
+                    throw c
+                } catch (t: Throwable) {
+                    log("⏰ Heartbeat #${attempt + 1} failed to read status: ${t.message}")
+                }
+            }
         }
         
         if (!ChipDnaMobile.isInitialized()) {
             log("❌ ChipDNA Mobile is not initialized")
             timeoutJob.cancel()
-            isConnectAndConfigureInProgress.set(false)
-            continuation.resumeWith(Result.failure(
-                ConnectReaderException("ChipDNA Mobile SDK not initialized")
-            ))
+            heartbeatJob.cancel()
+            if (resumed.compareAndSet(false, true)) {
+                isConnectAndConfigureInProgress.set(false)
+                continuation.resumeWith(Result.failure(
+                    ConnectReaderException("ChipDNA Mobile SDK not initialized")
+                ))
+            }
             return
         }
         
         val preConnectStatus = ChipDnaMobile.getInstance().getStatus(null)
         log("📊 SDK Status: ${preConnectStatus[ParameterKeys.Result]}, POSGUID: ${preConnectStatus[ParameterKeys.POSGUID]}, TAPPOIIDENTIFIER: ${preConnectStatus[ParameterKeys.TapToMobilePOIIdentifier]}")
         preConnectStatus[ParameterKeys.Errors]?.let { log("   Errors: $it") }
-        
+
         ChipDnaMobile.getInstance().apply {
             clearAllConnectAndConfigureFinishedListeners()
-            
+
             addConnectAndConfigureFinishedListener { callbackParams ->
                 val result = callbackParams[ParameterKeys.Result]
-                val errorCode = callbackParams["ErrorCode"]
                 val errorDescription = callbackParams[ParameterKeys.ErrorDescription]
                 val errors = callbackParams[ParameterKeys.Errors]
-                
+
                 timeoutJob.cancel()
-                
+                heartbeatJob.cancel()
+
                 log("✅ connectAndConfigure callback received")
                 log("Result: $result")
                 log("Errors: $errors")
-                log("ErrorCode: $errorCode")
                 log("ErrorDescription: $errorDescription")
-                
-                // Log all known Tap to Pay error codes from NMI documentation
-                val tapToPayErrorKeys = listOf(
-                    "TapToMobileNotSupported",
-                    "NoPoiSelected", 
-                    "LocationPermissionsNotGranted",
-                    "ApplicationUpdateRequired",
-                    "CountryCodeInvalid",
-                    "AttestationFailed",
-                    "CurrentCountryNotAllowed",
-                    "NoLocationFound",
-                    "DeveloperOptionsEnabled",
-                    "USBCableConnectedOrBluetoothEnabled",
-                    "CustomROMDetected",
-                    "EmulatorFound",
-                    "ShowTouchesEnabled"
-                )
-                
-                tapToPayErrorKeys.forEach { key ->
-                    callbackParams[key]?.let { value ->
-                        log("   ⚠️ NMI ERROR: $key = $value")
-                    }
-                }
-                
+
                 if (result == ParameterValues.TRUE) {
                     log("✅ Configuration successful")
                     logDeviceIdentifiers()
                     
                     isTapToPayReaderConnected = true
-                    isConnectAndConfigureInProgress.set(false)
                     mobileReaderConnectionStatusListener?.mobileReaderConnectionStatusUpdate(
                         MobileReaderConnectionStatus.CONNECTED
                     )
-                    continuation.resumeWith(Result.success(reader))
+                    if (resumed.compareAndSet(false, true)) {
+                        isConnectAndConfigureInProgress.set(false)
+                        continuation.resumeWith(Result.success(reader))
+                    }
                 } else {
-                    val userMessage = mapChipDnaErrorToUserMessage(errorCode, errorDescription)
+                    val userMessage = mapChipDnaErrorToUserMessage(errors, errorDescription)
                     log("❌ Configuration failed: $userMessage")
-                    log("Error code: $errorCode")
-                    log("Error description: $errorDescription")
-                    
+
                     val postFailStatus = ChipDnaMobile.getInstance().getStatus(null)
                     val statusInfo = "SDK Status: ${postFailStatus[ParameterKeys.Result]}, POSGUID: ${postFailStatus[ParameterKeys.POSGUID]}, TAPPOIIDENTIFIER: ${postFailStatus[ParameterKeys.TapToMobilePOIIdentifier]}"
                     log(statusInfo)
                     
-                    isConnectAndConfigureInProgress.set(false)
-                    continuation.resumeWith(Result.failure(ConnectReaderException("$userMessage | $statusInfo")))
+                    if (resumed.compareAndSet(false, true)) {
+                        isConnectAndConfigureInProgress.set(false)
+                        continuation.resumeWith(Result.failure(ConnectReaderException("$userMessage | $statusInfo")))
+                    }
                 }
             }
-        }.connectAndConfigure(connectParams)
+        }.let { instance ->
+            // ChipDNA Mobile signals early-init failures (e.g. FailedToInitializeTapToMobile,
+            // attestation / device-safety rejections) via the *synchronous* return value, NOT
+            // the addConnectAndConfigureFinishedListener callback. Without this branch the app
+            // waits the full 2-min timeout for a listener that never fires. The error token is
+            // carried inside the ERRORS value (there is no discrete ErrorCode key).
+            val syncResult = try {
+                instance.connectAndConfigure(connectParams)
+            } catch (t: Throwable) {
+                log("❌ connectAndConfigure threw synchronously: ${t.message}")
+                timeoutJob.cancel()
+                heartbeatJob.cancel()
+                if (resumed.compareAndSet(false, true)) {
+                    isConnectAndConfigureInProgress.set(false)
+                    continuation.resumeWith(Result.failure(
+                        ConnectReaderException(t.message ?: "Tap to Pay could not connect")
+                    ))
+                }
+                return
+            }
+            if (syncResult?.get(ParameterKeys.Result) == ParameterValues.FALSE) {
+                timeoutJob.cancel()
+                heartbeatJob.cancel()
+                val syncErrors = syncResult[ParameterKeys.Errors]
+                val syncErrorDescription = syncResult[ParameterKeys.ErrorDescription]
+                log("❌ connectAndConfigure returned synchronously with RESULT=False")
+                log("   Errors: $syncErrors")
+                log("   ErrorDescription: $syncErrorDescription")
+                val userMessage = mapChipDnaErrorToUserMessage(syncErrors, syncErrorDescription)
+                if (resumed.compareAndSet(false, true)) {
+                    isConnectAndConfigureInProgress.set(false)
+                    continuation.resumeWith(Result.failure(
+                        ConnectReaderException("$userMessage (sync) | errors=$syncErrors")
+                    ))
+                }
+            }
+        }
     }
     
     override suspend fun disconnect(reader: MobileReader?, error: (OmniException) -> Unit): Boolean {
@@ -699,17 +742,31 @@ internal class ChipDnaDriver :
         } else {
             ParameterValues.LiveEnvironment
         }
-        
+
+        // Confirm presence + length only; never log any portion of the NMI security key.
+        val apiKeyFingerprint = if (apiKey.isEmpty()) "<empty>" else "<set, len=${apiKey.length}>"
+        log(
+            "🔐 setCredentials: envMode=$envMode, testMode=${tapToPayConfig?.testMode}, " +
+                "ttpEnabled=${tapToPayConfig?.enabled}, appId=$appId, apiKey=$apiKeyFingerprint"
+        )
+
         val params = Parameters().apply {
             add(ParameterKeys.ApiKey, apiKey)
             add(ParameterKeys.Environment, environment)
             add(ParameterKeys.ApplicationIdentifier, appId)
-            
+
             tapToPayConfig?.let { config ->
                 if (config.enabled) {
-                    val fingerprint = config.certificateFingerprint?.takeIf { it.isNotEmpty() }
+                    val configured = config.certificateFingerprint?.takeIf { it.isNotEmpty() }
+                    val fingerprint = configured
                         ?: (applicationContext?.let { CertificateUtils.getCertificateFingerprint(it) })
-                    
+
+                    // DIAGNOSTIC: log the cert fingerprint we send and its source. A configured
+                    // value can mismatch the installed signing cert (the Play app-signing key on a
+                    // Play build), which breaks MasterCard attestation; when we fall back to the
+                    // installed cert there is nothing to compare against.
+                    log("🔏 CertificateFingerprint=$fingerprint (source=${if (configured != null) "config" else "installed-cert"})")
+
                     if (fingerprint != null) {
                         add(ParameterKeys.CertificateFingerprint, fingerprint)
                     } else {
@@ -718,8 +775,7 @@ internal class ChipDnaDriver :
                 }
             }
         }
-        
-        log("🔐 Setting credentials (Environment: $envMode)")
+
         return ChipDnaMobile.getInstance().setProperties(params)
     }
 
@@ -836,46 +892,38 @@ internal class ChipDnaDriver :
         }
     }
     
-    private fun mapChipDnaErrorToUserMessage(errorCode: String?, errorDescription: String?): String {
-        return when (errorCode) {
-            // Tap to Pay Specific Errors - Connect And Configure
-            "TapToMobileNotSupported" -> "This device does not support Tap to Pay"
-            "NoPoiSelected" -> "No payment method was selected for configuration"
-            "LocationPermissionsNotGranted" -> "Location permissions are required for Tap to Pay"
-            "ApplicationUpdateRequired" -> "SDK update required. Please update the app"
-            "CountryCodeInvalid" -> "Invalid country code for Tap to Pay"
-            "AttestationFailed" -> "Security attestation failed. Cannot use Tap to Pay"
-            "CurrentCountryNotAllowed" -> "Tap to Pay is not available in your current location"
-            "NoLocationFound" -> "Unable to determine location. Check location permissions"
-            "DeveloperOptionsEnabled" -> "Developer options must be disabled for Tap to Pay"
-            "USBCableConnectedOrBluetoothEnabled" -> "Disconnect USB and disable Bluetooth for Tap to Pay"
-            "CustomROMDetected" -> "Custom ROM detected. Tap to Pay requires stock ROM"
-            "EmulatorFound" -> "Tap to Pay cannot run on an emulator"
-            "ShowTouchesEnabled" -> "Disable 'Show touches' in Developer options"
-            
-            // Transaction Errors - Start Transaction
-            "TransactionPOINotConnected" -> "Payment method not connected"
-            "TransactionPOIInvalid" -> "Invalid payment method selected"
-            "AutoConfirmRequired" -> "Transaction must be auto-confirmed for Tap to Pay"
-            "TipAmountInvalid" -> "Invalid tip amount format"
-            "TipAmountNotAllowed" -> "Tipping not supported for this payment method"
-            "MerchantTippingNotSupported" -> "Merchant tipping not supported"
-            "RequestActivityListenerRequired" -> "Activity listener required for Tap to Pay"
-            "InvalidActivity" -> "Activity is invalid, finishing, or destroyed"
-            
-            // Transaction Finished Errors
-            "MerchantTerminatedTransaction" -> "Transaction was cancelled"
-            "TapToMobileSessionClosed" -> "Tap to Pay session is no longer available"
-            "NfcDisabled" -> "NFC must be enabled for Tap to Pay"
-            "NoPatternOrPinSet" -> "Device lock screen (PIN/pattern) must be set"
-            "CameraUsed" -> "Camera is in use by another app"
-            "MicrophoneUsed" -> "Microphone is in use by another app"
-            
-            // Connection Errors
-            "ConnectionClosed" -> "Connection closed"
-            "BluetoothNotEnabled" -> "Bluetooth not enabled"
-            
-            else -> errorDescription ?: "Unknown error: $errorCode"
+    /**
+     * Maps a ChipDNA connect failure to a user-facing message.
+     *
+     * The error identity is carried as a token inside the SDK's [ParameterKeys.Errors] value
+     * (a comma-joined string) — there is NO discrete "ErrorCode" key — so we match by substring.
+     * Token names are the CloudCommerceError subclass / ChipDnaMobileErrorCode names verified
+     * against the cardpresent 4.0.7 jar. Unmapped failures fall back to the raw error text so the
+     * real reason is always surfaced (never a blank or "null").
+     */
+    internal fun mapChipDnaErrorToUserMessage(errors: String?, errorDescription: String?): String {
+        val e = errors ?: ""
+        return when {
+            e.contains("TapToMobileNotSupported") -> "This device does not support Tap to Pay"
+            e.contains("FailedToInitializeTapToMobile") -> "Tap to Pay could not be initialized on this device — check device attestation, signing-cert allow-list, and developer options"
+            e.contains("NoPoiSelected") -> "No payment method was selected for configuration"
+            e.contains("LocationPermissionNotGranted") -> "Location permission is required for Tap to Pay"
+            e.contains("GpsDisabled") || e.contains("NoGpsSignal") -> "Turn on location/GPS for Tap to Pay"
+            e.contains("AttestationFailed") -> "Security attestation failed. Cannot use Tap to Pay"
+            e.contains("RootedDeviceFound") -> "Tap to Pay can't run on a rooted device"
+            e.contains("DeveloperModeOrUSBDebuggingEnabled") -> "Disable Developer options / USB debugging for Tap to Pay"
+            e.contains("DeveloperOptionsEnabled") -> "Developer options must be disabled for Tap to Pay"
+            e.contains("EmulatorDetected") -> "Tap to Pay cannot run on an emulator"
+            e.contains("CustomROMDetected") -> "Custom ROM detected. Tap to Pay requires a stock ROM"
+            e.contains("CountryNotAllowed") -> "Tap to Pay is not available in your current location"
+            e.contains("USBCableConnectedOrBluetoothEnabled") -> "Disconnect USB and disable Bluetooth for Tap to Pay"
+            e.contains("ShowTouchesEnabled") -> "Disable 'Show touches' in Developer options"
+            e.contains("NfcDisabled") -> "NFC must be enabled for Tap to Pay"
+            e.contains("NoPatternOrPinSet") -> "Set a device lock screen (PIN or pattern) for Tap to Pay"
+            e.contains("NoInternetConnection") -> "No internet connection. Tap to Pay needs network access"
+            else -> errorDescription?.takeIf { it.isNotBlank() }
+                ?: errors?.takeIf { it.isNotBlank() }
+                ?: "Tap to Pay could not connect. Please try again."
         }
     }
 
