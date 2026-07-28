@@ -12,7 +12,7 @@ afterEvaluate {
                 from(components["release"])
                 groupId = "com.github.fattmerchantorg"
                 artifactId = "cardpresent"
-                version = "2.7.2"
+                version = "2.7.4"
             }
         }
     }
