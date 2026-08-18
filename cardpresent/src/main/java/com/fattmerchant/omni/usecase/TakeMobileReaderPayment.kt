@@ -39,6 +39,18 @@ internal class TakeMobileReaderPayment(
         OmniException("Could not take mobile reader payment", message)
 
     companion object {
+        /**
+         * Placeholder token applied to Tap to Pay payment methods when the gateway doesn't
+         * return a customer vault id.
+         *
+         * Omni only persists a `spreedly_token` when the payment method is created through
+         * `POST payment-method/token`, and that route requires a non-empty `payment_token`.
+         * ChipDNA only hands back a `CustomerVaultId` when vaulting succeeds, so without a
+         * fallback the Tap to Pay record lands on the plain `payment-method` route with no
+         * token at all. iOS already uses this same placeholder in `TakeTapPaymentJob`.
+         */
+        internal const val TAP_TO_PAY_PLACEHOLDER_TOKEN = "nmi_1234"
+
         internal fun transactionMetaFrom(result: TransactionResult): Map<String, Any> {
             val transactionMeta = mutableMapOf<String, Any>()
 
@@ -171,6 +183,11 @@ internal class TakeMobileReaderPayment(
             result.generatePaymentMethod().apply {
                 merchantId = customer.merchantId
                 customerId = customer.id
+
+                // Keep Tap to Pay records tokenized even when the gateway gave us no vault id
+                if (readerType == ReaderType.TAP_TO_PAY && paymentToken.isNullOrEmpty()) {
+                    paymentToken = TAP_TO_PAY_PLACEHOLDER_TOKEN
+                }
             }
         ) {
             voidAndFail(it)
